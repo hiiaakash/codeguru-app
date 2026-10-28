@@ -1,0 +1,1230 @@
+{
+ "n": 9,
+ "id": "aiml-09",
+ "title": "Data Visualization and Math for ML",
+ "goal": "You will learn to pick the right chart to look at data and do EDA, and understand the essential math behind ML (statistics, probability, Bayes, vectors, matrices, gradient descent) in a simple way.",
+ "lessons": [
+  {
+   "title": "Why visualization, and matplotlib basics",
+   "blocks": [
+    [
+     "p",
+     "Looking at a long list of numbers, it is hard to see a pattern. In a **graph** that pattern shows up in one second: the trend is going up, some value looks odd, two things are rising together."
+    ],
+    [
+     "analogy",
+     "Read 365 numbers in the factory's monthly production register, or look at one line chart. The chart instantly shows that production went up around Diwali and dropped in the rainy season."
+    ],
+    [
+     "p",
+     "In ML, visualization does three jobs: (1) **EDA** = understanding the data, (2) **debugging** = where the model is making mistakes, (3) **presentation** = showing results to your boss/client."
+    ],
+    [
+     "p",
+     "Python has two main libraries: **matplotlib** (the base, can draw anything) and **seaborn** (built on matplotlib, beautiful statistical charts with less code). Always import them like this:"
+    ],
+    [
+     "code",
+     "python",
+     "import matplotlib.pyplot as plt\nimport seaborn as sns",
+     ""
+    ],
+    [
+     "p",
+     "**Line chart** = trend over time. Every chart follows the same pattern: create figure → plot → add title/labels → show/save."
+    ],
+    [
+     "code",
+     "python",
+     "import matplotlib.pyplot as plt\n\nmonths = [\"Jan\", \"Feb\", \"Mar\", \"Apr\", \"May\"]\nsales = [120, 135, 150, 145, 170]\n\nplt.figure(figsize=(8, 4))\nplt.plot(months, sales, marker=\"o\", label=\"Cable sales\")\nplt.title(\"Monthly Sales\")\nplt.xlabel(\"Month\")\nplt.ylabel(\"Units\")\nplt.legend()\nplt.grid(alpha=0.3)\nplt.savefig(\"sales.png\", dpi=150)\nplt.show()",
+     ""
+    ],
+    [
+     "p",
+     "Running this code opens a line chart that rises from Jan to May, dipping a little only in April. `savefig` saves it to an image file."
+    ],
+    [
+     "sketch",
+     {
+      "k": "chart",
+      "title": "Monthly Sales",
+      "type": "line",
+      "points": [
+       [
+        1,
+        120
+       ],
+       [
+        2,
+        135
+       ],
+       [
+        3,
+        150
+       ],
+       [
+        4,
+        145
+       ],
+       [
+        5,
+        170
+       ]
+      ],
+      "xl": "Month",
+      "yl": "Units"
+     }
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Recipe for every plot",
+      "steps": [
+       "plt.figure",
+       "plt.plot/bar...",
+       "title + labels",
+       "savefig / show"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "**Bar, scatter, histogram** work the same way:"
+    ],
+    [
+     "code",
+     "python",
+     "import matplotlib.pyplot as plt\nimport numpy as np\n\nplt.bar([\"Python\", \"SQL\", \"Excel\"], [92, 70, 55])     # compare categories\nplt.show()\n\nrng = np.random.default_rng(0)\nx = rng.normal(size=200)\ny = 2 * x + rng.normal(scale=0.5, size=200)\nplt.scatter(x, y, alpha=0.6)                            # relation between 2 things\nplt.show()\n\nplt.hist(rng.normal(size=1000), bins=30)                # distribution\nplt.show()",
+     ""
+    ],
+    [
+     "p",
+     "In the scatter, points rise along a straight line (x goes up, y goes up). The histogram looks like a bell, tallest in the middle."
+    ],
+    [
+     "p",
+     "In **Seaborn**, a heatmap and a boxplot take one line each:"
+    ],
+    [
+     "code",
+     "python",
+     "import seaborn as sns\nimport matplotlib.pyplot as plt\n\nsns.heatmap(df.corr(numeric_only=True), annot=True, cmap=\"coolwarm\", center=0)\nplt.show()\n\nsns.boxplot(data=df, x=\"dept\", y=\"salary\")\nplt.show()",
+     ""
+    ],
+    [
+     "tip",
+     "Look carefully: always add a **title and axis labels** to every chart. A chart without labels = a file without a name, nobody will understand it."
+    ],
+    [
+     "warn",
+     "Common mistake: if you forget `plt.show()` in a script, no window opens. On a server or outside a notebook, save to a file with `plt.savefig()`."
+    ]
+   ]
+  },
+  {
+   "title": "Which chart when, and EDA",
+   "blocks": [
+    [
+     "p",
+     "Wrong chart = wrong understanding. Pick the chart based on the question:"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Question → chart",
+      "head": [
+       "Question",
+       "Chart"
+      ],
+      "rows": [
+       [
+        "Trend over time?",
+        "Line"
+       ],
+       [
+        "Compare categories?",
+        "Bar"
+       ],
+       [
+        "How is data spread?",
+        "Histogram"
+       ],
+       [
+        "Relation of 2 numbers?",
+        "Scatter"
+       ],
+       [
+        "Where are outliers?",
+        "Box plot"
+       ],
+       [
+        "All feature relations?",
+        "Heatmap"
+       ]
+      ]
+     }
+    ],
+    [
+     "sketch",
+     {
+      "k": "chart",
+      "title": "Bar: skill score",
+      "type": "bar",
+      "points": [
+       [
+        "Python",
+        92
+       ],
+       [
+        "SQL",
+        70
+       ],
+       [
+        "Excel",
+        55
+       ]
+      ],
+      "xl": "Skill",
+      "yl": "Score"
+     }
+    ],
+    [
+     "sketch",
+     {
+      "k": "chart",
+      "title": "Scatter: x vs y",
+      "type": "scatter",
+      "points": [
+       [
+        1,
+        2.1
+       ],
+       [
+        2,
+        3.9
+       ],
+       [
+        3,
+        6.2
+       ],
+       [
+        4,
+        7.8
+       ],
+       [
+        5,
+        10.1
+       ]
+      ],
+      "line": [
+       [
+        0,
+        0
+       ],
+       [
+        5,
+        10
+       ]
+      ],
+      "xl": "Feature",
+      "yl": "Target"
+     }
+    ],
+    [
+     "warn",
+     "Common mistake: a line chart for categories (Delhi, Jaipur). A line means \"there are values in between too\", which categories don't have. Use a bar for categories."
+    ],
+    [
+     "p",
+     "**EDA (Exploratory Data Analysis)** = making friends with the data before building a model. \"Explain your EDA process\" is almost always asked in an IQ."
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "EDA steps",
+      "steps": [
+       "shape, info",
+       "describe",
+       "missing/dup",
+       "hist + box",
+       "heatmap",
+       "check target"
+      ],
+      "dir": "v"
+     }
+    ],
+    [
+     "list",
+     [
+      "**1. Size and types**: `df.shape`, `df.info()`",
+      "**2. Summary**: `df.describe()` (mean, std, min, max, percentiles)",
+      "**3. Missing and duplicates**: `df.isna().sum()`, `df.duplicated().sum()`",
+      "**4. Distribution**: a histogram of every numeric column, outliers from a box plot",
+      "**5. Relations**: correlation heatmap, feature vs target scatter",
+      "**6. Target**: class balance with `value_counts()` (bar chart)"
+     ]
+    ],
+    [
+     "p",
+     "Even without a chart, numbers alone show a lot:"
+    ],
+    [
+     "code",
+     "python",
+     "import pandas as pd\n\ndf = pd.DataFrame({\n    \"exp\": [1, 2, 3, 4, 5, 6],\n    \"salary\": [20, 25, 31, 34, 41, 95],\n})\nd = df[\"salary\"].describe()\nprint(d[\"mean\"].round(1), d[\"50%\"], d[\"max\"])\nprint(df.corr().loc[\"exp\", \"salary\"].round(2))",
+     "41.0 32.5 95.0\n0.83"
+    ],
+    [
+     "p",
+     "Look: the mean is 41 but the median (50%) is only 32.5. That means one **big value** (95) is pulling the mean up. This hints at an outlier. In a box plot, that 95 would show up as a separate dot."
+    ],
+    [
+     "tip",
+     "A big gap between mean and median = the data is skewed or has an outlier. This is the cheapest check in EDA."
+    ],
+    [
+     "analogy",
+     "Imagine a street where 9 people earn 20 thousand and one millionaire lives. Looking at the average, you'd think everyone is rich. The median tells the truth."
+    ]
+   ]
+  },
+  {
+   "title": "Statistics: mean, std, percentiles, outliers and correlation",
+   "blocks": [
+    [
+     "p",
+     "ML = learning from data, and the language for understanding data is **statistics**. Don't worry, you only need a few things."
+    ],
+    [
+     "p",
+     "**3 measures of the center**: mean = average, median = the middle value after sorting, mode = the value that appears most often."
+    ],
+    [
+     "code",
+     "python",
+     "import statistics as st\n\nmarks = [40, 50, 50, 60, 100]\nprint(st.mean(marks))\nprint(st.median(marks))\nprint(st.mode(marks))",
+     "60\n50\n50"
+    ],
+    [
+     "sketch",
+     {
+      "k": "array",
+      "title": "Sorted: median in middle",
+      "items": [
+       "40",
+       "50",
+       "50",
+       "60",
+       "100"
+      ],
+      "index": true
+     }
+    ],
+    [
+     "p",
+     "**Spread**: the average alone is not enough. Two classes can both average 50, but in one everyone scored 48-52 and in the other 0 to 100. We measure this with **variance** and **standard deviation (std)**."
+    ],
+    [
+     "list",
+     [
+      "Find each value's difference from the mean",
+      "Square the difference (the minus goes away)",
+      "Average of all squares = **variance**",
+      "Square root of variance = **std** (back in the original unit)"
+     ]
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\na = np.array([48, 50, 52])\nb = np.array([0, 50, 100])\nprint(a.mean(), b.mean())\nprint(a.std().round(2), b.std().round(2))\nprint(a.var().round(2))",
+     "50.0 50.0\n1.63 40.82\n2.67"
+    ],
+    [
+     "tip",
+     "Same mean, but very different std. Small std = values close together (a consistent machine). Big std = values scattered."
+    ],
+    [
+     "warn",
+     "Common mistake: NumPy `std()` gives population std (divide by n) by default, Pandas `.std()` gives sample std (divide by n-1). That's why the two numbers come out slightly different."
+    ],
+    [
+     "p",
+     "**Percentile**: 90th percentile = 90% of values are below it. Median = 50th percentile. **Q1** = 25th, **Q3** = 75th. **IQR** = Q3 - Q1 (the width of the middle 50% of data)."
+    ],
+    [
+     "p",
+     "**Outlier (IQR rule)**: any value below `Q1 - 1.5*IQR` or above `Q3 + 1.5*IQR` is an outlier. A box plot uses exactly this rule."
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\nw = np.array([10, 12, 11, 13, 12, 11, 40])   # cable weight (kg)\nq1, q3 = np.percentile(w, [25, 75])\niqr = q3 - q1\nlow, high = q1 - 1.5 * iqr, q3 + 1.5 * iqr\nprint(q1, q3, iqr)\nprint(low, high)\nprint(w[(w < low) | (w > high)])",
+     "11.0 12.5 1.5\n8.75 14.75\n[40]"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "IQR outlier rule",
+      "steps": [
+       "Q1, Q3",
+       "IQR = Q3-Q1",
+       "fence ±1.5×IQR",
+       "outside = outlier"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "**Correlation** (-1 to +1): how two things change together. +1 = when one goes up the other goes straight up, -1 = when one goes up the other goes down, 0 = no straight-line relation."
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\nhours = [1, 2, 3, 4, 5]\nmarks = [35, 45, 50, 62, 70]\nphone = [5, 4, 4, 2, 1]\nprint(np.corrcoef(hours, marks)[0, 1].round(2))\nprint(np.corrcoef(hours, phone)[0, 1].round(2))",
+     "0.99\n-0.96"
+    ],
+    [
+     "sketch",
+     {
+      "k": "chart",
+      "title": "Positive correlation",
+      "type": "scatter",
+      "points": [
+       [
+        1,
+        35
+       ],
+       [
+        2,
+        45
+       ],
+       [
+        3,
+        50
+       ],
+       [
+        4,
+        62
+       ],
+       [
+        5,
+        70
+       ]
+      ],
+      "xl": "Study hours",
+      "yl": "Marks"
+     }
+    ],
+    [
+     "warn",
+     "Correlation ≠ causation. In summer, both ice-cream and ACs sell more. Their correlation is high, but ice-cream doesn't make ACs sell; the cause of both is the heat."
+    ]
+   ]
+  },
+  {
+   "title": "Normal distribution, probability and Bayes",
+   "blocks": [
+    [
+     "p",
+     "**Normal distribution** (bell curve): most values near the middle (mean), few at the edges. Height, weight, machine error, exam marks all look like this."
+    ],
+    [
+     "sketch",
+     {
+      "k": "chart",
+      "title": "Bell curve",
+      "type": "line",
+      "points": [
+       [
+        -3,
+        0.4
+       ],
+       [
+        -2,
+        5.4
+       ],
+       [
+        -1,
+        24.2
+       ],
+       [
+        0,
+        39.9
+       ],
+       [
+        1,
+        24.2
+       ],
+       [
+        2,
+        5.4
+       ],
+       [
+        3,
+        0.4
+       ]
+      ],
+      "xl": "std away",
+      "yl": "how many people"
+     }
+    ],
+    [
+     "p",
+     "**68-95-99.7 rule**: about 68% of data lies within mean ± 1 std, 95% within ± 2 std, 99.7% within ± 3 std. That's why a value more than 3 std away is often treated as an outlier."
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\nrng = np.random.default_rng(42)\nx = rng.normal(loc=0, scale=1, size=100_000)\nprint(round(float(np.mean(np.abs(x) < 1)), 2))\nprint(round(float(np.mean(np.abs(x) < 2)), 2))",
+     "0.68\n0.95"
+    ],
+    [
+     "p",
+     "**z-score** = how many std a value is from the mean: `z = (x - mean) / std`. In ML we scale features this way (StandardScaler, in Stage 10)."
+    ],
+    [
+     "code",
+     "python",
+     "mean, std = 50, 10\nfor x in [50, 70, 20]:\n    print(x, (x - mean) / std)",
+     "50 0.0\n70 2.0\n20 -3.0"
+    ],
+    [
+     "p",
+     "**Probability** = the chance of something happening, from 0 (never) to 1 (certain). `P = favourable / total`."
+    ],
+    [
+     "code",
+     "python",
+     "from fractions import Fraction\n\nprint(Fraction(1, 6))              # rolling a 4 on a dice\nprint(Fraction(3, 6))              # getting an even number\nprint(Fraction(1, 6) * Fraction(1, 6))   # two dice, both 6 (AND = multiply)",
+     "1/6\n1/2\n1/36"
+    ],
+    [
+     "list",
+     [
+      "**AND** (both happen, independent): P(A) × P(B)",
+      "**OR** (either one, can't happen together): P(A) + P(B)",
+      "**NOT**: 1 - P(A)",
+      "**Conditional** P(A|B) = B is known, now the chance of A"
+     ]
+    ],
+    [
+     "p",
+     "**Bayes theorem** = updating your guess when new information arrives:\n`P(A|B) = P(B|A) × P(A) / P(B)`"
+    ],
+    [
+     "analogy",
+     "In a factory, 1% of cables are defective. The testing machine catches 99% of defective ones, but it also wrongly 'fails' a good cable 5% of the time. The machine said fail. What is the real chance it's defective? Your gut says 99%, Bayes says much lower."
+    ],
+    [
+     "code",
+     "python",
+     "p_def = 0.01             # prior guess (prior)\np_fail_if_def = 0.99     # machine catches correctly\np_fail_if_ok = 0.05      # good cable wrongly failed\n\np_fail = p_fail_if_def * p_def + p_fail_if_ok * (1 - p_def)\np_def_if_fail = p_fail_if_def * p_def / p_fail\nprint(round(p_fail, 4))\nprint(round(p_def_if_fail, 3))",
+     "0.0594\n0.167"
+    ],
+    [
+     "sketch",
+     {
+      "k": "tree",
+      "title": "1000 cables",
+      "root": {
+       "label": "1000 cables",
+       "children": [
+        {
+         "label": "10 defective",
+         "children": [
+          {
+           "label": "~10 fail",
+           "children": []
+          }
+         ]
+        },
+        {
+         "label": "990 good",
+         "children": [
+          {
+           "label": "~50 wrong fail",
+           "children": []
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ],
+    [
+     "tip",
+     "Only ~17%! Because there are so many good cables that their wrong 'fails' (~50) outnumber the real defective ones (~10). This is why for rare things (fraud, disease) we look carefully at precision/recall in the model."
+    ],
+    [
+     "p",
+     "A spam filter (Naive Bayes) does the same: the word \"free\" shows up → the chance of spam gets updated."
+    ]
+   ]
+  },
+  {
+   "title": "Linear algebra: vectors, dot product, matrices",
+   "blocks": [
+    [
+     "p",
+     "In ML everything becomes a list of numbers. A house = [area, rooms, age]. A word = an embedding of 768 numbers. This list is called a **vector**."
+    ],
+    [
+     "sketch",
+     {
+      "k": "array",
+      "title": "A house is a vector",
+      "items": [
+       "1200 sqft",
+       "3 rooms",
+       "5 years"
+      ],
+      "index": true
+     }
+    ],
+    [
+     "p",
+     "**Vector addition and scalar multiplication** are element-wise (remember vectorization from Stage 8):"
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\na = np.array([1, 2, 3])\nb = np.array([4, 5, 6])\nprint(a + b)\nprint(3 * a)\nprint(np.linalg.norm([3, 4]))   # length",
+     "[5 7 9]\n[3 6 9]\n5.0"
+    ],
+    [
+     "p",
+     "**Dot product** = multiply the items at the same position, then add them all up. You get one number."
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\na = np.array([1, 2, 3])\nb = np.array([4, 5, 6])\nprint(1*4 + 2*5 + 3*6)\nprint(np.dot(a, b))\nprint(a @ b)",
+     "32\n32\n32"
+    ],
+    [
+     "analogy",
+     "Making a bill is a dot product: qty [2, 1, 3] and price [50, 120, 10] → 2×50 + 1×120 + 3×10 = 250."
+    ],
+    [
+     "p",
+     "Why does it matter? A linear model's prediction = `weights · features + bias`. A neuron does the same. And how **similar** two vectors are is measured with **cosine similarity** (in RAG/search, Stage 12):"
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\ndef cosine(a, b):\n    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))\n\ncable = np.array([0.9, 0.8, 0.1])\nwire = np.array([0.8, 0.9, 0.2])\nmango = np.array([0.1, 0.0, 0.9])\nprint(cosine(cable, wire).round(2))\nprint(cosine(cable, mango).round(2))",
+     "0.99\n0.16"
+    ],
+    [
+     "tip",
+     "Cosine near 1 = same direction (similar meaning). Near 0 = no relation."
+    ],
+    [
+     "p",
+     "**Matrix** = a table of numbers (rows × columns). A dataset is itself a matrix: each row is a sample, each column is a feature."
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "X: 3 samples × 2 features",
+      "head": [
+       "",
+       "area",
+       "rooms"
+      ],
+      "rows": [
+       [
+        "house 1",
+        "1000",
+        "2"
+       ],
+       [
+        "house 2",
+        "1500",
+        "3"
+       ],
+       [
+        "house 3",
+        "800",
+        "1"
+       ]
+      ]
+     }
+    ],
+    [
+     "p",
+     "**Matrix multiply** `A @ B`: dot product of each row of A with each column of B. **Shape rule**: (m, n) @ (n, p) = (m, p). The middle n must be equal."
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\nA = np.array([[1, 2],\n              [3, 4]])\nB = np.array([[5, 6],\n              [7, 8]])\nprint(A @ B)\nprint(A * B)    # element-wise, a different thing!",
+     "[[19 22]\n [43 50]]\n[[ 5 12]\n [21 32]]"
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\nX = np.array([[1000, 2], [1500, 3], [800, 1]])   # (3, 2)\nw = np.array([50, 10000])                        # (2,)\nprint(X.shape, w.shape)\nprint(X @ w)       # predicted price of each house",
+     "(3, 2) (2,)\n[ 70000 105000  50000]"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Shape rule",
+      "steps": [
+       "(3, 2)",
+       "@ (2,)",
+       "= (3,)"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "**Transpose** `.T` = turn rows into columns. Very useful for making shapes match."
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\nM = np.array([[1, 2, 3], [4, 5, 6]])\nprint(M.shape, M.T.shape)",
+     "(2, 3) (3, 2)"
+    ],
+    [
+     "warn",
+     "Common mistake: `(3, 2) @ (3, 2)` → error \"shapes not aligned\". The middle numbers (2 and 3) don't match. Fix it with `.T` or reshape. That's why you should always print `.shape`."
+    ]
+   ]
+  },
+  {
+   "title": "Calculus intuition: slope and gradient descent",
+   "blocks": [
+    [
+     "p",
+     "Don't be scared, you don't need full calculus. Just one idea: **slope** = if you increase one thing, how much does the other change."
+    ],
+    [
+     "sketch",
+     {
+      "k": "chart",
+      "title": "y = x²",
+      "type": "line",
+      "points": [
+       [
+        -3,
+        9
+       ],
+       [
+        -2,
+        4
+       ],
+       [
+        -1,
+        1
+       ],
+       [
+        0,
+        0
+       ],
+       [
+        1,
+        1
+       ],
+       [
+        2,
+        4
+       ],
+       [
+        3,
+        9
+       ]
+      ],
+      "xl": "x",
+      "yl": "y"
+     }
+    ],
+    [
+     "p",
+     "**Derivative** = the slope at a point. The derivative of `y = x²` is `2x`: at x = 3 the slope is 6 (steep climb), at x = 0 it's 0 (right at the bottom, flat). You can measure it yourself with a small step:"
+    ],
+    [
+     "code",
+     "python",
+     "def f(x):\n    return x ** 2\n\nh = 0.0001\nfor x in [3, 0, -2]:\n    slope = (f(x + h) - f(x)) / h\n    print(x, round(slope, 2))",
+     "3 6.0\n0 0.0\n-2 -4.0"
+    ],
+    [
+     "tip",
+     "Slope + = going up, slope - = going down, slope 0 = reached the bottom (or top)."
+    ],
+    [
+     "p",
+     "In ML there is a **loss** = how much the model is getting wrong. We want to make the loss **minimum**. The slope tells us which direction the loss increases, so we walk in the **opposite direction**. This is called **gradient descent**."
+    ],
+    [
+     "analogy",
+     "You have to climb down a hill at night and you can't see anything. Feel the slope of the ground with your feet and take a small step in the direction it goes down. Keep doing it and you'll reach the valley (minimum)."
+    ],
+    [
+     "sketch",
+     {
+      "k": "cycle",
+      "title": "Gradient descent",
+      "steps": [
+       "Predict",
+       "Compute loss",
+       "Slope (gradient)",
+       "w = w - lr × slope"
+      ]
+     }
+    ],
+    [
+     "p",
+     "Rule: `w = w - learning_rate × slope`. **Learning rate** = the size of the step."
+    ],
+    [
+     "code",
+     "python",
+     "w = 10.0          # starting guess\nlr = 0.1\nfor step in range(5):\n    slope = 2 * w          # loss = w², slope = 2w\n    w = w - lr * slope\n    print(step, round(w, 3))",
+     "0 8.0\n1 6.4\n2 5.12\n3 4.096\n4 3.277"
+    ],
+    [
+     "p",
+     "At every step w moves toward 0 (the minimum). Now a real example: the data is `y = 2x`, and the model `y = w*x` must learn **w = 2** on its own."
+    ],
+    [
+     "code",
+     "python",
+     "xs = [1, 2, 3, 4]\nys = [2, 4, 6, 8]\nw, lr = 0.0, 0.01\nfor epoch in range(50):\n    grad = sum(2 * (w * x - y) * x for x, y in zip(xs, ys)) / len(xs)\n    w -= lr * grad\nprint(round(w, 3))",
+     "1.999"
+    ],
+    [
+     "tip",
+     "This is the heart of all ML training. A neural network has millions of w's, but each one is updated with this same rule. Finding the slope for every w = the **gradient**, and **backpropagation** does that job (Stage 11)."
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "Learning rate",
+      "left": {
+       "title": "Too small",
+       "items": [
+        "very slow",
+        "runs a long time"
+       ]
+      },
+      "right": {
+       "title": "Too big",
+       "items": [
+        "jumps past minimum",
+        "loss blows up"
+       ]
+      }
+     }
+    ],
+    [
+     "warn",
+     "Common mistake: with a learning rate that's too big (like 1.5), w runs further away each step and the loss keeps growing (diverges). If the loss is rising, first make lr smaller."
+    ]
+   ]
+  }
+ ],
+ "teach": [
+  {
+   "say": "A pattern is hidden in a long list of numbers. Draw a graph and it shows up in one second.",
+   "sketch": {
+    "k": "chart",
+    "type": "line",
+    "points": [
+     [
+      1,
+      120
+     ],
+     [
+      2,
+      135
+     ],
+     [
+      3,
+      150
+     ],
+     [
+      4,
+      145
+     ],
+     [
+      5,
+      170
+     ]
+    ],
+    "xl": "Month",
+    "yl": "Sales"
+   },
+   "code": "plt.plot(months, sales)\nplt.show()"
+  },
+  {
+   "say": "Pick the chart from the question: line for trend, bar for comparing, histogram for spread, scatter for relations, box plot for outliers.",
+   "sketch": {
+    "k": "table",
+    "head": [
+     "Question",
+     "Chart"
+    ],
+    "rows": [
+     [
+      "Trend",
+      "Line"
+     ],
+     [
+      "Compare",
+      "Bar"
+     ],
+     [
+      "Spread",
+      "Histogram"
+     ],
+     [
+      "Relation",
+      "Scatter"
+     ],
+     [
+      "Outlier",
+      "Box"
+     ]
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "Mean is the average, median is the middle one. One millionaire spoils the street's mean, not the median. If you see a big gap between the two, look for an outlier.",
+   "sketch": {
+    "k": "array",
+    "items": [
+     "40",
+     "50",
+     "50",
+     "60",
+     "100"
+    ],
+    "index": true
+   },
+   "code": "st.mean(x), st.median(x)"
+  },
+  {
+   "say": "Std tells how scattered the values are. Same average, but one machine is consistent and the other can't be trusted.",
+   "sketch": {
+    "k": "compare",
+    "left": {
+     "title": "Small std",
+     "items": [
+      "48, 50, 52",
+      "consistent"
+     ]
+    },
+    "right": {
+     "title": "Big std",
+     "items": [
+      "0, 50, 100",
+      "scattered"
+     ]
+    }
+   },
+   "code": "a.std()"
+  },
+  {
+   "say": "The IQR rule for catching outliers: Q3 minus Q1, then a wall of one and a half times that on both sides. Whatever is outside the wall is an outlier.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Q1, Q3",
+     "IQR",
+     "±1.5×IQR",
+     "outlier"
+    ],
+    "dir": "h"
+   },
+   "code": "q1, q3 = np.percentile(w, [25, 75])"
+  },
+  {
+   "say": "Correlation goes from minus one to plus one. But remember, correlation does not mean cause.",
+   "sketch": {
+    "k": "chart",
+    "type": "scatter",
+    "points": [
+     [
+      1,
+      35
+     ],
+     [
+      2,
+      45
+     ],
+     [
+      3,
+      50
+     ],
+     [
+      4,
+      62
+     ],
+     [
+      5,
+      70
+     ]
+    ],
+    "xl": "Hours",
+    "yl": "Marks"
+   },
+   "code": "np.corrcoef(a, b)[0, 1]"
+  },
+  {
+   "say": "Bayes: even if the test says fail, the chance of being defective can be low if defects are rare. Never forget the prior.",
+   "sketch": {
+    "k": "tree",
+    "root": {
+     "label": "1000 cables",
+     "children": [
+      {
+       "label": "10 defective",
+       "children": []
+      },
+      {
+       "label": "990 good",
+       "children": []
+      }
+     ]
+    }
+   },
+   "code": null
+  },
+  {
+   "say": "Dot product: multiply the items in the same place and add them up. That's exactly a model's prediction, weights dot features.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "[1,2,3]",
+     "· [4,5,6]",
+     "4+10+18",
+     "= 32"
+    ],
+    "dir": "h"
+   },
+   "code": "a @ b"
+  },
+  {
+   "say": "Shape rule of matrix multiply: (m, n) at (n, p) equals (m, p). The middle numbers must match.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "(3, 2)",
+     "@ (2, 4)",
+     "= (3, 4)"
+    ],
+    "dir": "h"
+   },
+   "code": "print(X.shape, W.shape)"
+  },
+  {
+   "say": "Finally, gradient descent: look at the slope, take a small step the opposite way, again and again. That is the training of every ML model. Now go practice!",
+   "sketch": {
+    "k": "cycle",
+    "steps": [
+     "Predict",
+     "Loss",
+     "Slope",
+     "Update w"
+    ]
+   },
+   "code": "w = w - lr * slope"
+  }
+ ],
+ "practice": [
+  {
+   "q": "Statistics without NumPy. For `w = [10, 12, 11, 13, 12, 11, 40]` (cable weights), find the mean (2 decimals), median, population std (2 decimals), then find outliers with the IQR rule. Q1 = 11, Q3 = 12.5 are given:\nmean: 15.57\nmedian: 12\nstd: 10.01\noutliers: [40]",
+   "starter": "import math\n\nw = [10, 12, 11, 13, 12, 11, 40]\nq1, q3 = 11, 12.5\n# TODO: mean\n# TODO: median (middle of the sorted list)\n# TODO: std = sqrt(sum((x-mean)^2)/n)\n# TODO: IQR fences and outliers\n",
+   "hint": "iqr = q3 - q1; low = q1 - 1.5*iqr; high = q3 + 1.5*iqr",
+   "solution": "import math\n\nw = [10, 12, 11, 13, 12, 11, 40]\nq1, q3 = 11, 12.5\nn = len(w)\nmean = sum(w) / n\nprint(f\"mean: {mean:.2f}\")\ns = sorted(w)\nprint(\"median:\", s[n // 2])\nstd = math.sqrt(sum((x - mean) ** 2 for x in w) / n)\nprint(f\"std: {std:.2f}\")\niqr = q3 - q1\nlow, high = q1 - 1.5 * iqr, q3 + 1.5 * iqr\nprint(\"outliers:\", [x for x in w if x < low or x > high])",
+   "expect": "mean: 15.57\nmedian: 12\nstd: 10.01\noutliers: [40]"
+  },
+  {
+   "q": "Write dot product and cosine similarity yourself (only `math`). Three word-vectors are given. Print the dot and cosine (2 decimals) for `cable`-`wire` and `cable`-`mango`:\ndot cable-wire: 1.46\ncos cable-wire: 0.99\ndot cable-mango: 0.18\ncos cable-mango: 0.16",
+   "starter": "import math\n\ncable = [0.9, 0.8, 0.1]\nwire = [0.8, 0.9, 0.2]\nmango = [0.1, 0.0, 0.9]\n\ndef dot(a, b):\n    # TODO: multiply with zip and add up\n    pass\n\ndef cosine(a, b):\n    # TODO: dot / (length(a) * length(b))\n    pass\n",
+   "hint": "length(a) = math.sqrt(dot(a, a))",
+   "solution": "import math\n\ncable = [0.9, 0.8, 0.1]\nwire = [0.8, 0.9, 0.2]\nmango = [0.1, 0.0, 0.9]\n\ndef dot(a, b):\n    return sum(x * y for x, y in zip(a, b))\n\ndef cosine(a, b):\n    return dot(a, b) / (math.sqrt(dot(a, a)) * math.sqrt(dot(b, b)))\n\nprint(f\"dot cable-wire: {dot(cable, wire):.2f}\")\nprint(f\"cos cable-wire: {cosine(cable, wire):.2f}\")\nprint(f\"dot cable-mango: {dot(cable, mango):.2f}\")\nprint(f\"cos cable-mango: {cosine(cable, mango):.2f}\")",
+   "expect": "dot cable-wire: 1.46\ncos cable-wire: 0.99\ndot cable-mango: 0.18\ncos cable-mango: 0.16"
+  },
+  {
+   "q": "Learn a line with gradient descent. The data is made from `y = 3x + 1`. Model `y = w*x + b`, starting with w = 0, b = 0, lr = 0.05, 2000 epochs. In every epoch compute the MSE gradient and update. At the end print w, b (2 decimals) and loss (4 decimals):\nw: 3.00\nb: 1.00\nloss: 0.0000",
+   "starter": "xs = [0, 1, 2, 3, 4]\nys = [1, 4, 7, 10, 13]\nw, b, lr = 0.0, 0.0, 0.05\nn = len(xs)\nfor epoch in range(2000):\n    # TODO: errors = (w*x + b - y) for each point\n    # TODO: dw = 2/n * sum(err * x), db = 2/n * sum(err)\n    # TODO: update w and b\n    pass\n# TODO: loss = average(err^2), print it\n",
+   "hint": "errs = [w * x + b - y for x, y in zip(xs, ys)]",
+   "solution": "xs = [0, 1, 2, 3, 4]\nys = [1, 4, 7, 10, 13]\nw, b, lr = 0.0, 0.0, 0.05\nn = len(xs)\nfor epoch in range(2000):\n    errs = [w * x + b - y for x, y in zip(xs, ys)]\n    dw = 2 / n * sum(e * x for e, x in zip(errs, xs))\n    db = 2 / n * sum(errs)\n    w -= lr * dw\n    b -= lr * db\nerrs = [w * x + b - y for x, y in zip(xs, ys)]\nloss = sum(e * e for e in errs) / n\nprint(f\"w: {w:.2f}\")\nprint(f\"b: {b:.2f}\")\nprint(f\"loss: {loss:.4f}\")",
+   "expect": "w: 3.00\nb: 1.00\nloss: 0.0000"
+  }
+ ],
+ "quiz": [
+  {
+   "q": "You need to show the month-wise sales trend. Best chart?",
+   "o": [
+    "Pie",
+    "Line",
+    "Heatmap",
+    "Box plot"
+   ],
+   "a": 1,
+   "why": "For a trend over time, a line chart is the clearest."
+  },
+  {
+   "q": "For the data `[2, 3, 3, 4, 100]`, which gives the most correct 'typical' value?",
+   "o": [
+    "Mean",
+    "Max",
+    "Variance",
+    "Median"
+   ],
+   "a": 3,
+   "why": "The outlier 100 pulls the mean up (22.4); the median 3 shows the typical value."
+  },
+  {
+   "q": "Q1 = 10, Q3 = 20. What is the upper fence by the IQR rule?",
+   "o": [
+    "35",
+    "30",
+    "25",
+    "40"
+   ],
+   "a": 0,
+   "why": "IQR = 10, upper fence = Q3 + 1.5 × 10 = 35."
+  },
+  {
+   "q": "What does a correlation of -0.9 mean?",
+   "o": [
+    "No relation",
+    "When one rises, the other rises too",
+    "When one rises, the other fairly surely falls",
+    "One causes the other"
+   ],
+   "a": 2,
+   "why": "Near -1 = strong negative relation. Cause (causation) is not proven by correlation."
+  },
+  {
+   "q": "In a normal distribution, about how much data is within mean ± 2 std?",
+   "o": [
+    "68%",
+    "95%",
+    "99.7%",
+    "50%"
+   ],
+   "a": 1,
+   "why": "The 68-95-99.7 rule: 1 std = 68%, 2 std = 95%, 3 std = 99.7%."
+  },
+  {
+   "q": "`np.dot([1, 2, 3], [4, 5, 6])` = ?",
+   "o": [
+    "[4, 10, 18]",
+    "15",
+    "32",
+    "21"
+   ],
+   "a": 2,
+   "why": "1×4 + 2×5 + 3×6 = 4 + 10 + 18 = 32."
+  },
+  {
+   "q": "A has shape (4, 3), B has (3, 5). What is the shape of `A @ B`?",
+   "o": [
+    "(4, 5)",
+    "(3, 3)",
+    "(5, 4)",
+    "Error"
+   ],
+   "a": 0,
+   "why": "(m, n) @ (n, p) = (m, p); the middle 3s match, result (4, 5)."
+  },
+  {
+   "q": "Update rule of gradient descent?",
+   "o": [
+    "w = w + lr × slope",
+    "w = lr × slope",
+    "w = w × slope",
+    "w = w - lr × slope"
+   ],
+   "a": 3,
+   "why": "We move opposite to the slope so the loss goes down, hence the minus."
+  },
+  {
+   "q": "During training the loss increases every step. What will you try first?",
+   "o": [
+    "Make learning rate smaller",
+    "Increase epochs",
+    "Make learning rate bigger",
+    "Remove the data"
+   ],
+   "a": 0,
+   "why": "A big learning rate jumps past the minimum (diverges); making it smaller fixes it."
+  },
+  {
+   "q": "A test for a rare disease (1%) came back positive. According to Bayes, what is correct?",
+   "o": [
+    "The disease is certain",
+    "The chance equals the test accuracy",
+    "The real chance also depends on the prior and can be quite low",
+    "The test is useless"
+   ],
+   "a": 2,
+   "why": "Posterior = likelihood × prior / evidence. For rare things, false positives become many."
+  }
+ ],
+ "iq": [
+  {
+   "q": "Explain your EDA process.",
+   "a": "First `shape`, `info()`, `describe()` for size, types and summary. Then missing values and duplicates. A histogram and box plot of every numeric feature (distribution, outliers). Correlation heatmap and feature vs target scatter. Finally class balance of the target with `value_counts()`. This gives the plan for cleaning and feature engineering."
+  },
+  {
+   "q": "When would you use mean and when median?",
+   "a": "Mean when the data is symmetric with no outliers. Median for skewed data or outliers (salary, house price), because it doesn't move with extreme values. For filling missing values in a skewed column, median is also the safe choice."
+  },
+  {
+   "q": "What are variance and standard deviation?",
+   "a": "Variance = the average of the squared differences of each value from the mean; std = the square root of variance, so it is in the original unit. Both tell how spread out the data is. Std is used in feature scaling (z-score)."
+  },
+  {
+   "q": "How do you detect and handle outliers?",
+   "a": "Detect: box plot / IQR rule (outside Q1 - 1.5·IQR, Q3 + 1.5·IQR), or |z-score| > 3. Handle: first check whether it is a data entry error or real. If it's an error, remove/fix it; if it's real, cap it (winsorize), use a log transform, or use a robust model (tree-based)."
+  },
+  {
+   "q": "Difference between correlation and causation?",
+   "a": "Correlation only says two variables change together. Causation means one is the cause of the other. A third hidden factor (confounder) can drive both, like heat → ice-cream and AC. To prove causation you need a controlled experiment (A/B test)."
+  },
+  {
+   "q": "Why is the normal distribution important in ML?",
+   "a": "Many natural measurements and errors are normal. Several models assume it (linear regression residuals, Gaussian Naive Bayes). We catch outliers with the 68-95-99.7 rule, and standardization (z-score) brings features to mean 0, std 1."
+  },
+  {
+   "q": "Explain Bayes theorem with an example.",
+   "a": "P(A|B) = P(B|A)·P(A) / P(B): updating the belief in A when new evidence B arrives. Example: 1% of cables defective, test 99% sensitive, 5% false positive. Even after a fail, the chance of defective is only ~17%, because the prior is small. The Naive Bayes spam filter runs on this."
+  },
+  {
+   "q": "Where is the dot product used in ML?",
+   "a": "The output of a linear model / neuron `w · x + b` is a dot product. Cosine similarity (embeddings, search, RAG) is the dot product divided by the lengths. In the attention mechanism too, there is a dot product of query and key."
+  },
+  {
+   "q": "What is the shape rule of matrix multiplication, and how is it different from `*`?",
+   "a": "(m, n) @ (n, p) = (m, p); the inner dimensions must be equal. `@` does row-column dot products. `*` is element-wise multiply, where shapes must be the same (or broadcastable). A neural network layer = `X @ W + b`."
+  },
+  {
+   "q": "What is gradient descent?",
+   "a": "An iterative way to minimise the loss. At every step, find the gradient (slope) of each parameter and take a small step the opposite way: `w = w - lr * grad`. Learning rate is the step size: small = slow, big = diverge. Variants: batch, stochastic (SGD), mini-batch, and optimizers like Adam."
+  },
+  {
+   "q": "What is the role of the derivative in ML?",
+   "a": "The derivative tells how much the loss will change if a parameter changes a little. Without it, we wouldn't know whether to increase or decrease a weight. In neural networks, backpropagation computes all the derivatives using the chain rule."
+  }
+ ]
+}

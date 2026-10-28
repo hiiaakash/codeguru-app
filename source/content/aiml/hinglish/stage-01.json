@@ -1,0 +1,1141 @@
+{
+ "n": 1,
+ "id": "aiml-01",
+ "title": "Python Basics",
+ "goal": "Program kya hota hai, print, variables, data types, operators, strings, input aur f-strings samajh ke chhote programs khud likh paoge, .py file chala paoge aur error message padh ke galti khud theek kar paoge.",
+ "lessons": [
+  {
+   "title": "Program kya hai, aur print",
+   "blocks": [
+    [
+     "p",
+     "**Program** = computer ko diye gaye **instructions (hukum)** ki list. Computer bahut tez hai, lekin khud kuch nahi sochta. Jo likhoge, bilkul wahi karega, **upar se neeche, ek-ek line**."
+    ],
+    [
+     "analogy",
+     "Jaise chai banane ke steps: paani garam karo → chai patti daalo → doodh daalo. Order badla to chai kharab. Computer bhi aise hi line by line, order mein chalta hai."
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Program kaise chalta hai",
+      "steps": [
+       "Line 1",
+       "Line 2",
+       "Line 3",
+       "Output"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "**Python** ek language hai jisme hum yeh instructions likhte hain. Yeh **English jaisi** hai, isliye padhne mein aasaan hai. AI/ML mein sabse zyada Python hi use hoti hai, isliye hum yahin se shuru kar rahe hain."
+    ],
+    [
+     "p",
+     "`print` = screen pe kuch **dikhana**. Yeh tumhara pehla aur sabse zyada use hone wala hukum hai."
+    ],
+    [
+     "code",
+     "python",
+     "print(\"Hello Akash\")\nprint(\"Main Python seekh raha hoon\")",
+     "Hello Akash\nMain Python seekh raha hoon"
+    ],
+    [
+     "tip",
+     "Dhyan se dekh: `print` ke baad gol bracket `( )`, aur text hamesha quotes `\" \"` mein. Har `print` nayi line pe dikhata hai."
+    ],
+    [
+     "code",
+     "python",
+     "print(10 + 5)\nprint(10 - 5)\nprint(10 * 5)\nprint(10 / 5)",
+     "15\n5\n50\n2.0"
+    ],
+    [
+     "p",
+     "Numbers ko quotes nahi chahiye. `/` (divide) hamesha decimal deta hai, isliye `2.0` aaya."
+    ],
+    [
+     "code",
+     "python",
+     "print(10 + 5)\nprint(\"10 + 5\")",
+     "15\n10 + 5"
+    ],
+    [
+     "tip",
+     "Quotes ke andar = **text** (jaisa likha waisa dikhega). Quotes ke bahar = **number / hisaab**."
+    ],
+    [
+     "p",
+     "Ek hi `print` mein comma `,` laga ke kai cheezein dikha sakte ho. Python beech mein apne aap ek space daal deta hai. `sep` se beech ka nishaan badlo, `end` se line ka aakhri hissa."
+    ],
+    [
+     "code",
+     "python",
+     "print(\"Naam:\", \"Akash\", 25)\nprint(\"2026\", \"10\", \"28\", sep=\"-\")\nprint(\"Hello\", end=\" \")\nprint(\"World\")",
+     "Naam: Akash 25\n2026-10-28\nHello World"
+    ],
+    [
+     "p",
+     "`#` ke baad jo likha ho woh **comment** hai. Python use ignore karta hai, yeh sirf insaan ke liye note hai: \"yeh line kyun likhi\"."
+    ],
+    [
+     "code",
+     "python",
+     "# Yeh poori line comment hai\nprint(\"Chai ready\")  # line ke end mein bhi comment chal jaata hai",
+     "Chai ready"
+    ],
+    [
+     "warn",
+     "Common galti: `print(\"Hello)` (quote band nahi kiya), `Print(\"Hello\")` (P capital — Python chhota-bada farak karta hai), `print \"Hello\"` (bracket nahi)."
+    ]
+   ]
+  },
+  {
+   "title": "Variables aur data types — dibba aur uska maal",
+   "blocks": [
+    [
+     "p",
+     "**Variable** = ek **dibba** jiske upar naam likha hai, aur andar koi value rakhi hai. Baad mein naam se value wapas nikaal lete hain."
+    ],
+    [
+     "code",
+     "python",
+     "name = \"Akash\"\nage = 25\nprint(name)\nprint(age)",
+     "Akash\n25"
+    ],
+    [
+     "sketch",
+     {
+      "k": "boxes",
+      "title": "Memory mein dibbe",
+      "items": [
+       {
+        "label": "name",
+        "value": "\"Akash\""
+       },
+       {
+        "label": "age",
+        "value": "25"
+       }
+      ]
+     }
+    ],
+    [
+     "p",
+     "Yahan `=` ka matlab **barabar nahi**, balki **\"rakh do\"** hai. Right side ki value, left side ke dibbe mein jaati hai."
+    ],
+    [
+     "code",
+     "python",
+     "score = 10\nscore = score + 5\nprint(score)",
+     "15"
+    ],
+    [
+     "p",
+     "Dibbe ki value badal sakti hai. Pehle 10 tha, phir purani value + 5 = 15 rakh diya. Purani value mit jaati hai."
+    ],
+    [
+     "code",
+     "python",
+     "a, b = 5, 10\nprint(a, b)\na, b = b, a   # swap: dono ki value adla-badli\nprint(a, b)",
+     "5 10\n10 5"
+    ],
+    [
+     "list",
+     [
+      "Naam letter ya `_` se shuru ho, number se nahi: `name1` sahi, `1name` galat.",
+      "Space nahi: `my_name` sahi, `my name` galat.",
+      "Python ke apne shabd (`if`, `for`, `class`, `True`) naam nahi ban sakte.",
+      "Naam aisa rakho jo kaam bataye: `total_price`, na ki `x`. Python mein chhote letters + `_` (snake_case) chalta hai."
+     ]
+    ],
+    [
+     "warn",
+     "Common galti: `print(\"name\")` likhoge to dibbe ki value nahi, seedha shabd `name` print hoga. Variable ke liye quotes mat lagao. Aur `Name` aur `name` do alag dibbe hain."
+    ],
+    [
+     "p",
+     "Har value ka ek **type** hota hai, yaani dibbe mein kis tarah ka maal hai. Python khud pehchaan leta hai."
+    ],
+    [
+     "analogy",
+     "Kirana dukaan socho: chawal ke packet gine jaate hain (pura number), chawal ka wazan 2.5 kg (decimal), dukaan ka naam (text), aur \"stock hai?\" ka jawab haan/naa. Har cheez ka type alag."
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "4 basic data types",
+      "head": [
+       "Type",
+       "Matlab",
+       "Example"
+      ],
+      "rows": [
+       [
+        "int",
+        "pura number",
+        "25"
+       ],
+       [
+        "float",
+        "decimal number",
+        "5.5"
+       ],
+       [
+        "str",
+        "text",
+        "\"Akash\""
+       ],
+       [
+        "bool",
+        "haan / naa",
+        "True"
+       ]
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "print(type(25))\nprint(type(5.5))\nprint(type(\"Akash\"))\nprint(type(True))",
+     "<class 'int'>\n<class 'float'>\n<class 'str'>\n<class 'bool'>"
+    ],
+    [
+     "p",
+     "Type badalna (**type conversion**) bahut kaam ka hai, khaaskar `input` ke saath: `int()`, `float()`, `str()`, `bool()`."
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Type conversion",
+      "steps": [
+       "\"10\" (str)",
+       "int()",
+       "10 (int)"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "code",
+     "python",
+     "a = \"10\"\nb = int(a)\nprint(b + 5)\nprint(str(99) + \"!\")\nprint(float(\"3.5\") * 2)\nprint(int(9.99))",
+     "15\n99!\n7.0\n9"
+    ],
+    [
+     "tip",
+     "Dhyan se dekh: `int(9.99)` round nahi karta, decimal ka hissa **kaat** deta hai, isliye `9`. Round chahiye to `round(9.99)` = `10`."
+    ],
+    [
+     "warn",
+     "Common galti: `\"10\" + 5` error deta hai (TypeError), kyunki text aur number seedha jod nahi sakte. Pehle `int(\"10\")` karo. Aur `int(\"3.5\")` bhi error deta hai; pehle `float(\"3.5\")` karo."
+    ],
+    [
+     "code",
+     "python",
+     "print(bool(0), bool(5), bool(\"\"), bool(\"hi\"))\nx = None   # abhi koi value nahi\nprint(x, type(x))",
+     "False True False True\nNone <class 'NoneType'>"
+    ],
+    [
+     "tip",
+     "`True` aur `False` ka pehla letter capital hota hai. `true` likhoge to error. `0` aur khaali text `\"\"` False maane jaate hain, baaki sab True. `None` ka matlab \"abhi kuch nahi\"."
+    ]
+   ]
+  },
+  {
+   "title": "Operators aur math — Python ek calculator",
+   "blocks": [
+    [
+     "p",
+     "Python ek bahut tez **calculator** bhi hai. Hisaab ke nishaan ko **operator** kehte hain. ML mein bhi andar sab yahi jodna, guna, bhaag hi chalta hai."
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Math operators",
+      "head": [
+       "Operator",
+       "Matlab",
+       "Example",
+       "Result"
+      ],
+      "rows": [
+       [
+        "+",
+        "jodna",
+        "7 + 2",
+        "9"
+       ],
+       [
+        "*",
+        "guna",
+        "7 * 2",
+        "14"
+       ],
+       [
+        "/",
+        "bhaag (decimal)",
+        "7 / 2",
+        "3.5"
+       ],
+       [
+        "//",
+        "bhaag (pura)",
+        "7 // 2",
+        "3"
+       ],
+       [
+        "%",
+        "bacha hua",
+        "7 % 2",
+        "1"
+       ],
+       [
+        "**",
+        "power",
+        "2 ** 3",
+        "8"
+       ]
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "print(7 / 2)\nprint(7 // 2)\nprint(7 % 2)\nprint(2 ** 3)\nprint(7 - 2)",
+     "3.5\n3\n1\n8\n5"
+    ],
+    [
+     "analogy",
+     "17 samose, 5 dost. Har dost ko kitne mile? `17 // 5` = 3. Kitne bache? `17 % 5` = 2. `//` = pure hisse, `%` = jo bach gaya."
+    ],
+    [
+     "p",
+     "Factory ka real example: 1250 meter cable hai, ek coil 100 meter ka banta hai. Kitne pure coil bane, aur kitna cable bacha?"
+    ],
+    [
+     "code",
+     "python",
+     "length = 1250\ncoil = 100\nprint(length // coil)\nprint(length % coil)",
+     "12\n50"
+    ],
+    [
+     "tip",
+     "`%` se even/odd pata karo: `n % 2` agar `0` hai to number even, `1` hai to odd. Yeh trick IQ aur coding tests mein bahut aati hai."
+    ],
+    [
+     "code",
+     "python",
+     "print(10 % 2)\nprint(7 % 2)\nprint(5 + 2.0)",
+     "0\n1\n7.0"
+    ],
+    [
+     "p",
+     "int aur float mile to result **float** ban jaata hai, isliye `5 + 2.0` = `7.0`."
+    ],
+    [
+     "p",
+     "**Order (precedence)** school ke BODMAS jaisa hai: pehle bracket `( )`, phir `**`, phir `* / // %`, aakhir mein `+ -`. Shaq ho to bracket laga do."
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Kaun pehle chalega",
+      "steps": [
+       "( )",
+       "**",
+       "* / // %",
+       "+ -"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "code",
+     "python",
+     "print(2 + 3 * 4)\nprint((2 + 3) * 4)",
+     "14\n20"
+    ],
+    [
+     "p",
+     "**Shortcut operators**: `x += 5` matlab `x = x + 5`. Waise hi `-=`, `*=`, `/=`."
+    ],
+    [
+     "code",
+     "python",
+     "stock = 100\nstock -= 30   # 30 bik gaye\nstock += 10   # 10 naye aaye\nprint(stock)",
+     "80"
+    ],
+    [
+     "p",
+     "Kuch ready-made math helpers: `abs()` (minus hatao), `round()`, `min()`, `max()`. Aur `math` module mein `sqrt`, `pi` jaisi cheezein."
+    ],
+    [
+     "code",
+     "python",
+     "print(abs(-7), round(4.567, 1), min(3, 9, 1), max(3, 9, 1))\nimport math\nprint(math.sqrt(16))\nprint(round(math.pi, 2))",
+     "7 4.6 1 9\n4.0\n3.14"
+    ],
+    [
+     "warn",
+     "Common galti: `10 / 0` karoge to **ZeroDivisionError**. Aur `0.1 + 0.2` exactly `0.3` nahi aata (`0.30000000000000004`), kyunki float binary mein store hota hai. Paise dikhane ho to `round()` lagao."
+    ]
+   ]
+  },
+  {
+   "title": "Strings basics — text ke saath khel",
+   "blocks": [
+    [
+     "p",
+     "**String (str)** = characters (akshar) ki line. Single quote `' '` ya double quote `\" \"` dono chalte hain, bas shuru aur band ek jaisa ho."
+    ],
+    [
+     "code",
+     "python",
+     "s1 = 'Hello'\ns2 = \"Hello\"\nprint(s1 == s2)",
+     "True"
+    ],
+    [
+     "p",
+     "String ka har akshar ek **index** (number) pe baitha hai. Gintee **0** se shuru hoti hai. Ulta (peeche se) gino to `-1`, `-2`..."
+    ],
+    [
+     "sketch",
+     {
+      "k": "array",
+      "title": "word = \"PYTHON\"",
+      "items": [
+       "P",
+       "Y",
+       "T",
+       "H",
+       "O",
+       "N"
+      ],
+      "index": true
+     }
+    ],
+    [
+     "analogy",
+     "Train ke dibbe socho: engine ke baad pehla dibba number 0, phir 1, 2... Aakhri dibba pakadna ho to bolo `-1`, gintee ki zaroorat hi nahi."
+    ],
+    [
+     "code",
+     "python",
+     "word = \"Python\"\nprint(word[0])\nprint(word[5])\nprint(word[-1])",
+     "P\nn\nn"
+    ],
+    [
+     "p",
+     "`len()` batata hai string mein kitne akshar hain. Space bhi gina jaata hai."
+    ],
+    [
+     "code",
+     "python",
+     "print(len(\"Python\"))\nprint(len(\"Akash Kumar\"))",
+     "6\n11"
+    ],
+    [
+     "warn",
+     "Common galti: `\"Python\"` ki length 6 hai, to aakhri index **5** hai, 6 nahi. `word[6]` likhoge to **IndexError**."
+    ],
+    [
+     "p",
+     "**Slicing (preview)**: `word[start:end]` se ek tukda nikalo. `start` shamil, `end` shamil **nahi**. Khaali chhodo to shuru/aakhir tak."
+    ],
+    [
+     "code",
+     "python",
+     "word = \"Python\"\nprint(word[0:3])\nprint(word[2:])\nprint(word[:4])\nprint(word[-3:])",
+     "Pyt\nthon\nPyth\nhon"
+    ],
+    [
+     "tip",
+     "Slicing Stage 4 mein lists pe bhi aayegi, aur Pandas mein bhi. Abhi bas yaad rakho: `end` wala index chhoot jaata hai."
+    ],
+    [
+     "p",
+     "String ke paas apne kaam ke tools (**methods**) hain: `.upper()`, `.lower()`, `.title()`, `.strip()` (aage-peeche ki spaces hatao), `.replace()`."
+    ],
+    [
+     "code",
+     "python",
+     "name = \"  akash kumar  \"\nprint(name.strip())\nprint(name.strip().upper())\nprint(name.strip().title())\nprint(\"cable-wire\".replace(\"-\", \" \"))\nprint(\"Py\" in \"Python\")",
+     "akash kumar\nAKASH KUMAR\nAkash Kumar\ncable wire\nTrue"
+    ],
+    [
+     "tip",
+     "Dhyan se dekh: string **badalti nahi** (immutable). `.upper()` nayi string deta hai; purani wahi rehti hai. Rakhni ho to wapas variable mein daalo: `name = name.upper()`."
+    ],
+    [
+     "code",
+     "python",
+     "print(\"Chai\" + \" \" + \"Garam\")\nprint(\"-\" * 10)",
+     "Chai Garam\n----------"
+    ],
+    [
+     "p",
+     "**Escape characters**: backslash `\\` ke baad wala akshar special kaam karta hai. Text ke andar nayi line, tab ya quote daalne ke liye."
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Escape characters",
+      "head": [
+       "Likho",
+       "Matlab"
+      ],
+      "rows": [
+       [
+        "\\n",
+        "nayi line"
+       ],
+       [
+        "\\t",
+        "tab space"
+       ],
+       [
+        "\\\"",
+        "quote andar"
+       ],
+       [
+        "\\\\",
+        "ek backslash"
+       ]
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "print(\"Line 1\\nLine 2\")\nprint(\"Naam:\\tAkash\")\nprint(\"Usne kaha \\\"Hi\\\"\")\nprint(\"C:\\\\new_folder\")",
+     "Line 1\nLine 2\nNaam:\tAkash\nUsne kaha \"Hi\"\nC:\\new_folder"
+    ],
+    [
+     "warn",
+     "Common galti: Windows path `\"C:\\new\"` mein `\\n` nayi line ban jaata hai! `\\\\` likho ya raw string `r\"C:\\new\"` use karo."
+    ]
+   ]
+  },
+  {
+   "title": "input aur f-strings",
+   "blocks": [
+    [
+     "p",
+     "`input()` user se value **maangta** hai. Jo bhi type karo, woh hamesha **text (str)** ban ke aata hai."
+    ],
+    [
+     "code",
+     "python",
+     "name = input(\"Tumhara naam? \")\nprint(\"Namaste\", name)",
+     ""
+    ],
+    [
+     "p",
+     "Upar wala code chalao to screen pe `Tumhara naam? ` aayega. Tum `Akash` likh ke Enter dabaoge to `Namaste Akash` dikhega."
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "input ka safar",
+      "steps": [
+       "User type kare",
+       "input()",
+       "str value",
+       "variable"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "code",
+     "python",
+     "age = int(\"25\")   # input se aaya text, int mein badla\nprint(age + 1)",
+     "26"
+    ],
+    [
+     "tip",
+     "Number chahiye to seedha lapet do: `age = int(input(\"Age? \"))`, decimal ke liye `float(input(...))`."
+    ],
+    [
+     "p",
+     "**f-string** = text ke andar variable seedha daalne ka sabse aasaan tareeka. Quote se pehle `f` lagao aur variable ko `{ }` mein likho."
+    ],
+    [
+     "code",
+     "python",
+     "name = \"Akash\"\nage = 25\nprint(f\"Mera naam {name} hai, umar {age} saal\")\nprint(f\"Agle saal {age + 1} ka ho jaunga\")",
+     "Mera naam Akash hai, umar 25 saal\nAgle saal 26 ka ho jaunga"
+    ],
+    [
+     "tip",
+     "`{ }` ke andar hisaab bhi chal jaata hai: `{age + 1}`, `{price * 2}`. Aur `{price:.2f}` = decimal ke baad sirf 2 digit."
+    ],
+    [
+     "code",
+     "python",
+     "item = \"Copper wire\"\nqty = 3\nrate = 125.5\nprint(f\"{item}: {qty} x {rate} = {qty * rate}\")\nprint(f\"Bill: Rs {qty * rate:.2f}\")",
+     "Copper wire: 3 x 125.5 = 376.5\nBill: Rs 376.50"
+    ],
+    [
+     "p",
+     "Text jodne ke aur tareeke bhi hain, sab ka result same. Lekin f-string sabse saaf aur aaj kal sabse zyada use hoti hai."
+    ],
+    [
+     "code",
+     "python",
+     "name = \"Akash\"\nprint(\"Hi \" + name)\nprint(\"Hi\", name)\nprint(\"Hi {}\".format(name))\nprint(f\"Hi {name}\")",
+     "Hi Akash\nHi Akash\nHi Akash\nHi Akash"
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "Text jodna",
+      "left": {
+       "title": "+ se",
+       "items": [
+        "\"Age \" + str(25)",
+        "str() bhoolo to error",
+        "lamba"
+       ]
+      },
+      "right": {
+       "title": "f-string",
+       "items": [
+        "f\"Age {age}\"",
+        "type ki tension nahi",
+        "saaf aur tez"
+       ]
+      }
+     }
+    ],
+    [
+     "warn",
+     "Common galti: `f` lagana bhool gaye to `{name}` jaisa ka taisa print hoga. Aur `\"Age: \" + 25` TypeError deta hai; `str(25)` ya f-string use karo."
+    ]
+   ]
+  },
+  {
+   "title": "Pehli .py file aur error message padhna",
+   "blocks": [
+    [
+     "p",
+     "Ab tak chhote code tukde dekhe. Asli kaam mein code ek **file** mein likhte hain jiska naam `.py` pe khatam hota hai, jaise `hello.py`. File save rehti hai, baar baar chala sakte ho."
+    ],
+    [
+     "list",
+     [
+      "Editor kholo (VS Code, ya phone pe isi app ka editor).",
+      "Nayi file banao, naam rakho `hello.py`.",
+      "Code likho aur save karo.",
+      "Terminal mein usi folder mein jaa ke likho: `python hello.py` (Linux/Mac pe aksar `python3 hello.py`)."
+     ]
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "File se program",
+      "steps": [
+       "hello.py likho",
+       "Save",
+       "python hello.py",
+       "Output"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "code",
+     "python",
+     "# hello.py\nname = \"Akash\"\nprint(f\"Hello {name}, meri pehli file chal gayi!\")",
+     "Hello Akash, meri pehli file chal gayi!"
+    ],
+    [
+     "code",
+     "bash",
+     "python hello.py",
+     "Hello Akash, meri pehli file chal gayi!"
+    ],
+    [
+     "p",
+     "Galti hogi, aur woh bilkul theek hai. Python galti pe ruk ke **error message (Traceback)** dikhata hai. Yeh dushman nahi, **dost** hai: batata hai kahan aur kya galat hai."
+    ],
+    [
+     "analogy",
+     "Factory ki machine ka alarm panel socho: woh batata hai kaunsi machine (file), kaunsa hissa (line number), aur kya problem (error type). Alarm padh ke hi mechanic theek karta hai."
+    ],
+    [
+     "code",
+     "text",
+     "Traceback (most recent call last):\n  File \"hello.py\", line 2, in <module>\n    print(nam)\n          ^^^\nNameError: name 'nam' is not defined. Did you mean: 'name'?",
+     ""
+    ],
+    [
+     "sketch",
+     {
+      "k": "stack",
+      "title": "Traceback padhna",
+      "items": [
+       "Traceback",
+       "File + line no.",
+       "Galat wali line",
+       "ErrorType: wajah"
+      ]
+     }
+    ],
+    [
+     "tip",
+     "Dhyan se dekh: error **neeche se upar** padho. 1) Aakhri line: error ka type aur wajah. 2) Upar: file aur **line number**. 3) Us line pe jaa ke dekho. Yahan Python ne khud bata diya: `nam` nahi, `name` likhna tha."
+    ],
+    [
+     "p",
+     "**SyntaxError** = grammar ki galti (bracket/quote band nahi, colon chhoota). Yeh code chalne se **pehle** hi pakdi jaati hai, isliye ek bhi line nahi chalti."
+    ],
+    [
+     "code",
+     "text",
+     "  File \"hello.py\", line 1\n    print(\"Hello\"\n         ^\nSyntaxError: '(' was never closed",
+     ""
+    ],
+    [
+     "p",
+     "**NameError** = Python ko yeh naam mila hi nahi. Spelling galat, chhota-bada letter galat, ya variable banane se pehle use kar liya."
+    ],
+    [
+     "p",
+     "**TypeError** = galat type ke saath kaam. Jaise text aur number ko `+` se jodna."
+    ],
+    [
+     "code",
+     "text",
+     "TypeError: can only concatenate str (not \"int\") to str",
+     ""
+    ],
+    [
+     "p",
+     "**ValueError** = type to sahi hai, lekin value bekaar. Jaise `int(\"abc\")`: text ko number banana tha, par `abc` koi number nahi."
+    ],
+    [
+     "code",
+     "text",
+     "ValueError: invalid literal for int() with base 10: 'abc'",
+     ""
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Common errors",
+      "head": [
+       "Error",
+       "Kab aata hai",
+       "Example"
+      ],
+      "rows": [
+       [
+        "SyntaxError",
+        "grammar galat",
+        "print(\"Hi\""
+       ],
+       [
+        "NameError",
+        "naam nahi mila",
+        "print(nam)"
+       ],
+       [
+        "TypeError",
+        "type mismatch",
+        "\"5\" + 5"
+       ],
+       [
+        "ValueError",
+        "value galat",
+        "int(\"abc\")"
+       ],
+       [
+        "IndentationError",
+        "galat space",
+        " print(1)"
+       ],
+       [
+        "ZeroDivisionError",
+        "0 se bhaag",
+        "10 / 0"
+       ]
+      ]
+     }
+    ],
+    [
+     "warn",
+     "Common galti: line ke shuru mein faltu space daal di to **IndentationError**. Python mein shuru ki space ka matlab hota hai (Stage 2 mein if/for ke saath dekhoge)."
+    ],
+    [
+     "tip",
+     "Error samajh na aaye to aakhri line copy karke search karo ya AI se poochho. Stage 5 mein `try/except` se errors ko pakadna (handle karna) bhi seekhenge."
+    ]
+   ]
+  }
+ ],
+ "teach": [
+  {
+   "say": "Chalo shuru karte hain. Program matlab computer ko diye gaye hukum, ek ke baad ek, upar se neeche.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Hukum 1",
+     "Hukum 2",
+     "Hukum 3"
+    ],
+    "dir": "h"
+   },
+   "code": null
+  },
+  {
+   "say": "Sabse pehla hukum: print. Jo bracket ke andar likhoge, screen pe dikhega. Text quotes mein, number bina quotes.",
+   "sketch": null,
+   "code": "print(\"Hello Akash\")\nprint(10 + 5)"
+  },
+  {
+   "say": "Ab socho ek dibba hai, upar naam likha hai 'name', aur andar rakha hai Akash. Isi ko variable kehte hain.",
+   "sketch": {
+    "k": "boxes",
+    "items": [
+     {
+      "label": "name",
+      "value": "\"Akash\""
+     }
+    ]
+   },
+   "code": "name = \"Akash\""
+  },
+  {
+   "say": "Yahan barabar ka nishaan matlab 'rakh do'. Right ki value left ke dibbe mein jaati hai, aur nayi value purani ko hata deti hai.",
+   "sketch": {
+    "k": "boxes",
+    "items": [
+     {
+      "label": "age",
+      "value": "25"
+     },
+     {
+      "label": "score",
+      "value": "15"
+     }
+    ]
+   },
+   "code": "age = 25\nscore = 10 + 5"
+  },
+  {
+   "say": "Har value ka type hota hai: pura number int, decimal float, text str, aur haan-naa bool.",
+   "sketch": {
+    "k": "table",
+    "head": [
+     "Type",
+     "Example"
+    ],
+    "rows": [
+     [
+      "int",
+      "25"
+     ],
+     [
+      "float",
+      "5.5"
+     ],
+     [
+      "str",
+      "\"Hi\""
+     ],
+     [
+      "bool",
+      "True"
+     ]
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "Ab hisaab. 17 samose, 5 dost: double slash se pure hisse milte hain, percent se jo bacha. Yeh dono bahut kaam aate hain.",
+   "sketch": {
+    "k": "boxes",
+    "items": [
+     {
+      "label": "17 // 5",
+      "value": "3"
+     },
+     {
+      "label": "17 % 5",
+      "value": "2"
+     },
+     {
+      "label": "17 / 5",
+      "value": "3.4"
+     }
+    ]
+   },
+   "code": "print(17 // 5, 17 % 5)   # 3 2"
+  },
+  {
+   "say": "String ke har akshar ka ek number hota hai, zero se shuru. Peeche se gino to minus ek. len batata hai kul kitne akshar.",
+   "sketch": {
+    "k": "array",
+    "items": [
+     "P",
+     "Y",
+     "T",
+     "H",
+     "O",
+     "N"
+    ],
+    "index": true
+   },
+   "code": "word = \"Python\"\nprint(word[0], word[-1], len(word))   # P n 6"
+  },
+  {
+   "say": "input se jo bhi aata hai, woh text hota hai. Number chahiye to int lagao.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "input()",
+     "\"25\" (str)",
+     "int()",
+     "25 (int)"
+    ],
+    "dir": "h"
+   },
+   "code": "age = int(input(\"Age? \"))"
+  },
+  {
+   "say": "f-string: quote se pehle f, aur variable curly bracket mein. Python khud value bhar deta hai. Bas, sentence ready.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "f\"Hi {name}\"",
+     "name = Akash",
+     "Hi Akash"
+    ],
+    "dir": "h"
+   },
+   "code": "print(f\"Hi {name}, age {age}\")"
+  },
+  {
+   "say": "Aur galti hogi to ghabrana nahi. Error ki aakhri line padho, line number dekho, theek karo. Python chhota-bada letter alag maanta hai, yeh yaad rakhna. Ab practice karo!",
+   "sketch": {
+    "k": "compare",
+    "left": {
+     "title": "Sahi",
+     "items": [
+      "print(\"Hi\")",
+      "name = \"A\"",
+      "True"
+     ]
+    },
+    "right": {
+     "title": "Galat",
+     "items": [
+      "Print(\"Hi\")",
+      "1name = \"A\"",
+      "true"
+     ]
+    }
+   },
+   "code": null
+  }
+ ],
+ "practice": [
+  {
+   "q": "`name = \"  akash kumar  \"` diya hai. Aage-peeche ki spaces hatao, har shabd ka pehla letter capital karo, aur yeh print karo:\nAkash Kumar\nLength: 11\nPehla akshar: A",
+   "starter": "name = \"  akash kumar  \"\n# TODO: strip() aur title() se clean naam banao\nclean = name\n# TODO: clean, uski length aur pehla akshar print karo\n",
+   "expect": "Akash Kumar\nLength: 11\nPehla akshar: A",
+   "hint": "clean = name.strip().title(), phir len(clean) aur clean[0].",
+   "solution": "name = \"  akash kumar  \"\nclean = name.strip().title()\nprint(clean)\nprint(f\"Length: {len(clean)}\")\nprint(f\"Pehla akshar: {clean[0]}\")"
+  },
+  {
+   "q": "Variables `price = 120` aur `qty = 3` banao aur f-string se print karo:\nTotal: 360",
+   "starter": "price = 120\nqty = 3\n# TODO: f-string se total print karo\n",
+   "expect": "Total: 360",
+   "hint": "print(f\"Total: {price * qty}\")",
+   "solution": "price = 120\nqty = 3\nprint(f\"Total: {price * qty}\")"
+  },
+  {
+   "q": "Cable ki length text mein aayi hai: `length = \"1250\"` (meter). Ek coil 100 meter ka banta hai. Length ko number mein badlo, phir `//` aur `%` se yeh print karo:\nPure coil: 12\nBacha hua: 50 m",
+   "starter": "length = \"1250\"\ncoil = 100\n# TODO: length ko int mein badlo\n# TODO: // se pure coil, % se bacha hua cable nikaalo\n# TODO: f-string se dono print karo\n",
+   "expect": "Pure coil: 12\nBacha hua: 50 m",
+   "hint": "meters = int(length), phir meters // coil aur meters % coil.",
+   "solution": "length = \"1250\"\ncoil = 100\nmeters = int(length)\nprint(f\"Pure coil: {meters // coil}\")\nprint(f\"Bacha hua: {meters % coil} m\")"
+  }
+ ],
+ "quiz": [
+  {
+   "q": "`print(\"5\" + \"5\")` ka output kya hoga?",
+   "o": [
+    "10",
+    "55",
+    "Error",
+    "5 5"
+   ],
+   "a": 1,
+   "why": "Dono text hain, aur text ka + unhe jod deta hai: \"55\"."
+  },
+  {
+   "q": "`print(17 // 5)` kya print karega?",
+   "o": [
+    "3",
+    "3.4",
+    "2",
+    "4"
+   ],
+   "a": 0,
+   "why": "`//` bhaag ka sirf pura hissa deta hai: 17 mein 5 teen baar poora jaata hai."
+  },
+  {
+   "q": "Kaunsa variable naam sahi hai?",
+   "o": [
+    "2name",
+    "my name",
+    "my_name",
+    "my-name"
+   ],
+   "a": 2,
+   "why": "Naam number se shuru nahi ho sakta, space ya - nahi chalta; underscore chalta hai."
+  },
+  {
+   "q": "`input()` hamesha kis type ki value deta hai?",
+   "o": [
+    "int",
+    "float",
+    "bool",
+    "str"
+   ],
+   "a": 3,
+   "why": "User jo bhi type kare, input use text (str) bana ke deta hai."
+  },
+  {
+   "q": "`type(3.0)` kya hai?",
+   "o": [
+    "<class 'int'>",
+    "<class 'float'>",
+    "<class 'str'>",
+    "<class 'number'>"
+   ],
+   "a": 1,
+   "why": "Decimal point wala number float hota hai, chahe .0 hi ho."
+  },
+  {
+   "q": "`word = \"Python\"` ho to `word[-1]` kya dega?",
+   "o": [
+    "n",
+    "P",
+    "o",
+    "Error"
+   ],
+   "a": 0,
+   "why": "`-1` matlab peeche se pehla, yaani aakhri akshar: n."
+  },
+  {
+   "q": "Kaunsi line error degi?",
+   "o": [
+    "print(\"Hi\")",
+    "print('Hi')",
+    "print(\"Hi\", 5)",
+    "Print(\"Hi\")"
+   ],
+   "a": 3,
+   "why": "Python case-sensitive hai; `Print` naam ka koi function nahi, NameError aayega."
+  },
+  {
+   "q": "`name = \"Ravi\"` ho to `print(f\"Hi {name}\")` ka output?",
+   "o": [
+    "Hi {name}",
+    "Hi name",
+    "Hi Ravi",
+    "f\"Hi Ravi\""
+   ],
+   "a": 2,
+   "why": "f-string `{name}` ki jagah variable ki value daal deti hai."
+  },
+  {
+   "q": "`name` banaya hi nahi aur `print(name)` likh diya. Kaunsa error aayega?",
+   "o": [
+    "NameError",
+    "SyntaxError",
+    "TypeError",
+    "ValueError"
+   ],
+   "a": 0,
+   "why": "Python ko `name` naam ka koi dibba mila hi nahi, isliye NameError."
+  },
+  {
+   "q": "`print(\"Age: \" + 25)` ka kya hoga?",
+   "o": [
+    "Age: 25",
+    "TypeError",
+    "NameError",
+    "Age:25"
+   ],
+   "a": 1,
+   "why": "Text aur number ko `+` se seedha nahi jod sakte; `str(25)` ya f-string chahiye."
+  }
+ ],
+ "iq": [
+  {
+   "q": "Python kya hai aur AI/ML mein itni popular kyun hai?",
+   "a": "Python ek high-level, interpreted, easy-to-read language hai. AI/ML mein popular hai kyunki iske paas NumPy, Pandas, scikit-learn, PyTorch jaisi badi libraries hain, community bahut badi hai, aur ideas jaldi prototype ho jaate hain."
+  },
+  {
+   "q": "Interpreted language ka kya matlab hai?",
+   "a": "Code ko pehle poora machine code mein compile nahi karte; interpreter line by line padh ke chalata hai. Isse testing aasaan hoti hai, lekin C/C++ se thoda slow hota hai."
+  },
+  {
+   "q": "Python dynamically typed hai — iska matlab?",
+   "a": "Variable ka type pehle declare nahi karna padta; value se type apne aap tay hota hai, aur baad mein badal bhi sakta hai: `x = 5` phir `x = \"hi\"` chal jaata hai."
+  },
+  {
+   "q": "`=` aur `==` mein kya farak hai?",
+   "a": "`=` assignment hai (value dibbe mein rakhna). `==` comparison hai (dono barabar hain kya), jo True/False deta hai."
+  },
+  {
+   "q": "Python ke basic data types batao.",
+   "a": "int (pura number), float (decimal), str (text), bool (True/False). Iske alawa complex aur NoneType bhi hain. Collections: list, tuple, set, dict."
+  },
+  {
+   "q": "`/`, `//` aur `%` mein kya farak hai?",
+   "a": "`/` normal bhaag hai aur hamesha float deta hai (`7 / 2` = 3.5). `//` floor division hai, sirf pura hissa (`7 // 2` = 3). `%` modulo hai, bacha hua (`7 % 2` = 1); even/odd check mein bahut use hota hai."
+  },
+  {
+   "q": "input() se aaye number par hisaab kyun error deta hai?",
+   "a": "Kyunki input hamesha str deta hai. `\"5\" + 1` TypeError dega. Pehle `int(input())` ya `float(input())` se convert karna padta hai."
+  },
+  {
+   "q": "f-string kya hai aur iska fayda?",
+   "a": "Python 3.6+ ka string formatting tareeka: `f\"Hi {name}\"`. Padhne mein saaf, tez, aur `{}` ke andar expressions bhi chal jaate hain, jaise `{price * qty}` ya `{x:.2f}`."
+  },
+  {
+   "q": "Strings mutable hain ya immutable? Iska kya asar hai?",
+   "a": "Strings immutable hain: ek baar bani to andar se badal nahi sakti. `s[0] = \"X\"` TypeError deta hai. `.upper()`, `.replace()` jaise methods nayi string return karte hain, isliye `s = s.upper()` likhna padta hai."
+  },
+  {
+   "q": "Python mein comment kaise likhte hain aur docstring kya hai?",
+   "a": "Single-line comment `#` se. Docstring triple quotes `\"\"\"...\"\"\"` mein function/class ke shuru mein likhi documentation hai, jo `help()` mein dikhti hai."
+  },
+  {
+   "q": "Error aane pe tum debug kaise karte ho? SyntaxError aur runtime error mein farak?",
+   "a": "Traceback neeche se upar padhta hoon: aakhri line mein error type aur wajah, upar file aur line number. SyntaxError code chalne se pehle hi aata hai (grammar galat), isliye ek bhi line nahi chalti. NameError, TypeError, ValueError, ZeroDivisionError runtime errors hain, jo chalte waqt us line pe aate hain."
+  },
+  {
+   "q": "`print(0.1 + 0.2)` ka output 0.3 kyun nahi aata?",
+   "a": "Floats binary mein exactly store nahi hote, isliye `0.30000000000000004` aata hai. Paise jaise exact kaam ke liye `round()` ya `decimal.Decimal` use karte hain."
+  }
+ ]
+}

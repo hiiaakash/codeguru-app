@@ -1,0 +1,1230 @@
+{
+ "n": 9,
+ "id": "aiml-09",
+ "title": "Data Visualization & Math for ML",
+ "goal": "Sahi chart chun ke data ko dekhna aur EDA karna, aur ML ke peeche ka zaroori math (statistics, probability, Bayes, vectors, matrices, gradient descent) simple tareeke se samajh jaoge.",
+ "lessons": [
+  {
+   "title": "Visualization kyun, aur matplotlib basics",
+   "blocks": [
+    [
+     "p",
+     "Numbers ki lambi list dekh ke pattern samajhna mushkil hai. **Graph** mein woh pattern ek second mein dikh jaata hai: trend upar ja raha hai, koi value ajeeb hai, do cheezein saath badh rahi hain."
+    ],
+    [
+     "analogy",
+     "Factory ki monthly production ki register mein 365 numbers padho, ya ek line chart dekho. Chart mein turant dikh jaayega ki Diwali ke time production badha aur barish mein gira."
+    ],
+    [
+     "p",
+     "ML mein visualization teen kaam aata hai: (1) **EDA** = data ko samajhna, (2) **debugging** = model kahan galti kar raha hai, (3) **presentation** = boss/client ko result dikhana."
+    ],
+    [
+     "p",
+     "Python mein do main libraries: **matplotlib** (base, sab kuch bana sakti hai) aur **seaborn** (matplotlib ke upar, kam code mein sundar statistical charts). Import hamesha aise:"
+    ],
+    [
+     "code",
+     "python",
+     "import matplotlib.pyplot as plt\nimport seaborn as sns",
+     ""
+    ],
+    [
+     "p",
+     "**Line chart** = time ke saath trend. Har chart ka same pattern hai: figure banao → plot karo → title/labels lagao → show/save."
+    ],
+    [
+     "code",
+     "python",
+     "import matplotlib.pyplot as plt\n\nmonths = [\"Jan\", \"Feb\", \"Mar\", \"Apr\", \"May\"]\nsales = [120, 135, 150, 145, 170]\n\nplt.figure(figsize=(8, 4))\nplt.plot(months, sales, marker=\"o\", label=\"Cable sales\")\nplt.title(\"Monthly Sales\")\nplt.xlabel(\"Month\")\nplt.ylabel(\"Units\")\nplt.legend()\nplt.grid(alpha=0.3)\nplt.savefig(\"sales.png\", dpi=150)\nplt.show()",
+     ""
+    ],
+    [
+     "p",
+     "Yeh code chalane pe ek line chart khulta hai jo Jan se May tak upar jaata dikhta hai, sirf April mein thoda girta hai. `savefig` usko image file mein save karta hai."
+    ],
+    [
+     "sketch",
+     {
+      "k": "chart",
+      "title": "Monthly Sales",
+      "type": "line",
+      "points": [
+       [
+        1,
+        120
+       ],
+       [
+        2,
+        135
+       ],
+       [
+        3,
+        150
+       ],
+       [
+        4,
+        145
+       ],
+       [
+        5,
+        170
+       ]
+      ],
+      "xl": "Month",
+      "yl": "Units"
+     }
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Har plot ka recipe",
+      "steps": [
+       "plt.figure",
+       "plt.plot/bar...",
+       "title + labels",
+       "savefig / show"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "**Bar, scatter, histogram** bhi isi tarah:"
+    ],
+    [
+     "code",
+     "python",
+     "import matplotlib.pyplot as plt\nimport numpy as np\n\nplt.bar([\"Python\", \"SQL\", \"Excel\"], [92, 70, 55])     # categories compare\nplt.show()\n\nrng = np.random.default_rng(0)\nx = rng.normal(size=200)\ny = 2 * x + rng.normal(scale=0.5, size=200)\nplt.scatter(x, y, alpha=0.6)                            # 2 cheezon ka rishta\nplt.show()\n\nplt.hist(rng.normal(size=1000), bins=30)                # distribution\nplt.show()",
+     ""
+    ],
+    [
+     "p",
+     "Scatter mein points ek seedhi line ke aas-paas upar jaate dikhenge (x badha to y badha). Histogram ghante (bell) jaisa dikhega, beech mein sabse uncha."
+    ],
+    [
+     "p",
+     "**Seaborn** mein heatmap aur boxplot ek line mein:"
+    ],
+    [
+     "code",
+     "python",
+     "import seaborn as sns\nimport matplotlib.pyplot as plt\n\nsns.heatmap(df.corr(numeric_only=True), annot=True, cmap=\"coolwarm\", center=0)\nplt.show()\n\nsns.boxplot(data=df, x=\"dept\", y=\"salary\")\nplt.show()",
+     ""
+    ],
+    [
+     "tip",
+     "Dhyan se dekh: har chart pe **title aur axis labels** zaroor lagao. Bina label ka chart = bina naam ki file, koi samjhega nahi."
+    ],
+    [
+     "warn",
+     "Common galti: script mein `plt.show()` bhool gaye to window nahi khulegi. Server ya notebook ke bahar `plt.savefig()` se file mein save karo."
+    ]
+   ]
+  },
+  {
+   "title": "Kaunsa chart kab, aur EDA",
+   "blocks": [
+    [
+     "p",
+     "Galat chart = galat samajh. Sawaal dekh ke chart chuno:"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Sawaal → chart",
+      "head": [
+       "Sawaal",
+       "Chart"
+      ],
+      "rows": [
+       [
+        "Time ke saath trend?",
+        "Line"
+       ],
+       [
+        "Categories compare?",
+        "Bar"
+       ],
+       [
+        "Data kaise phaila?",
+        "Histogram"
+       ],
+       [
+        "2 numbers ka rishta?",
+        "Scatter"
+       ],
+       [
+        "Outliers kahan?",
+        "Box plot"
+       ],
+       [
+        "Sab features ka rishta?",
+        "Heatmap"
+       ]
+      ]
+     }
+    ],
+    [
+     "sketch",
+     {
+      "k": "chart",
+      "title": "Bar: skill score",
+      "type": "bar",
+      "points": [
+       [
+        "Python",
+        92
+       ],
+       [
+        "SQL",
+        70
+       ],
+       [
+        "Excel",
+        55
+       ]
+      ],
+      "xl": "Skill",
+      "yl": "Score"
+     }
+    ],
+    [
+     "sketch",
+     {
+      "k": "chart",
+      "title": "Scatter: x vs y",
+      "type": "scatter",
+      "points": [
+       [
+        1,
+        2.1
+       ],
+       [
+        2,
+        3.9
+       ],
+       [
+        3,
+        6.2
+       ],
+       [
+        4,
+        7.8
+       ],
+       [
+        5,
+        10.1
+       ]
+      ],
+      "line": [
+       [
+        0,
+        0
+       ],
+       [
+        5,
+        10
+       ]
+      ],
+      "xl": "Feature",
+      "yl": "Target"
+     }
+    ],
+    [
+     "warn",
+     "Common galti: categories (Delhi, Jaipur) pe line chart. Line ka matlab hota hai \"beech mein bhi values hain\", jo categories mein nahi hoti. Categories ke liye bar."
+    ],
+    [
+     "p",
+     "**EDA (Exploratory Data Analysis)** = model banane se pehle data se dosti. IQ mein \"apna EDA process batao\" pakka poochha jaata hai."
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "EDA ke steps",
+      "steps": [
+       "shape, info",
+       "describe",
+       "missing/dup",
+       "hist + box",
+       "heatmap",
+       "target check"
+      ],
+      "dir": "v"
+     }
+    ],
+    [
+     "list",
+     [
+      "**1. Size aur types**: `df.shape`, `df.info()`",
+      "**2. Summary**: `df.describe()` (mean, std, min, max, percentiles)",
+      "**3. Missing aur duplicate**: `df.isna().sum()`, `df.duplicated().sum()`",
+      "**4. Distribution**: har numeric column ka histogram, box plot se outliers",
+      "**5. Rishte**: correlation heatmap, feature vs target scatter",
+      "**6. Target**: `value_counts()` se class balance (bar chart)"
+     ]
+    ],
+    [
+     "p",
+     "Bina chart ke bhi numbers se kaafi kuch dikh jaata hai:"
+    ],
+    [
+     "code",
+     "python",
+     "import pandas as pd\n\ndf = pd.DataFrame({\n    \"exp\": [1, 2, 3, 4, 5, 6],\n    \"salary\": [20, 25, 31, 34, 41, 95],\n})\nd = df[\"salary\"].describe()\nprint(d[\"mean\"].round(1), d[\"50%\"], d[\"max\"])\nprint(df.corr().loc[\"exp\", \"salary\"].round(2))",
+     "41.0 32.5 95.0\n0.83"
+    ],
+    [
+     "p",
+     "Dekho: mean 41 hai lekin median (50%) sirf 32.5. Matlab koi ek **badi value** (95) mean ko upar kheench rahi hai. Yeh outlier ka ishaara hai. Box plot banate to woh 95 ek alag dot ki tarah dikhta."
+    ],
+    [
+     "tip",
+     "Mean aur median mein bada farak = data tircha (skewed) hai ya outlier hai. Yeh EDA ka sabse sasta check hai."
+    ],
+    [
+     "analogy",
+     "Jaise kisi gali mein 9 log 20 hazaar kamaate hain aur ek crorepati rehta hai. Average dekhoge to lagega sab ameer hain. Median sach batayega."
+    ]
+   ]
+  },
+  {
+   "title": "Statistics: mean, std, percentiles, outliers, correlation",
+   "blocks": [
+    [
+     "p",
+     "ML = data se seekhna, aur data ko samajhne ki bhasha hai **statistics**. Ghabrao mat, sirf kuch cheezein chahiye."
+    ],
+    [
+     "p",
+     "**Center (beech) ke 3 naap**: mean = average, median = sort karke beech wala, mode = sabse zyada baar aane wala."
+    ],
+    [
+     "code",
+     "python",
+     "import statistics as st\n\nmarks = [40, 50, 50, 60, 100]\nprint(st.mean(marks))\nprint(st.median(marks))\nprint(st.mode(marks))",
+     "60\n50\n50"
+    ],
+    [
+     "sketch",
+     {
+      "k": "array",
+      "title": "Sorted: median beech mein",
+      "items": [
+       "40",
+       "50",
+       "50",
+       "60",
+       "100"
+      ],
+      "index": true
+     }
+    ],
+    [
+     "p",
+     "**Phailav (spread)**: sirf average kaafi nahi. Do classes ka average 50 ho sakta hai, lekin ek mein sab 48-52, doosri mein 0 se 100. Isko naapte hain **variance** aur **standard deviation (std)** se."
+    ],
+    [
+     "list",
+     [
+      "Har value ka mean se farak nikalo",
+      "Farak ka square karo (minus hat jaaye)",
+      "Sab squares ka average = **variance**",
+      "Variance ka square root = **std** (wapas original unit mein)"
+     ]
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\na = np.array([48, 50, 52])\nb = np.array([0, 50, 100])\nprint(a.mean(), b.mean())\nprint(a.std().round(2), b.std().round(2))\nprint(a.var().round(2))",
+     "50.0 50.0\n1.63 40.82\n2.67"
+    ],
+    [
+     "tip",
+     "Same mean, lekin std bilkul alag. Chhota std = values paas-paas (consistent machine). Bada std = values bikhri hui."
+    ],
+    [
+     "warn",
+     "Common galti: NumPy `std()` by default population std (divide by n) deta hai, Pandas `.std()` sample std (divide by n-1). Isliye dono ke number thode alag aate hain."
+    ],
+    [
+     "p",
+     "**Percentile**: 90th percentile = 90% values isse neeche. Median = 50th percentile. **Q1** = 25th, **Q3** = 75th. **IQR** = Q3 - Q1 (beech ke 50% data ki chaudai)."
+    ],
+    [
+     "p",
+     "**Outlier (IQR rule)**: jo value `Q1 - 1.5*IQR` se neeche ya `Q3 + 1.5*IQR` se upar ho, woh outlier. Box plot yahi rule use karta hai."
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\nw = np.array([10, 12, 11, 13, 12, 11, 40])   # cable weight (kg)\nq1, q3 = np.percentile(w, [25, 75])\niqr = q3 - q1\nlow, high = q1 - 1.5 * iqr, q3 + 1.5 * iqr\nprint(q1, q3, iqr)\nprint(low, high)\nprint(w[(w < low) | (w > high)])",
+     "11.0 12.5 1.5\n8.75 14.75\n[40]"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "IQR outlier rule",
+      "steps": [
+       "Q1, Q3",
+       "IQR = Q3-Q1",
+       "fence ±1.5×IQR",
+       "bahar = outlier"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "**Correlation** (-1 se +1): do cheezein saath kaise badalti hain. +1 = ek badhe to doosra bhi seedha badhe, -1 = ek badhe to doosra ghate, 0 = koi seedha rishta nahi."
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\nhours = [1, 2, 3, 4, 5]\nmarks = [35, 45, 50, 62, 70]\nphone = [5, 4, 4, 2, 1]\nprint(np.corrcoef(hours, marks)[0, 1].round(2))\nprint(np.corrcoef(hours, phone)[0, 1].round(2))",
+     "0.99\n-0.96"
+    ],
+    [
+     "sketch",
+     {
+      "k": "chart",
+      "title": "Positive correlation",
+      "type": "scatter",
+      "points": [
+       [
+        1,
+        35
+       ],
+       [
+        2,
+        45
+       ],
+       [
+        3,
+        50
+       ],
+       [
+        4,
+        62
+       ],
+       [
+        5,
+        70
+       ]
+      ],
+      "xl": "Study hours",
+      "yl": "Marks"
+     }
+    ],
+    [
+     "warn",
+     "Correlation ≠ causation. Garmi mein ice-cream bhi bikti hai aur AC bhi. Dono ka correlation high hai, lekin ice-cream AC nahi bikwaati, dono ki wajah garmi hai."
+    ]
+   ]
+  },
+  {
+   "title": "Normal distribution, probability aur Bayes",
+   "blocks": [
+    [
+     "p",
+     "**Normal distribution** (bell curve): zyada values beech (mean) ke paas, kinaaron pe kam. Height, weight, machine ka error, exam marks, sab aisa hi dikhte hain."
+    ],
+    [
+     "sketch",
+     {
+      "k": "chart",
+      "title": "Bell curve",
+      "type": "line",
+      "points": [
+       [
+        -3,
+        0.4
+       ],
+       [
+        -2,
+        5.4
+       ],
+       [
+        -1,
+        24.2
+       ],
+       [
+        0,
+        39.9
+       ],
+       [
+        1,
+        24.2
+       ],
+       [
+        2,
+        5.4
+       ],
+       [
+        3,
+        0.4
+       ]
+      ],
+      "xl": "std door",
+      "yl": "kitne log"
+     }
+    ],
+    [
+     "p",
+     "**68-95-99.7 rule**: mean ± 1 std mein lagbhag 68% data, ± 2 std mein 95%, ± 3 std mein 99.7%. Isliye 3 std se door ki value ko aksar outlier maante hain."
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\nrng = np.random.default_rng(42)\nx = rng.normal(loc=0, scale=1, size=100_000)\nprint(round(float(np.mean(np.abs(x) < 1)), 2))\nprint(round(float(np.mean(np.abs(x) < 2)), 2))",
+     "0.68\n0.95"
+    ],
+    [
+     "p",
+     "**z-score** = value mean se kitne std door hai: `z = (x - mean) / std`. ML mein features ko isi se scale karte hain (StandardScaler, Stage 10 mein)."
+    ],
+    [
+     "code",
+     "python",
+     "mean, std = 50, 10\nfor x in [50, 70, 20]:\n    print(x, (x - mean) / std)",
+     "50 0.0\n70 2.0\n20 -3.0"
+    ],
+    [
+     "p",
+     "**Probability** = kisi cheez ke hone ka chance, 0 (kabhi nahi) se 1 (pakka). `P = favourable / total`."
+    ],
+    [
+     "code",
+     "python",
+     "from fractions import Fraction\n\nprint(Fraction(1, 6))              # dice pe 4 aana\nprint(Fraction(3, 6))              # even number aana\nprint(Fraction(1, 6) * Fraction(1, 6))   # do dice, dono 6 (AND = guna)",
+     "1/6\n1/2\n1/36"
+    ],
+    [
+     "list",
+     [
+      "**AND** (dono ho, independent): P(A) × P(B)",
+      "**OR** (koi ek, saath na ho sake): P(A) + P(B)",
+      "**NOT**: 1 - P(A)",
+      "**Conditional** P(A|B) = B pata hai, ab A ka chance"
+     ]
+    ],
+    [
+     "p",
+     "**Bayes theorem** = nayi jaankari aane pe apna andaaza update karna:\n`P(A|B) = P(B|A) × P(A) / P(B)`"
+    ],
+    [
+     "analogy",
+     "Factory mein 1% cables defective hain. Testing machine defective ko 99% pakad leti hai, lekin achhi cable ko bhi 5% baar galti se 'fail' kar deti hai. Machine ne fail bola. Asli mein defective hone ka chance kitna? Dil kehta hai 99%, Bayes kehta hai bahut kam."
+    ],
+    [
+     "code",
+     "python",
+     "p_def = 0.01             # pehle se andaaza (prior)\np_fail_if_def = 0.99     # machine sahi pakadti hai\np_fail_if_ok = 0.05      # achhi cable ko galat fail\n\np_fail = p_fail_if_def * p_def + p_fail_if_ok * (1 - p_def)\np_def_if_fail = p_fail_if_def * p_def / p_fail\nprint(round(p_fail, 4))\nprint(round(p_def_if_fail, 3))",
+     "0.0594\n0.167"
+    ],
+    [
+     "sketch",
+     {
+      "k": "tree",
+      "title": "1000 cables",
+      "root": {
+       "label": "1000 cables",
+       "children": [
+        {
+         "label": "10 defective",
+         "children": [
+          {
+           "label": "~10 fail",
+           "children": []
+          }
+         ]
+        },
+        {
+         "label": "990 achhi",
+         "children": [
+          {
+           "label": "~50 galat fail",
+           "children": []
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ],
+    [
+     "tip",
+     "Sirf ~17%! Kyunki achhi cables itni zyada hain ki unke galat 'fail' (~50) asli defective (~10) se zyada ho gaye. Yahi wajah hai ki rare cheezon (fraud, bimari) ke model mein precision/recall dhyan se dekhte hain."
+    ],
+    [
+     "p",
+     "Spam filter (Naive Bayes) bhi yahi karta hai: \"free\" shabd aaya → spam hone ka chance update."
+    ]
+   ]
+  },
+  {
+   "title": "Linear algebra: vectors, dot product, matrices",
+   "blocks": [
+    [
+     "p",
+     "ML mein har cheez numbers ki list ban jaati hai. Ek ghar = [area, rooms, age]. Ek shabd = 768 numbers ka embedding. Is list ko **vector** kehte hain."
+    ],
+    [
+     "sketch",
+     {
+      "k": "array",
+      "title": "Ghar ek vector hai",
+      "items": [
+       "1200 sqft",
+       "3 rooms",
+       "5 saal"
+      ],
+      "index": true
+     }
+    ],
+    [
+     "p",
+     "**Vector ka plus aur scalar guna** element-wise hota hai (Stage 8 ka vectorization yaad hai):"
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\na = np.array([1, 2, 3])\nb = np.array([4, 5, 6])\nprint(a + b)\nprint(3 * a)\nprint(np.linalg.norm([3, 4]))   # length",
+     "[5 7 9]\n[3 6 9]\n5.0"
+    ],
+    [
+     "p",
+     "**Dot product** = same position wale guna karo, phir sab jodo. Ek number milta hai."
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\na = np.array([1, 2, 3])\nb = np.array([4, 5, 6])\nprint(1*4 + 2*5 + 3*6)\nprint(np.dot(a, b))\nprint(a @ b)",
+     "32\n32\n32"
+    ],
+    [
+     "analogy",
+     "Bill banana hi dot product hai: qty [2, 1, 3] aur price [50, 120, 10] → 2×50 + 1×120 + 3×10 = 250."
+    ],
+    [
+     "p",
+     "Kyun zaroori? Linear model ka prediction = `weights · features + bias`. Neuron bhi yahi karta hai. Aur do vectors kitne **milte-julte** hain, woh **cosine similarity** se naapte hain (RAG/search mein Stage 12):"
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\ndef cosine(a, b):\n    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))\n\ncable = np.array([0.9, 0.8, 0.1])\nwire = np.array([0.8, 0.9, 0.2])\nmango = np.array([0.1, 0.0, 0.9])\nprint(cosine(cable, wire).round(2))\nprint(cosine(cable, mango).round(2))",
+     "0.99\n0.16"
+    ],
+    [
+     "tip",
+     "Cosine 1 ke paas = same direction (meaning milta hai). 0 ke paas = koi rishta nahi."
+    ],
+    [
+     "p",
+     "**Matrix** = numbers ki table (rows × columns). Dataset khud ek matrix hai: har row ek sample, har column ek feature."
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "X: 3 samples × 2 features",
+      "head": [
+       "",
+       "area",
+       "rooms"
+      ],
+      "rows": [
+       [
+        "ghar 1",
+        "1000",
+        "2"
+       ],
+       [
+        "ghar 2",
+        "1500",
+        "3"
+       ],
+       [
+        "ghar 3",
+        "800",
+        "1"
+       ]
+      ]
+     }
+    ],
+    [
+     "p",
+     "**Matrix multiply** `A @ B`: A ki har row ka B ke har column se dot product. **Shape rule**: (m, n) @ (n, p) = (m, p). Beech wale n barabar hone chahiye."
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\nA = np.array([[1, 2],\n              [3, 4]])\nB = np.array([[5, 6],\n              [7, 8]])\nprint(A @ B)\nprint(A * B)    # element-wise, alag cheez!",
+     "[[19 22]\n [43 50]]\n[[ 5 12]\n [21 32]]"
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\nX = np.array([[1000, 2], [1500, 3], [800, 1]])   # (3, 2)\nw = np.array([50, 10000])                        # (2,)\nprint(X.shape, w.shape)\nprint(X @ w)       # har ghar ki predicted price",
+     "(3, 2) (2,)\n[ 70000 105000  50000]"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Shape rule",
+      "steps": [
+       "(3, 2)",
+       "@ (2,)",
+       "= (3,)"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "**Transpose** `.T` = rows ko columns bana do. Shapes match karne ke liye bahut kaam aata hai."
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\nM = np.array([[1, 2, 3], [4, 5, 6]])\nprint(M.shape, M.T.shape)",
+     "(2, 3) (3, 2)"
+    ],
+    [
+     "warn",
+     "Common galti: `(3, 2) @ (3, 2)` → error \"shapes not aligned\". Beech ke numbers (2 aur 3) match nahi. `.T` ya reshape se theek karo. Isliye hamesha `.shape` print karo."
+    ]
+   ]
+  },
+  {
+   "title": "Calculus intuition: slope aur gradient descent",
+   "blocks": [
+    [
+     "p",
+     "Darr mat, poora calculus nahi chahiye. Sirf ek idea: **slope (dhalaan)** = ek cheez badhao to doosri kitni badalti hai."
+    ],
+    [
+     "sketch",
+     {
+      "k": "chart",
+      "title": "y = x²",
+      "type": "line",
+      "points": [
+       [
+        -3,
+        9
+       ],
+       [
+        -2,
+        4
+       ],
+       [
+        -1,
+        1
+       ],
+       [
+        0,
+        0
+       ],
+       [
+        1,
+        1
+       ],
+       [
+        2,
+        4
+       ],
+       [
+        3,
+        9
+       ]
+      ],
+      "xl": "x",
+      "yl": "y"
+     }
+    ],
+    [
+     "p",
+     "**Derivative** = kisi point pe slope. `y = x²` ka derivative `2x` hai: x = 3 pe slope 6 (tez chadhaai), x = 0 pe 0 (bilkul neeche, flat). Chhote step se khud naap sakte ho:"
+    ],
+    [
+     "code",
+     "python",
+     "def f(x):\n    return x ** 2\n\nh = 0.0001\nfor x in [3, 0, -2]:\n    slope = (f(x + h) - f(x)) / h\n    print(x, round(slope, 2))",
+     "3 6.0\n0 0.0\n-2 -4.0"
+    ],
+    [
+     "tip",
+     "Slope + = upar ja raha hai, slope - = neeche ja raha hai, slope 0 = sabse neeche (ya upar) pahunch gaye."
+    ],
+    [
+     "p",
+     "ML mein ek **loss** hota hai = model kitni galti kar raha hai. Hume loss **minimum** karna hai. Slope batata hai kis taraf loss badhta hai, to hum **ulti taraf** chalte hain. Isi ko **gradient descent** kehte hain."
+    ],
+    [
+     "analogy",
+     "Raat ko pahaad se neeche utarna hai, kuch dikh nahi raha. Pair se zameen ki dhalaan mehsoos karo aur jidhar neeche ja rahi hai udhar ek chhota kadam lo. Baar-baar karo, ghaati (minimum) mein pahunch jaaoge."
+    ],
+    [
+     "sketch",
+     {
+      "k": "cycle",
+      "title": "Gradient descent",
+      "steps": [
+       "Predict",
+       "Loss nikalo",
+       "Slope (gradient)",
+       "w = w - lr × slope"
+      ]
+     }
+    ],
+    [
+     "p",
+     "Rule: `w = w - learning_rate × slope`. **Learning rate** = kadam ka size."
+    ],
+    [
+     "code",
+     "python",
+     "w = 10.0          # shuru ka andaaza\nlr = 0.1\nfor step in range(5):\n    slope = 2 * w          # loss = w², slope = 2w\n    w = w - lr * slope\n    print(step, round(w, 3))",
+     "0 8.0\n1 6.4\n2 5.12\n3 4.096\n4 3.277"
+    ],
+    [
+     "p",
+     "w har step pe 0 (minimum) ki taraf ja raha hai. Ab ek asli example: data `y = 2x` hai, model `y = w*x` ko khud **w = 2** seekhna hai."
+    ],
+    [
+     "code",
+     "python",
+     "xs = [1, 2, 3, 4]\nys = [2, 4, 6, 8]\nw, lr = 0.0, 0.01\nfor epoch in range(50):\n    grad = sum(2 * (w * x - y) * x for x, y in zip(xs, ys)) / len(xs)\n    w -= lr * grad\nprint(round(w, 3))",
+     "1.999"
+    ],
+    [
+     "tip",
+     "Yeh hai poori ML training ka dil. Neural network mein lakhon w hote hain, lekin har ek isi rule se update hota hai. Har w ka slope nikalna = **gradient**, aur woh kaam **backpropagation** karta hai (Stage 11)."
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "Learning rate",
+      "left": {
+       "title": "Bahut chhota",
+       "items": [
+        "bahut slow",
+        "der tak chalega"
+       ]
+      },
+      "right": {
+       "title": "Bahut bada",
+       "items": [
+        "minimum ke paar",
+        "loss phat jaata"
+       ]
+      }
+     }
+    ],
+    [
+     "warn",
+     "Common galti: learning rate bahut bada (jaise 1.5) rakha to w har step pe aur door bhaagta hai aur loss badhta jaata hai (diverge). Loss badh raha ho to pehle lr chhota karo."
+    ]
+   ]
+  }
+ ],
+ "teach": [
+  {
+   "say": "Numbers ki lambi list mein pattern chhupa hota hai. Graph banao, woh ek second mein dikh jaata hai.",
+   "sketch": {
+    "k": "chart",
+    "type": "line",
+    "points": [
+     [
+      1,
+      120
+     ],
+     [
+      2,
+      135
+     ],
+     [
+      3,
+      150
+     ],
+     [
+      4,
+      145
+     ],
+     [
+      5,
+      170
+     ]
+    ],
+    "xl": "Month",
+    "yl": "Sales"
+   },
+   "code": "plt.plot(months, sales)\nplt.show()"
+  },
+  {
+   "say": "Chart sawaal se chuno: trend ke liye line, compare ke liye bar, phailav ke liye histogram, rishte ke liye scatter, outlier ke liye box plot.",
+   "sketch": {
+    "k": "table",
+    "head": [
+     "Sawaal",
+     "Chart"
+    ],
+    "rows": [
+     [
+      "Trend",
+      "Line"
+     ],
+     [
+      "Compare",
+      "Bar"
+     ],
+     [
+      "Phailav",
+      "Histogram"
+     ],
+     [
+      "Rishta",
+      "Scatter"
+     ],
+     [
+      "Outlier",
+      "Box"
+     ]
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "Mean average hai, median beech wala. Ek crorepati gali ka mean bigaad deta hai, median nahi. Dono mein bada farak dikhe to outlier dhoondo.",
+   "sketch": {
+    "k": "array",
+    "items": [
+     "40",
+     "50",
+     "50",
+     "60",
+     "100"
+    ],
+    "index": true
+   },
+   "code": "st.mean(x), st.median(x)"
+  },
+  {
+   "say": "Std batata hai values kitni bikhri hain. Same average, lekin ek machine consistent, doosri bharosemand nahi.",
+   "sketch": {
+    "k": "compare",
+    "left": {
+     "title": "Chhota std",
+     "items": [
+      "48, 50, 52",
+      "consistent"
+     ]
+    },
+    "right": {
+     "title": "Bada std",
+     "items": [
+      "0, 50, 100",
+      "bikhra hua"
+     ]
+    }
+   },
+   "code": "a.std()"
+  },
+  {
+   "say": "Outlier pakadne ka IQR rule: Q3 minus Q1, phir dono taraf dedh guna ki deewar. Deewar ke bahar jo hai, woh outlier.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Q1, Q3",
+     "IQR",
+     "±1.5×IQR",
+     "outlier"
+    ],
+    "dir": "h"
+   },
+   "code": "q1, q3 = np.percentile(w, [25, 75])"
+  },
+  {
+   "say": "Correlation minus ek se plus ek. Lekin yaad rakhna, correlation ka matlab wajah nahi hota.",
+   "sketch": {
+    "k": "chart",
+    "type": "scatter",
+    "points": [
+     [
+      1,
+      35
+     ],
+     [
+      2,
+      45
+     ],
+     [
+      3,
+      50
+     ],
+     [
+      4,
+      62
+     ],
+     [
+      5,
+      70
+     ]
+    ],
+    "xl": "Hours",
+    "yl": "Marks"
+   },
+   "code": "np.corrcoef(a, b)[0, 1]"
+  },
+  {
+   "say": "Bayes: test ne fail bola, to bhi defective hone ka chance kam ho sakta hai, agar defective cheez rare hai. Prior ko kabhi mat bhoolo.",
+   "sketch": {
+    "k": "tree",
+    "root": {
+     "label": "1000 cables",
+     "children": [
+      {
+       "label": "10 defective",
+       "children": []
+      },
+      {
+       "label": "990 achhi",
+       "children": []
+      }
+     ]
+    }
+   },
+   "code": null
+  },
+  {
+   "say": "Dot product: same jagah wale guna karo aur jodo. Model ki prediction yahi hai, weights dot features.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "[1,2,3]",
+     "· [4,5,6]",
+     "4+10+18",
+     "= 32"
+    ],
+    "dir": "h"
+   },
+   "code": "a @ b"
+  },
+  {
+   "say": "Matrix multiply ka shape rule: (m, n) at (n, p) barabar (m, p). Beech wale number match hone chahiye.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "(3, 2)",
+     "@ (2, 4)",
+     "= (3, 4)"
+    ],
+    "dir": "h"
+   },
+   "code": "print(X.shape, W.shape)"
+  },
+  {
+   "say": "Aakhir mein gradient descent: slope dekho, ulti taraf chhota kadam lo, baar-baar. Yahi har ML model ki training hai. Ab practice karo!",
+   "sketch": {
+    "k": "cycle",
+    "steps": [
+     "Predict",
+     "Loss",
+     "Slope",
+     "Update w"
+    ]
+   },
+   "code": "w = w - lr * slope"
+  }
+ ],
+ "practice": [
+  {
+   "q": "NumPy ke bina statistics. `w = [10, 12, 11, 13, 12, 11, 40]` (cable weights) ka mean (2 decimal), median, population std (2 decimal) nikalo, phir IQR rule se outliers dhoondo. Q1 = 11, Q3 = 12.5 diye hain:\nmean: 15.57\nmedian: 12\nstd: 10.01\noutliers: [40]",
+   "starter": "import math\n\nw = [10, 12, 11, 13, 12, 11, 40]\nq1, q3 = 11, 12.5\n# TODO: mean\n# TODO: median (sorted list ka beech)\n# TODO: std = sqrt(sum((x-mean)^2)/n)\n# TODO: IQR fences aur outliers\n",
+   "hint": "iqr = q3 - q1; low = q1 - 1.5*iqr; high = q3 + 1.5*iqr",
+   "solution": "import math\n\nw = [10, 12, 11, 13, 12, 11, 40]\nq1, q3 = 11, 12.5\nn = len(w)\nmean = sum(w) / n\nprint(f\"mean: {mean:.2f}\")\ns = sorted(w)\nprint(\"median:\", s[n // 2])\nstd = math.sqrt(sum((x - mean) ** 2 for x in w) / n)\nprint(f\"std: {std:.2f}\")\niqr = q3 - q1\nlow, high = q1 - 1.5 * iqr, q3 + 1.5 * iqr\nprint(\"outliers:\", [x for x in w if x < low or x > high])",
+   "expect": "mean: 15.57\nmedian: 12\nstd: 10.01\noutliers: [40]"
+  },
+  {
+   "q": "Dot product aur cosine similarity khud likho (sirf `math`). Teen word-vectors diye hain. `cable`-`wire` aur `cable`-`mango` ka dot aur cosine (2 decimal) print karo:\ndot cable-wire: 1.46\ncos cable-wire: 0.99\ndot cable-mango: 0.18\ncos cable-mango: 0.16",
+   "starter": "import math\n\ncable = [0.9, 0.8, 0.1]\nwire = [0.8, 0.9, 0.2]\nmango = [0.1, 0.0, 0.9]\n\ndef dot(a, b):\n    # TODO: zip se guna karke jodo\n    pass\n\ndef cosine(a, b):\n    # TODO: dot / (length(a) * length(b))\n    pass\n",
+   "hint": "length(a) = math.sqrt(dot(a, a))",
+   "solution": "import math\n\ncable = [0.9, 0.8, 0.1]\nwire = [0.8, 0.9, 0.2]\nmango = [0.1, 0.0, 0.9]\n\ndef dot(a, b):\n    return sum(x * y for x, y in zip(a, b))\n\ndef cosine(a, b):\n    return dot(a, b) / (math.sqrt(dot(a, a)) * math.sqrt(dot(b, b)))\n\nprint(f\"dot cable-wire: {dot(cable, wire):.2f}\")\nprint(f\"cos cable-wire: {cosine(cable, wire):.2f}\")\nprint(f\"dot cable-mango: {dot(cable, mango):.2f}\")\nprint(f\"cos cable-mango: {cosine(cable, mango):.2f}\")",
+   "expect": "dot cable-wire: 1.46\ncos cable-wire: 0.99\ndot cable-mango: 0.18\ncos cable-mango: 0.16"
+  },
+  {
+   "q": "Gradient descent se line seekho. Data `y = 3x + 1` se bana hai. Model `y = w*x + b`, shuru mein w = 0, b = 0, lr = 0.05, 2000 epochs. Har epoch mein MSE ka gradient nikalo aur update karo. Aakhir mein w, b (2 decimal) aur loss (4 decimal) print karo:\nw: 3.00\nb: 1.00\nloss: 0.0000",
+   "starter": "xs = [0, 1, 2, 3, 4]\nys = [1, 4, 7, 10, 13]\nw, b, lr = 0.0, 0.0, 0.05\nn = len(xs)\nfor epoch in range(2000):\n    # TODO: errors = (w*x + b - y) har point ka\n    # TODO: dw = 2/n * sum(err * x), db = 2/n * sum(err)\n    # TODO: w aur b update\n    pass\n# TODO: loss = average(err^2), print karo\n",
+   "hint": "errs = [w * x + b - y for x, y in zip(xs, ys)]",
+   "solution": "xs = [0, 1, 2, 3, 4]\nys = [1, 4, 7, 10, 13]\nw, b, lr = 0.0, 0.0, 0.05\nn = len(xs)\nfor epoch in range(2000):\n    errs = [w * x + b - y for x, y in zip(xs, ys)]\n    dw = 2 / n * sum(e * x for e, x in zip(errs, xs))\n    db = 2 / n * sum(errs)\n    w -= lr * dw\n    b -= lr * db\nerrs = [w * x + b - y for x, y in zip(xs, ys)]\nloss = sum(e * e for e in errs) / n\nprint(f\"w: {w:.2f}\")\nprint(f\"b: {b:.2f}\")\nprint(f\"loss: {loss:.4f}\")",
+   "expect": "w: 3.00\nb: 1.00\nloss: 0.0000"
+  }
+ ],
+ "quiz": [
+  {
+   "q": "Mahine-wise sales ka trend dikhana hai. Best chart?",
+   "o": [
+    "Pie",
+    "Line",
+    "Heatmap",
+    "Box plot"
+   ],
+   "a": 1,
+   "why": "Time ke saath trend ke liye line chart sabse saaf hai."
+  },
+  {
+   "q": "Data `[2, 3, 3, 4, 100]` ke liye sabse sahi 'typical' value kaunsi batayegi?",
+   "o": [
+    "Mean",
+    "Max",
+    "Variance",
+    "Median"
+   ],
+   "a": 3,
+   "why": "100 outlier mean ko kheench leta hai (22.4); median 3 typical value batata hai."
+  },
+  {
+   "q": "Q1 = 10, Q3 = 20. IQR rule se upar ki fence?",
+   "o": [
+    "35",
+    "30",
+    "25",
+    "40"
+   ],
+   "a": 0,
+   "why": "IQR = 10, upper fence = Q3 + 1.5 × 10 = 35."
+  },
+  {
+   "q": "Correlation -0.9 ka matlab?",
+   "o": [
+    "Koi rishta nahi",
+    "Ek badhe to doosra bhi badhe",
+    "Ek badhe to doosra kaafi pakka ghate",
+    "Ek doosre ki wajah hai"
+   ],
+   "a": 2,
+   "why": "-1 ke paas = strong negative rishta. Wajah (causation) correlation se sabit nahi hoti."
+  },
+  {
+   "q": "Normal distribution mein mean ± 2 std ke andar lagbhag kitna data?",
+   "o": [
+    "68%",
+    "95%",
+    "99.7%",
+    "50%"
+   ],
+   "a": 1,
+   "why": "68-95-99.7 rule: 1 std = 68%, 2 std = 95%, 3 std = 99.7%."
+  },
+  {
+   "q": "`np.dot([1, 2, 3], [4, 5, 6])` = ?",
+   "o": [
+    "[4, 10, 18]",
+    "15",
+    "32",
+    "21"
+   ],
+   "a": 2,
+   "why": "1×4 + 2×5 + 3×6 = 4 + 10 + 18 = 32."
+  },
+  {
+   "q": "A ka shape (4, 3), B ka (3, 5). `A @ B` ka shape?",
+   "o": [
+    "(4, 5)",
+    "(3, 3)",
+    "(5, 4)",
+    "Error"
+   ],
+   "a": 0,
+   "why": "(m, n) @ (n, p) = (m, p); beech ke 3 match, result (4, 5)."
+  },
+  {
+   "q": "Gradient descent ka update rule?",
+   "o": [
+    "w = w + lr × slope",
+    "w = lr × slope",
+    "w = w × slope",
+    "w = w - lr × slope"
+   ],
+   "a": 3,
+   "why": "Slope ki ulti taraf chalte hain taaki loss ghate, isliye minus."
+  },
+  {
+   "q": "Training mein loss har step pe badh raha hai. Sabse pehle kya try karoge?",
+   "o": [
+    "Learning rate chhota karo",
+    "Epochs badhao",
+    "Learning rate bada karo",
+    "Data hata do"
+   ],
+   "a": 0,
+   "why": "Bada learning rate minimum ke paar kood jaata hai (diverge); chhota karne se theek hota hai."
+  },
+  {
+   "q": "Rare bimari (1%) ka test positive aaya. Bayes ke hisaab se kya sahi hai?",
+   "o": [
+    "Bimari pakki hai",
+    "Chance test accuracy ke barabar hai",
+    "Asli chance prior pe bhi depend karta hai, kaafi kam ho sakta hai",
+    "Test bekaar hai"
+   ],
+   "a": 2,
+   "why": "Posterior = likelihood × prior / evidence. Rare cheez mein false positives zyada ho jaate hain."
+  }
+ ],
+ "iq": [
+  {
+   "q": "Apna EDA process batao.",
+   "a": "Pehle `shape`, `info()`, `describe()` se size, types aur summary. Phir missing values aur duplicates. Har numeric feature ka histogram aur box plot (distribution, outliers). Correlation heatmap aur feature vs target scatter. Aakhir mein target ka `value_counts()` se class balance. Isse cleaning aur feature engineering ka plan banta hai."
+  },
+  {
+   "q": "Mean aur median mein kab kaunsa use karoge?",
+   "a": "Symmetric data bina outlier ke ho to mean. Skewed data ya outliers (salary, house price) mein median, kyunki woh extreme values se nahi hilta. Missing values bharne ke liye bhi skewed column mein median safe hai."
+  },
+  {
+   "q": "Variance aur standard deviation kya hai?",
+   "a": "Variance = mean se har value ke farak ke square ka average; std = variance ka square root, isliye original unit mein hota hai. Dono batate hain data kitna phaila hai. Feature scaling (z-score) mein std use hota hai."
+  },
+  {
+   "q": "Outliers kaise detect aur handle karte ho?",
+   "a": "Detect: box plot / IQR rule (Q1 - 1.5·IQR, Q3 + 1.5·IQR ke bahar), ya |z-score| > 3. Handle: pehle check karo data entry galti hai ya asli. Galti ho to hatao/theek karo; asli ho to cap (winsorize), log transform, ya robust model (tree-based) use karo."
+  },
+  {
+   "q": "Correlation aur causation mein farak?",
+   "a": "Correlation sirf batata hai do variables saath badalte hain. Causation matlab ek doosre ki wajah hai. Teesra hidden factor (confounder) dono ko chala sakta hai, jaise garmi → ice-cream aur AC. Causation ke liye controlled experiment (A/B test) chahiye."
+  },
+  {
+   "q": "Normal distribution ML mein kyun important hai?",
+   "a": "Bahut se natural measurements aur errors normal hote hain. Kai models (linear regression ke residuals, Gaussian Naive Bayes) yeh maante hain. 68-95-99.7 rule se outliers pakadte hain, aur standardization (z-score) se features ko mean 0, std 1 pe laate hain."
+  },
+  {
+   "q": "Bayes theorem samjhao ek example se.",
+   "a": "P(A|B) = P(B|A)·P(A) / P(B): nayi evidence B aane pe A ka belief update karna. Example: 1% cables defective, test 99% sensitive, 5% false positive. Fail aane pe bhi defective ka chance sirf ~17%, kyunki prior chhota hai. Naive Bayes spam filter isi pe chalta hai."
+  },
+  {
+   "q": "Dot product ML mein kahan use hota hai?",
+   "a": "Linear model / neuron ka output `w · x + b` dot product hai. Cosine similarity (embeddings, search, RAG) dot product ko lengths se divide karke banti hai. Attention mechanism mein bhi query aur key ka dot product hota hai."
+  },
+  {
+   "q": "Matrix multiplication ka shape rule kya hai, aur `*` se kaise alag hai?",
+   "a": "(m, n) @ (n, p) = (m, p); andar wale dimension barabar hone chahiye. `@` row-column dot products karta hai. `*` element-wise multiply hai jisme shapes same (ya broadcastable) chahiye. Neural network layer = `X @ W + b`."
+  },
+  {
+   "q": "Gradient descent kya hai?",
+   "a": "Loss ko minimum karne ka iterative tareeka. Har step pe har parameter ka gradient (slope) nikalo aur ulti taraf chhota kadam lo: `w = w - lr * grad`. Learning rate kadam ka size hai: chhota = slow, bada = diverge. Variants: batch, stochastic (SGD), mini-batch, aur Adam jaise optimizers."
+  },
+  {
+   "q": "Derivative ka ML mein kya role hai?",
+   "a": "Derivative batata hai parameter thoda badalne se loss kitna badlega. Iske bina pata nahi chalega weight badhana hai ya ghatana. Neural networks mein chain rule se saare derivatives backpropagation nikalta hai."
+  }
+ ]
+}

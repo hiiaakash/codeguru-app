@@ -1,0 +1,1141 @@
+{
+ "n": 1,
+ "id": "aiml-01",
+ "title": "Python Basics",
+ "goal": "Program क्या होता है, print, variables, data types, operators, strings, input और f-strings समझकर तुम छोटे programs खुद लिख पाओगे, .py file चला पाओगे और error message पढ़कर गलती खुद ठीक कर पाओगे।",
+ "lessons": [
+  {
+   "title": "Program क्या है, और print",
+   "blocks": [
+    [
+     "p",
+     "**Program** = computer को दिए गए **instructions (हुक्म)** की list। Computer बहुत तेज़ है, लेकिन खुद कुछ नहीं सोचता। जो लिखोगे, बिल्कुल वही करेगा, **ऊपर से नीचे, एक-एक line**।"
+    ],
+    [
+     "analogy",
+     "जैसे चाय बनाने के steps: पानी गरम करो → चाय पत्ती डालो → दूध डालो। Order बदला तो चाय खराब। Computer भी ऐसे ही line by line, order में चलता है।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Program कैसे चलता है",
+      "steps": [
+       "Line 1",
+       "Line 2",
+       "Line 3",
+       "Output"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "**Python** एक language है जिसमें हम ये instructions लिखते हैं। यह **English जैसी** है, इसलिए पढ़ने में आसान है। AI/ML में सबसे ज़्यादा Python ही use होती है, इसलिए हम यहीं से शुरू कर रहे हैं।"
+    ],
+    [
+     "p",
+     "`print` = screen पर कुछ **दिखाना**। यह तुम्हारा पहला और सबसे ज़्यादा use होने वाला हुक्म है।"
+    ],
+    [
+     "code",
+     "python",
+     "print(\"Hello Akash\")\nprint(\"Main Python seekh raha hoon\")",
+     "Hello Akash\nMain Python seekh raha hoon"
+    ],
+    [
+     "tip",
+     "ध्यान से देखो: `print` के बाद गोल bracket `( )`, और text हमेशा quotes `\" \"` में। हर `print` नई line पर दिखाता है।"
+    ],
+    [
+     "code",
+     "python",
+     "print(10 + 5)\nprint(10 - 5)\nprint(10 * 5)\nprint(10 / 5)",
+     "15\n5\n50\n2.0"
+    ],
+    [
+     "p",
+     "Numbers को quotes नहीं चाहिए। `/` (divide) हमेशा decimal देता है, इसलिए `2.0` आया।"
+    ],
+    [
+     "code",
+     "python",
+     "print(10 + 5)\nprint(\"10 + 5\")",
+     "15\n10 + 5"
+    ],
+    [
+     "tip",
+     "Quotes के अंदर = **text** (जैसा लिखा वैसा दिखेगा)। Quotes के बाहर = **number / हिसाब**।"
+    ],
+    [
+     "p",
+     "एक ही `print` में comma `,` लगाकर कई चीज़ें दिखा सकते हो। Python बीच में अपने आप एक space डाल देता है। `sep` से बीच का निशान बदलो, `end` से line का आखिरी हिस्सा।"
+    ],
+    [
+     "code",
+     "python",
+     "print(\"Naam:\", \"Akash\", 25)\nprint(\"2026\", \"10\", \"28\", sep=\"-\")\nprint(\"Hello\", end=\" \")\nprint(\"World\")",
+     "Naam: Akash 25\n2026-10-28\nHello World"
+    ],
+    [
+     "p",
+     "`#` के बाद जो लिखा हो वह **comment** है। Python उसे ignore करता है, यह सिर्फ इंसान के लिए note है: \"यह line क्यों लिखी\"।"
+    ],
+    [
+     "code",
+     "python",
+     "# यह पूरी line comment है\nprint(\"Chai ready\")  # line के end में भी comment चल जाता है",
+     "Chai ready"
+    ],
+    [
+     "warn",
+     "आम गलती: `print(\"Hello)` (quote बंद नहीं किया), `Print(\"Hello\")` (P capital — Python छोटे-बड़े अक्षर में फर्क करता है), `print \"Hello\"` (bracket नहीं)।"
+    ]
+   ]
+  },
+  {
+   "title": "Variables और data types — डिब्बा और उसका माल",
+   "blocks": [
+    [
+     "p",
+     "**Variable** = एक **डिब्बा** जिसके ऊपर नाम लिखा है, और अंदर कोई value रखी है। बाद में नाम से value वापस निकाल लेते हैं।"
+    ],
+    [
+     "code",
+     "python",
+     "name = \"Akash\"\nage = 25\nprint(name)\nprint(age)",
+     "Akash\n25"
+    ],
+    [
+     "sketch",
+     {
+      "k": "boxes",
+      "title": "Memory में डिब्बे",
+      "items": [
+       {
+        "label": "name",
+        "value": "\"Akash\""
+       },
+       {
+        "label": "age",
+        "value": "25"
+       }
+      ]
+     }
+    ],
+    [
+     "p",
+     "यहाँ `=` का मतलब **बराबर नहीं**, बल्कि **\"रख दो\"** है। Right side की value, left side के डिब्बे में जाती है।"
+    ],
+    [
+     "code",
+     "python",
+     "score = 10\nscore = score + 5\nprint(score)",
+     "15"
+    ],
+    [
+     "p",
+     "डिब्बे की value बदल सकती है। पहले 10 था, फिर पुरानी value + 5 = 15 रख दिया। पुरानी value मिट जाती है।"
+    ],
+    [
+     "code",
+     "python",
+     "a, b = 5, 10\nprint(a, b)\na, b = b, a   # swap: दोनों की value अदला-बदली\nprint(a, b)",
+     "5 10\n10 5"
+    ],
+    [
+     "list",
+     [
+      "नाम letter या `_` से शुरू हो, number से नहीं: `name1` सही, `1name` गलत।",
+      "Space नहीं: `my_name` सही, `my name` गलत।",
+      "Python के अपने शब्द (`if`, `for`, `class`, `True`) नाम नहीं बन सकते।",
+      "नाम ऐसा रखो जो काम बताए: `total_price`, न कि `x`। Python में छोटे letters + `_` (snake_case) चलता है।"
+     ]
+    ],
+    [
+     "warn",
+     "आम गलती: `print(\"name\")` लिखोगे तो डिब्बे की value नहीं, सीधा शब्द `name` print होगा। Variable के लिए quotes मत लगाओ। और `Name` और `name` दो अलग डिब्बे हैं।"
+    ],
+    [
+     "p",
+     "हर value का एक **type** होता है, यानी डिब्बे में किस तरह का माल है। Python खुद पहचान लेता है।"
+    ],
+    [
+     "analogy",
+     "किराना दुकान सोचो: चावल के packet गिने जाते हैं (पूरा number), चावल का वज़न 2.5 kg (decimal), दुकान का नाम (text), और \"stock है?\" का जवाब हाँ/ना। हर चीज़ का type अलग।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "4 basic data types",
+      "head": [
+       "Type",
+       "मतलब",
+       "Example"
+      ],
+      "rows": [
+       [
+        "int",
+        "पूरा number",
+        "25"
+       ],
+       [
+        "float",
+        "decimal number",
+        "5.5"
+       ],
+       [
+        "str",
+        "text",
+        "\"Akash\""
+       ],
+       [
+        "bool",
+        "हाँ / ना",
+        "True"
+       ]
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "print(type(25))\nprint(type(5.5))\nprint(type(\"Akash\"))\nprint(type(True))",
+     "<class 'int'>\n<class 'float'>\n<class 'str'>\n<class 'bool'>"
+    ],
+    [
+     "p",
+     "Type बदलना (**type conversion**) बहुत काम का है, खासकर `input` के साथ: `int()`, `float()`, `str()`, `bool()`।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Type conversion",
+      "steps": [
+       "\"10\" (str)",
+       "int()",
+       "10 (int)"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "code",
+     "python",
+     "a = \"10\"\nb = int(a)\nprint(b + 5)\nprint(str(99) + \"!\")\nprint(float(\"3.5\") * 2)\nprint(int(9.99))",
+     "15\n99!\n7.0\n9"
+    ],
+    [
+     "tip",
+     "ध्यान से देखो: `int(9.99)` round नहीं करता, decimal का हिस्सा **काट** देता है, इसलिए `9`। Round चाहिए तो `round(9.99)` = `10`।"
+    ],
+    [
+     "warn",
+     "आम गलती: `\"10\" + 5` error देता है (TypeError), क्योंकि text और number सीधे जोड़ नहीं सकते। पहले `int(\"10\")` करो। और `int(\"3.5\")` भी error देता है; पहले `float(\"3.5\")` करो।"
+    ],
+    [
+     "code",
+     "python",
+     "print(bool(0), bool(5), bool(\"\"), bool(\"hi\"))\nx = None   # अभी कोई value नहीं\nprint(x, type(x))",
+     "False True False True\nNone <class 'NoneType'>"
+    ],
+    [
+     "tip",
+     "`True` और `False` का पहला letter capital होता है। `true` लिखोगे तो error। `0` और खाली text `\"\"` False माने जाते हैं, बाकी सब True। `None` का मतलब \"अभी कुछ नहीं\"।"
+    ]
+   ]
+  },
+  {
+   "title": "Operators और math — Python एक calculator",
+   "blocks": [
+    [
+     "p",
+     "Python एक बहुत तेज़ **calculator** भी है। हिसाब के निशान को **operator** कहते हैं। ML में भी अंदर सब यही जोड़ना, गुणा, भाग ही चलता है।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Math operators",
+      "head": [
+       "Operator",
+       "मतलब",
+       "Example",
+       "Result"
+      ],
+      "rows": [
+       [
+        "+",
+        "जोड़ना",
+        "7 + 2",
+        "9"
+       ],
+       [
+        "*",
+        "गुणा",
+        "7 * 2",
+        "14"
+       ],
+       [
+        "/",
+        "भाग (decimal)",
+        "7 / 2",
+        "3.5"
+       ],
+       [
+        "//",
+        "भाग (पूरा)",
+        "7 // 2",
+        "3"
+       ],
+       [
+        "%",
+        "बचा हुआ",
+        "7 % 2",
+        "1"
+       ],
+       [
+        "**",
+        "power",
+        "2 ** 3",
+        "8"
+       ]
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "print(7 / 2)\nprint(7 // 2)\nprint(7 % 2)\nprint(2 ** 3)\nprint(7 - 2)",
+     "3.5\n3\n1\n8\n5"
+    ],
+    [
+     "analogy",
+     "17 समोसे, 5 दोस्त। हर दोस्त को कितने मिले? `17 // 5` = 3। कितने बचे? `17 % 5` = 2। `//` = पूरे हिस्से, `%` = जो बच गया।"
+    ],
+    [
+     "p",
+     "Factory का असली example: 1250 meter cable है, एक coil 100 meter का बनता है। कितने पूरे coil बने, और कितना cable बचा?"
+    ],
+    [
+     "code",
+     "python",
+     "length = 1250\ncoil = 100\nprint(length // coil)\nprint(length % coil)",
+     "12\n50"
+    ],
+    [
+     "tip",
+     "`%` से even/odd पता करो: `n % 2` अगर `0` है तो number even, `1` है तो odd। यह trick IQ और coding tests में बहुत आती है।"
+    ],
+    [
+     "code",
+     "python",
+     "print(10 % 2)\nprint(7 % 2)\nprint(5 + 2.0)",
+     "0\n1\n7.0"
+    ],
+    [
+     "p",
+     "int और float मिलें तो result **float** बन जाता है, इसलिए `5 + 2.0` = `7.0`।"
+    ],
+    [
+     "p",
+     "**Order (precedence)** school के BODMAS जैसा है: पहले bracket `( )`, फिर `**`, फिर `* / // %`, आखिर में `+ -`। शक हो तो bracket लगा दो।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "कौन पहले चलेगा",
+      "steps": [
+       "( )",
+       "**",
+       "* / // %",
+       "+ -"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "code",
+     "python",
+     "print(2 + 3 * 4)\nprint((2 + 3) * 4)",
+     "14\n20"
+    ],
+    [
+     "p",
+     "**Shortcut operators**: `x += 5` मतलब `x = x + 5`। वैसे ही `-=`, `*=`, `/=`।"
+    ],
+    [
+     "code",
+     "python",
+     "stock = 100\nstock -= 30   # 30 बिक गए\nstock += 10   # 10 नए आए\nprint(stock)",
+     "80"
+    ],
+    [
+     "p",
+     "कुछ ready-made math helpers: `abs()` (minus हटाओ), `round()`, `min()`, `max()`। और `math` module में `sqrt`, `pi` जैसी चीज़ें।"
+    ],
+    [
+     "code",
+     "python",
+     "print(abs(-7), round(4.567, 1), min(3, 9, 1), max(3, 9, 1))\nimport math\nprint(math.sqrt(16))\nprint(round(math.pi, 2))",
+     "7 4.6 1 9\n4.0\n3.14"
+    ],
+    [
+     "warn",
+     "आम गलती: `10 / 0` करोगे तो **ZeroDivisionError**। और `0.1 + 0.2` बिल्कुल `0.3` नहीं आता (`0.30000000000000004`), क्योंकि float binary में store होता है। पैसे दिखाने हों तो `round()` लगाओ।"
+    ]
+   ]
+  },
+  {
+   "title": "Strings basics — text के साथ खेल",
+   "blocks": [
+    [
+     "p",
+     "**String (str)** = characters (अक्षरों) की line। Single quote `' '` या double quote `\" \"` दोनों चलते हैं, बस शुरू और बंद एक जैसा हो।"
+    ],
+    [
+     "code",
+     "python",
+     "s1 = 'Hello'\ns2 = \"Hello\"\nprint(s1 == s2)",
+     "True"
+    ],
+    [
+     "p",
+     "String का हर अक्षर एक **index** (number) पर बैठा है। गिनती **0** से शुरू होती है। उल्टा (पीछे से) गिनो तो `-1`, `-2`..."
+    ],
+    [
+     "sketch",
+     {
+      "k": "array",
+      "title": "word = \"PYTHON\"",
+      "items": [
+       "P",
+       "Y",
+       "T",
+       "H",
+       "O",
+       "N"
+      ],
+      "index": true
+     }
+    ],
+    [
+     "analogy",
+     "Train के डिब्बे सोचो: engine के बाद पहला डिब्बा number 0, फिर 1, 2... आखिरी डिब्बा पकड़ना हो तो बोलो `-1`, गिनती की ज़रूरत ही नहीं।"
+    ],
+    [
+     "code",
+     "python",
+     "word = \"Python\"\nprint(word[0])\nprint(word[5])\nprint(word[-1])",
+     "P\nn\nn"
+    ],
+    [
+     "p",
+     "`len()` बताता है string में कितने अक्षर हैं। Space भी गिना जाता है।"
+    ],
+    [
+     "code",
+     "python",
+     "print(len(\"Python\"))\nprint(len(\"Akash Kumar\"))",
+     "6\n11"
+    ],
+    [
+     "warn",
+     "आम गलती: `\"Python\"` की length 6 है, तो आखिरी index **5** है, 6 नहीं। `word[6]` लिखोगे तो **IndexError**।"
+    ],
+    [
+     "p",
+     "**Slicing (preview)**: `word[start:end]` से एक टुकड़ा निकालो। `start` शामिल, `end` शामिल **नहीं**। खाली छोड़ो तो शुरू/आखिर तक।"
+    ],
+    [
+     "code",
+     "python",
+     "word = \"Python\"\nprint(word[0:3])\nprint(word[2:])\nprint(word[:4])\nprint(word[-3:])",
+     "Pyt\nthon\nPyth\nhon"
+    ],
+    [
+     "tip",
+     "Slicing Stage 4 में lists पर भी आएगी, और Pandas में भी। अभी बस याद रखो: `end` वाला index छूट जाता है।"
+    ],
+    [
+     "p",
+     "String के पास अपने काम के tools (**methods**) हैं: `.upper()`, `.lower()`, `.title()`, `.strip()` (आगे-पीछे की spaces हटाओ), `.replace()`।"
+    ],
+    [
+     "code",
+     "python",
+     "name = \"  akash kumar  \"\nprint(name.strip())\nprint(name.strip().upper())\nprint(name.strip().title())\nprint(\"cable-wire\".replace(\"-\", \" \"))\nprint(\"Py\" in \"Python\")",
+     "akash kumar\nAKASH KUMAR\nAkash Kumar\ncable wire\nTrue"
+    ],
+    [
+     "tip",
+     "ध्यान से देखो: string **बदलती नहीं** (immutable)। `.upper()` नई string देता है; पुरानी वही रहती है। रखनी हो तो वापस variable में डालो: `name = name.upper()`।"
+    ],
+    [
+     "code",
+     "python",
+     "print(\"Chai\" + \" \" + \"Garam\")\nprint(\"-\" * 10)",
+     "Chai Garam\n----------"
+    ],
+    [
+     "p",
+     "**Escape characters**: backslash `\\` के बाद वाला अक्षर खास काम करता है। Text के अंदर नई line, tab या quote डालने के लिए।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Escape characters",
+      "head": [
+       "लिखो",
+       "मतलब"
+      ],
+      "rows": [
+       [
+        "\\n",
+        "नई line"
+       ],
+       [
+        "\\t",
+        "tab space"
+       ],
+       [
+        "\\\"",
+        "अंदर quote"
+       ],
+       [
+        "\\\\",
+        "एक backslash"
+       ]
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "print(\"Line 1\\nLine 2\")\nprint(\"Naam:\\tAkash\")\nprint(\"Usne kaha \\\"Hi\\\"\")\nprint(\"C:\\\\new_folder\")",
+     "Line 1\nLine 2\nNaam:\tAkash\nUsne kaha \"Hi\"\nC:\\new_folder"
+    ],
+    [
+     "warn",
+     "आम गलती: Windows path `\"C:\\new\"` में `\\n` नई line बन जाता है! `\\\\` लिखो या raw string `r\"C:\\new\"` use करो।"
+    ]
+   ]
+  },
+  {
+   "title": "input और f-strings",
+   "blocks": [
+    [
+     "p",
+     "`input()` user से value **माँगता** है। जो भी type करो, वह हमेशा **text (str)** बनकर आता है।"
+    ],
+    [
+     "code",
+     "python",
+     "name = input(\"Tumhara naam? \")\nprint(\"Namaste\", name)",
+     ""
+    ],
+    [
+     "p",
+     "ऊपर वाला code चलाओ तो screen पर `Tumhara naam? ` आएगा। तुम `Akash` लिखकर Enter दबाओगे तो `Namaste Akash` दिखेगा।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "input का सफ़र",
+      "steps": [
+       "User type करे",
+       "input()",
+       "str value",
+       "variable"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "code",
+     "python",
+     "age = int(\"25\")   # input से आया text, int में बदला\nprint(age + 1)",
+     "26"
+    ],
+    [
+     "tip",
+     "Number चाहिए तो सीधा लपेट दो: `age = int(input(\"Age? \"))`, decimal के लिए `float(input(...))`।"
+    ],
+    [
+     "p",
+     "**f-string** = text के अंदर variable सीधा डालने का सबसे आसान तरीका। Quote से पहले `f` लगाओ और variable को `{ }` में लिखो।"
+    ],
+    [
+     "code",
+     "python",
+     "name = \"Akash\"\nage = 25\nprint(f\"Mera naam {name} hai, umar {age} saal\")\nprint(f\"Agle saal {age + 1} ka ho jaunga\")",
+     "Mera naam Akash hai, umar 25 saal\nAgle saal 26 ka ho jaunga"
+    ],
+    [
+     "tip",
+     "`{ }` के अंदर हिसाब भी चल जाता है: `{age + 1}`, `{price * 2}`। और `{price:.2f}` = decimal के बाद सिर्फ 2 digit।"
+    ],
+    [
+     "code",
+     "python",
+     "item = \"Copper wire\"\nqty = 3\nrate = 125.5\nprint(f\"{item}: {qty} x {rate} = {qty * rate}\")\nprint(f\"Bill: Rs {qty * rate:.2f}\")",
+     "Copper wire: 3 x 125.5 = 376.5\nBill: Rs 376.50"
+    ],
+    [
+     "p",
+     "Text जोड़ने के और तरीके भी हैं, सबका result same। लेकिन f-string सबसे साफ़ है और आजकल सबसे ज़्यादा use होती है।"
+    ],
+    [
+     "code",
+     "python",
+     "name = \"Akash\"\nprint(\"Hi \" + name)\nprint(\"Hi\", name)\nprint(\"Hi {}\".format(name))\nprint(f\"Hi {name}\")",
+     "Hi Akash\nHi Akash\nHi Akash\nHi Akash"
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "Text जोड़ना",
+      "left": {
+       "title": "+ से",
+       "items": [
+        "\"Age \" + str(25)",
+        "str() भूले तो error",
+        "लंबा"
+       ]
+      },
+      "right": {
+       "title": "f-string",
+       "items": [
+        "f\"Age {age}\"",
+        "type की टेंशन नहीं",
+        "साफ़ और तेज़"
+       ]
+      }
+     }
+    ],
+    [
+     "warn",
+     "आम गलती: `f` लगाना भूल गए तो `{name}` जैसा का तैसा print होगा। और `\"Age: \" + 25` TypeError देता है; `str(25)` या f-string use करो।"
+    ]
+   ]
+  },
+  {
+   "title": "पहली .py file और error message पढ़ना",
+   "blocks": [
+    [
+     "p",
+     "अब तक छोटे code टुकड़े देखे। असली काम में code एक **file** में लिखते हैं जिसका नाम `.py` पर खत्म होता है, जैसे `hello.py`। File save रहती है, बार-बार चला सकते हो।"
+    ],
+    [
+     "list",
+     [
+      "Editor खोलो (VS Code, या phone पर इसी app का editor)।",
+      "नई file बनाओ, नाम रखो `hello.py`।",
+      "Code लिखो और save करो।",
+      "Terminal में उसी folder में जाकर लिखो: `python hello.py` (Linux/Mac पर अक्सर `python3 hello.py`)।"
+     ]
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "File से program",
+      "steps": [
+       "hello.py लिखो",
+       "Save",
+       "python hello.py",
+       "Output"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "code",
+     "python",
+     "# hello.py\nname = \"Akash\"\nprint(f\"Hello {name}, meri pehli file chal gayi!\")",
+     "Hello Akash, meri pehli file chal gayi!"
+    ],
+    [
+     "code",
+     "bash",
+     "python hello.py",
+     "Hello Akash, meri pehli file chal gayi!"
+    ],
+    [
+     "p",
+     "गलती होगी, और वह बिल्कुल ठीक है। Python गलती पर रुककर **error message (Traceback)** दिखाता है। यह दुश्मन नहीं, **दोस्त** है: बताता है कहाँ और क्या गलत है।"
+    ],
+    [
+     "analogy",
+     "Factory की machine का alarm panel सोचो: वह बताता है कौन सी machine (file), कौन सा हिस्सा (line number), और क्या problem (error type)। Alarm पढ़कर ही mechanic ठीक करता है।"
+    ],
+    [
+     "code",
+     "text",
+     "Traceback (most recent call last):\n  File \"hello.py\", line 2, in <module>\n    print(nam)\n          ^^^\nNameError: name 'nam' is not defined. Did you mean: 'name'?",
+     ""
+    ],
+    [
+     "sketch",
+     {
+      "k": "stack",
+      "title": "Traceback पढ़ना",
+      "items": [
+       "Traceback",
+       "File + line no.",
+       "गलत वाली line",
+       "ErrorType: वजह"
+      ]
+     }
+    ],
+    [
+     "tip",
+     "ध्यान से देखो: error **नीचे से ऊपर** पढ़ो। 1) आखिरी line: error का type और वजह। 2) ऊपर: file और **line number**। 3) उस line पर जाकर देखो। यहाँ Python ने खुद बता दिया: `nam` नहीं, `name` लिखना था।"
+    ],
+    [
+     "p",
+     "**SyntaxError** = grammar की गलती (bracket/quote बंद नहीं, colon छूटा)। यह code चलने से **पहले** ही पकड़ी जाती है, इसलिए एक भी line नहीं चलती।"
+    ],
+    [
+     "code",
+     "text",
+     "  File \"hello.py\", line 1\n    print(\"Hello\"\n         ^\nSyntaxError: '(' was never closed",
+     ""
+    ],
+    [
+     "p",
+     "**NameError** = Python को यह नाम मिला ही नहीं। Spelling गलत, छोटा-बड़ा letter गलत, या variable बनाने से पहले use कर लिया।"
+    ],
+    [
+     "p",
+     "**TypeError** = गलत type के साथ काम। जैसे text और number को `+` से जोड़ना।"
+    ],
+    [
+     "code",
+     "text",
+     "TypeError: can only concatenate str (not \"int\") to str",
+     ""
+    ],
+    [
+     "p",
+     "**ValueError** = type तो सही है, लेकिन value बेकार। जैसे `int(\"abc\")`: text को number बनाना था, पर `abc` कोई number नहीं।"
+    ],
+    [
+     "code",
+     "text",
+     "ValueError: invalid literal for int() with base 10: 'abc'",
+     ""
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Common errors",
+      "head": [
+       "Error",
+       "कब आता है",
+       "Example"
+      ],
+      "rows": [
+       [
+        "SyntaxError",
+        "grammar गलत",
+        "print(\"Hi\""
+       ],
+       [
+        "NameError",
+        "नाम नहीं मिला",
+        "print(nam)"
+       ],
+       [
+        "TypeError",
+        "type mismatch",
+        "\"5\" + 5"
+       ],
+       [
+        "ValueError",
+        "value गलत",
+        "int(\"abc\")"
+       ],
+       [
+        "IndentationError",
+        "गलत space",
+        " print(1)"
+       ],
+       [
+        "ZeroDivisionError",
+        "0 से भाग",
+        "10 / 0"
+       ]
+      ]
+     }
+    ],
+    [
+     "warn",
+     "आम गलती: line के शुरू में फालतू space डाल दी तो **IndentationError**। Python में शुरू की space का मतलब होता है (Stage 2 में if/for के साथ देखोगे)।"
+    ],
+    [
+     "tip",
+     "Error समझ न आए तो आखिरी line copy करके search करो या AI से पूछो। Stage 5 में `try/except` से errors को पकड़ना (handle करना) भी सीखेंगे।"
+    ]
+   ]
+  }
+ ],
+ "teach": [
+  {
+   "say": "चलो शुरू करते हैं। Program मतलब computer को दिए गए हुक्म, एक के बाद एक, ऊपर से नीचे।",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "हुक्म 1",
+     "हुक्म 2",
+     "हुक्म 3"
+    ],
+    "dir": "h"
+   },
+   "code": null
+  },
+  {
+   "say": "सबसे पहला हुक्म: print। जो bracket के अंदर लिखोगे, screen पर दिखेगा। Text quotes में, number बिना quotes।",
+   "sketch": null,
+   "code": "print(\"Hello Akash\")\nprint(10 + 5)"
+  },
+  {
+   "say": "अब सोचो एक डिब्बा है, ऊपर नाम लिखा है 'name', और अंदर रखा है Akash। इसी को variable कहते हैं।",
+   "sketch": {
+    "k": "boxes",
+    "items": [
+     {
+      "label": "name",
+      "value": "\"Akash\""
+     }
+    ]
+   },
+   "code": "name = \"Akash\""
+  },
+  {
+   "say": "यहाँ बराबर का निशान मतलब 'रख दो'। Right की value left के डिब्बे में जाती है, और नई value पुरानी को हटा देती है।",
+   "sketch": {
+    "k": "boxes",
+    "items": [
+     {
+      "label": "age",
+      "value": "25"
+     },
+     {
+      "label": "score",
+      "value": "15"
+     }
+    ]
+   },
+   "code": "age = 25\nscore = 10 + 5"
+  },
+  {
+   "say": "हर value का type होता है: पूरा number int, decimal float, text str, और हाँ-ना bool।",
+   "sketch": {
+    "k": "table",
+    "head": [
+     "Type",
+     "Example"
+    ],
+    "rows": [
+     [
+      "int",
+      "25"
+     ],
+     [
+      "float",
+      "5.5"
+     ],
+     [
+      "str",
+      "\"Hi\""
+     ],
+     [
+      "bool",
+      "True"
+     ]
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "अब हिसाब। 17 समोसे, 5 दोस्त: double slash से पूरे हिस्से मिलते हैं, percent से जो बचा। ये दोनों बहुत काम आते हैं।",
+   "sketch": {
+    "k": "boxes",
+    "items": [
+     {
+      "label": "17 // 5",
+      "value": "3"
+     },
+     {
+      "label": "17 % 5",
+      "value": "2"
+     },
+     {
+      "label": "17 / 5",
+      "value": "3.4"
+     }
+    ]
+   },
+   "code": "print(17 // 5, 17 % 5)   # 3 2"
+  },
+  {
+   "say": "String के हर अक्षर का एक number होता है, zero से शुरू। पीछे से गिनो तो minus एक। len बताता है कुल कितने अक्षर।",
+   "sketch": {
+    "k": "array",
+    "items": [
+     "P",
+     "Y",
+     "T",
+     "H",
+     "O",
+     "N"
+    ],
+    "index": true
+   },
+   "code": "word = \"Python\"\nprint(word[0], word[-1], len(word))   # P n 6"
+  },
+  {
+   "say": "input से जो भी आता है, वह text होता है। Number चाहिए तो int लगाओ।",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "input()",
+     "\"25\" (str)",
+     "int()",
+     "25 (int)"
+    ],
+    "dir": "h"
+   },
+   "code": "age = int(input(\"Age? \"))"
+  },
+  {
+   "say": "f-string: quote से पहले f, और variable curly bracket में। Python खुद value भर देता है। बस, sentence तैयार।",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "f\"Hi {name}\"",
+     "name = Akash",
+     "Hi Akash"
+    ],
+    "dir": "h"
+   },
+   "code": "print(f\"Hi {name}, age {age}\")"
+  },
+  {
+   "say": "और गलती हो तो घबराना नहीं। Error की आखिरी line पढ़ो, line number देखो, ठीक करो। Python छोटे-बड़े अक्षर को अलग मानता है, यह याद रखना। अब practice करो!",
+   "sketch": {
+    "k": "compare",
+    "left": {
+     "title": "सही",
+     "items": [
+      "print(\"Hi\")",
+      "name = \"A\"",
+      "True"
+     ]
+    },
+    "right": {
+     "title": "गलत",
+     "items": [
+      "Print(\"Hi\")",
+      "1name = \"A\"",
+      "true"
+     ]
+    }
+   },
+   "code": null
+  }
+ ],
+ "practice": [
+  {
+   "q": "`name = \"  akash kumar  \"` दिया है। आगे-पीछे की spaces हटाओ, हर शब्द का पहला letter capital करो, और यह print करो:\nAkash Kumar\nLength: 11\nPehla akshar: A",
+   "starter": "name = \"  akash kumar  \"\n# TODO: strip() और title() से clean नाम बनाओ\nclean = name\n# TODO: clean, उसकी length और पहला अक्षर print करो\n",
+   "expect": "Akash Kumar\nLength: 11\nPehla akshar: A",
+   "hint": "clean = name.strip().title(), फिर len(clean) और clean[0]।",
+   "solution": "name = \"  akash kumar  \"\nclean = name.strip().title()\nprint(clean)\nprint(f\"Length: {len(clean)}\")\nprint(f\"Pehla akshar: {clean[0]}\")"
+  },
+  {
+   "q": "Variables `price = 120` और `qty = 3` बनाओ और f-string से print करो:\nTotal: 360",
+   "starter": "price = 120\nqty = 3\n# TODO: f-string से total print करो\n",
+   "expect": "Total: 360",
+   "hint": "print(f\"Total: {price * qty}\")",
+   "solution": "price = 120\nqty = 3\nprint(f\"Total: {price * qty}\")"
+  },
+  {
+   "q": "Cable की length text में आई है: `length = \"1250\"` (meter)। एक coil 100 meter का बनता है। Length को number में बदलो, फिर `//` और `%` से यह print करो:\nPure coil: 12\nBacha hua: 50 m",
+   "starter": "length = \"1250\"\ncoil = 100\n# TODO: length को int में बदलो\n# TODO: // से पूरे coil, % से बचा हुआ cable निकालो\n# TODO: f-string से दोनों print करो\n",
+   "expect": "Pure coil: 12\nBacha hua: 50 m",
+   "hint": "meters = int(length), फिर meters // coil और meters % coil।",
+   "solution": "length = \"1250\"\ncoil = 100\nmeters = int(length)\nprint(f\"Pure coil: {meters // coil}\")\nprint(f\"Bacha hua: {meters % coil} m\")"
+  }
+ ],
+ "quiz": [
+  {
+   "q": "`print(\"5\" + \"5\")` का output क्या होगा?",
+   "o": [
+    "10",
+    "55",
+    "Error",
+    "5 5"
+   ],
+   "a": 1,
+   "why": "दोनों text हैं, और text का + उन्हें जोड़ देता है: \"55\"।"
+  },
+  {
+   "q": "`print(17 // 5)` क्या print करेगा?",
+   "o": [
+    "3",
+    "3.4",
+    "2",
+    "4"
+   ],
+   "a": 0,
+   "why": "`//` भाग का सिर्फ पूरा हिस्सा देता है: 17 में 5 तीन बार पूरा जाता है।"
+  },
+  {
+   "q": "कौन सा variable नाम सही है?",
+   "o": [
+    "2name",
+    "my name",
+    "my_name",
+    "my-name"
+   ],
+   "a": 2,
+   "why": "नाम number से शुरू नहीं हो सकता, space या - नहीं चलता; underscore चलता है।"
+  },
+  {
+   "q": "`input()` हमेशा किस type की value देता है?",
+   "o": [
+    "int",
+    "float",
+    "bool",
+    "str"
+   ],
+   "a": 3,
+   "why": "User जो भी type करे, input उसे text (str) बनाकर देता है।"
+  },
+  {
+   "q": "`type(3.0)` क्या है?",
+   "o": [
+    "<class 'int'>",
+    "<class 'float'>",
+    "<class 'str'>",
+    "<class 'number'>"
+   ],
+   "a": 1,
+   "why": "Decimal point वाला number float होता है, चाहे .0 ही हो।"
+  },
+  {
+   "q": "`word = \"Python\"` हो तो `word[-1]` क्या देगा?",
+   "o": [
+    "n",
+    "P",
+    "o",
+    "Error"
+   ],
+   "a": 0,
+   "why": "`-1` मतलब पीछे से पहला, यानी आखिरी अक्षर: n।"
+  },
+  {
+   "q": "कौन सी line error देगी?",
+   "o": [
+    "print(\"Hi\")",
+    "print('Hi')",
+    "print(\"Hi\", 5)",
+    "Print(\"Hi\")"
+   ],
+   "a": 3,
+   "why": "Python case-sensitive है; `Print` नाम का कोई function नहीं, NameError आएगा।"
+  },
+  {
+   "q": "`name = \"Ravi\"` हो तो `print(f\"Hi {name}\")` का output?",
+   "o": [
+    "Hi {name}",
+    "Hi name",
+    "Hi Ravi",
+    "f\"Hi Ravi\""
+   ],
+   "a": 2,
+   "why": "f-string `{name}` की जगह variable की value डाल देती है।"
+  },
+  {
+   "q": "`name` बनाया ही नहीं और `print(name)` लिख दिया। कौन सा error आएगा?",
+   "o": [
+    "NameError",
+    "SyntaxError",
+    "TypeError",
+    "ValueError"
+   ],
+   "a": 0,
+   "why": "Python को `name` नाम का कोई डिब्बा मिला ही नहीं, इसलिए NameError।"
+  },
+  {
+   "q": "`print(\"Age: \" + 25)` का क्या होगा?",
+   "o": [
+    "Age: 25",
+    "TypeError",
+    "NameError",
+    "Age:25"
+   ],
+   "a": 1,
+   "why": "Text और number को `+` से सीधा नहीं जोड़ सकते; `str(25)` या f-string चाहिए।"
+  }
+ ],
+ "iq": [
+  {
+   "q": "Python क्या है और AI/ML में इतनी popular क्यों है?",
+   "a": "Python एक high-level, interpreted, पढ़ने में आसान language है। AI/ML में popular है क्योंकि इसके पास NumPy, Pandas, scikit-learn, PyTorch जैसी बड़ी libraries हैं, community बहुत बड़ी है, और ideas जल्दी prototype हो जाते हैं।"
+  },
+  {
+   "q": "Interpreted language का क्या मतलब है?",
+   "a": "Code को पहले पूरा machine code में compile नहीं करते; interpreter line by line पढ़कर चलाता है। इससे testing आसान होती है, लेकिन C/C++ से थोड़ा slow होता है।"
+  },
+  {
+   "q": "Python dynamically typed है — इसका मतलब?",
+   "a": "Variable का type पहले declare नहीं करना पड़ता; value से type अपने आप तय होता है, और बाद में बदल भी सकता है: `x = 5` फिर `x = \"hi\"` चल जाता है।"
+  },
+  {
+   "q": "`=` और `==` में क्या फर्क है?",
+   "a": "`=` assignment है (value डिब्बे में रखना)। `==` comparison है (दोनों बराबर हैं क्या), जो True/False देता है।"
+  },
+  {
+   "q": "Python के basic data types बताओ।",
+   "a": "int (पूरा number), float (decimal), str (text), bool (True/False)। इसके अलावा complex और NoneType भी हैं। Collections: list, tuple, set, dict।"
+  },
+  {
+   "q": "`/`, `//` और `%` में क्या फर्क है?",
+   "a": "`/` normal भाग है और हमेशा float देता है (`7 / 2` = 3.5)। `//` floor division है, सिर्फ पूरा हिस्सा (`7 // 2` = 3)। `%` modulo है, बचा हुआ (`7 % 2` = 1); even/odd check में बहुत use होता है।"
+  },
+  {
+   "q": "input() से आए number पर हिसाब क्यों error देता है?",
+   "a": "क्योंकि input हमेशा str देता है। `\"5\" + 1` TypeError देगा। पहले `int(input())` या `float(input())` से convert करना पड़ता है।"
+  },
+  {
+   "q": "f-string क्या है और इसका फायदा?",
+   "a": "Python 3.6+ का string formatting तरीका: `f\"Hi {name}\"`। पढ़ने में साफ़, तेज़, और `{}` के अंदर expressions भी चल जाते हैं, जैसे `{price * qty}` या `{x:.2f}`।"
+  },
+  {
+   "q": "Strings mutable हैं या immutable? इसका क्या असर है?",
+   "a": "Strings immutable हैं: एक बार बनी तो अंदर से बदल नहीं सकती। `s[0] = \"X\"` TypeError देता है। `.upper()`, `.replace()` जैसे methods नई string return करते हैं, इसलिए `s = s.upper()` लिखना पड़ता है।"
+  },
+  {
+   "q": "Python में comment कैसे लिखते हैं और docstring क्या है?",
+   "a": "Single-line comment `#` से। Docstring triple quotes `\"\"\"...\"\"\"` में function/class के शुरू में लिखी documentation है, जो `help()` में दिखती है।"
+  },
+  {
+   "q": "Error आने पर तुम debug कैसे करते हो? SyntaxError और runtime error में फर्क?",
+   "a": "Traceback नीचे से ऊपर पढ़ता हूँ: आखिरी line में error type और वजह, ऊपर file और line number। SyntaxError code चलने से पहले ही आता है (grammar गलत), इसलिए एक भी line नहीं चलती। NameError, TypeError, ValueError, ZeroDivisionError runtime errors हैं, जो चलते समय उस line पर आते हैं।"
+  },
+  {
+   "q": "`print(0.1 + 0.2)` का output 0.3 क्यों नहीं आता?",
+   "a": "Floats binary में exactly store नहीं होते, इसलिए `0.30000000000000004` आता है। पैसे जैसे exact काम के लिए `round()` या `decimal.Decimal` use करते हैं।"
+  }
+ ]
+}

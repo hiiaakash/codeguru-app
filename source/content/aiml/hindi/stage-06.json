@@ -1,0 +1,1087 @@
+{
+ "n": 6,
+ "id": "aiml-06",
+ "title": "SQL और Databases",
+ "goal": "Database, table, keys और constraints समझोगे; SELECT, WHERE, JOIN, GROUP BY वाली queries लिखोगे; Python के sqlite3 से safe (parameterized) queries चलाओगे, जैसा ML engineer को training data निकालने के लिए रोज़ करना पड़ता है।",
+ "lessons": [
+  {
+   "title": "Database क्या है, और ML engineer को SQL क्यों चाहिए",
+   "blocks": [
+    [
+     "p",
+     "**Database** = data को साफ़-सुथरे, सुरक्षित तरीके से save करने की जगह। **SQL** (Structured Query Language) = database से बात करने की language। तू English जैसा लिखता है \"मुझे यह data दो\", database निकाल के दे देता है।"
+    ],
+    [
+     "analogy",
+     "Database एक बड़ा godown है। हर अलमारी एक **table** है (customers, orders, products)। अलमारी की हर shelf एक **row** है (एक customer)। और हर shelf पे लगे label **columns** हैं (नाम, city, phone)।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Table = rows x columns",
+      "head": [
+       "id",
+       "name",
+       "city"
+      ],
+      "rows": [
+       [
+        "1",
+        "Sharma Elec.",
+        "Delhi"
+       ],
+       [
+        "2",
+        "Gupta Traders",
+        "Jaipur"
+       ],
+       [
+        "3",
+        "Verma Cables",
+        "Delhi"
+       ]
+      ]
+     }
+    ],
+    [
+     "list",
+     [
+      "**Table** = एक topic का data (जैसे सिर्फ़ customers)।",
+      "**Row** (record) = एक चीज़ की पूरी info (एक customer)।",
+      "**Column** (field) = एक property (नाम, city)। हर column का एक fixed type होता है।"
+     ]
+    ],
+    [
+     "p",
+     "Excel भी table रखता है, तो database क्यों? क्योंकि:"
+    ],
+    [
+     "list",
+     [
+      "Excel लाख rows पे अटकने लगता है; database करोड़ rows आराम से संभालता है।",
+      "Database में 100 लोग एक साथ पढ़-लिख सकते हैं, data खराब नहीं होता।",
+      "Database rules लगा सकता है: \"phone खाली नहीं\", \"email duplicate नहीं\"।",
+      "Crash हो जाए तब भी committed data safe रहता है।"
+     ]
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "Excel vs Database",
+      "left": {
+       "title": "Excel",
+       "items": [
+        "छोटा data",
+        "एक आदमी edit",
+        "कोई rule नहीं",
+        "Manual filter"
+       ]
+      },
+      "right": {
+       "title": "Database",
+       "items": [
+        "करोड़ rows",
+        "100 लोग एक साथ",
+        "Constraints",
+        "SQL query"
+       ]
+      }
+     }
+    ],
+    [
+     "p",
+     "**ML engineer को SQL क्यों?** Model का खाना data है, और company का असली data CSV में नहीं, database में पड़ा होता है: orders, users, machines के sensor logs। Training से पहले तुझे SQL से सही rows निकालनी होंगी, filter करनी होंगी, tables जोड़नी होंगी (JOIN), और features बनाने होंगे (GROUP BY से \"हर customer का total order\")।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "ML का data सफ़र",
+      "steps": [
+       "Database",
+       "SQL query",
+       "Pandas",
+       "Model train"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "tip",
+     "ध्यान से देख: IQ में data science / ML role के लिए भी SQL round होता है। JOIN और GROUP BY लिखना नहीं आया तो आगे नहीं बढ़ते।"
+    ],
+    [
+     "p",
+     "हम इस stage में **SQLite** use करेंगे। यह एक छोटा database है जो एक file (या memory) में रहता है, और Python में `sqlite3` नाम से **पहले से आता है** (install नहीं करना)। Company में PostgreSQL/MySQL मिलेगा, लेकिन SQL लगभग same है।"
+    ],
+    [
+     "code",
+     "python",
+     "import sqlite3\n\ncon = sqlite3.connect(\":memory:\")   # RAM में database\ncur = con.cursor()\ncur.execute(\"SELECT 2 + 3\")\nprint(cur.fetchone())\nprint(cur.execute(\"SELECT 10 * 85\").fetchone()[0])\ncon.close()",
+     "(5,)\n850"
+    ],
+    [
+     "list",
+     [
+      "`connect()` = database से connection खोलो (file का नाम दो, या `\":memory:\"`)।",
+      "`cursor()` = एक pen जिससे query लिखते हो।",
+      "`execute()` = query चलाओ।",
+      "`fetchone()` / `fetchall()` = result लो। हर row एक **tuple** आती है।",
+      "`close()` = काम के बाद connection बंद।"
+     ]
+    ],
+    [
+     "warn",
+     "आम गलती: `fetchone()` का result `5` नहीं, `(5,)` tuple होता है। Value चाहिए तो `cur.fetchone()[0]`।"
+    ]
+   ]
+  },
+  {
+   "title": "Table बनाना: data types और constraints",
+   "blocks": [
+    [
+     "p",
+     "`CREATE TABLE` नया table बनाता है। हर column का नाम, **data type** और **constraints** (rules) बताते हैं। Rules database खुद enforce करता है, चाहे app में bug हो।"
+    ],
+    [
+     "code",
+     "sql",
+     "CREATE TABLE customers (\n    id      INTEGER PRIMARY KEY,\n    name    TEXT NOT NULL,\n    email   TEXT UNIQUE,\n    city    TEXT DEFAULT 'Delhi',\n    credit  INTEGER CHECK (credit >= 0)\n);",
+     ""
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Common data types",
+      "head": [
+       "Type",
+       "क्या रखता",
+       "Example"
+      ],
+      "rows": [
+       [
+        "INTEGER",
+        "पूरा number",
+        "42"
+       ],
+       [
+        "NUMERIC(10,2)",
+        "exact decimal",
+        "1234.56"
+       ],
+       [
+        "VARCHAR(n)/TEXT",
+        "text",
+        "'Copper'"
+       ],
+       [
+        "BOOLEAN",
+        "true/false",
+        "true"
+       ],
+       [
+        "DATE/TIMESTAMP",
+        "date, time",
+        "2026-10-28"
+       ]
+      ]
+     }
+    ],
+    [
+     "warn",
+     "IQ trap: \"पैसे किस type में रखोगे?\" FLOAT कभी नहीं, क्योंकि 0.1 + 0.2 float में exactly 0.3 नहीं होता। `NUMERIC(10,2)` (exact decimal) use करो, या पैसे को paisa-integer में रखो (₹12.50 = 1250)।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Constraints = rules",
+      "head": [
+       "Constraint",
+       "Rule"
+      ],
+      "rows": [
+       [
+        "PRIMARY KEY",
+        "unique + not null id"
+       ],
+       [
+        "NOT NULL",
+        "खाली नहीं चलेगा"
+       ],
+       [
+        "UNIQUE",
+        "repeat नहीं होगा"
+       ],
+       [
+        "FOREIGN KEY",
+        "दूसरे table से link"
+       ],
+       [
+        "CHECK",
+        "अपनी condition"
+       ],
+       [
+        "DEFAULT",
+        "value न दो तो यह"
+       ]
+      ]
+     }
+    ],
+    [
+     "p",
+     "**PRIMARY KEY** = हर row की पक्की पहचान, जैसे Aadhaar number। एक table में एक ही primary key। वह अपने आप UNIQUE + NOT NULL होती है।"
+    ],
+    [
+     "p",
+     "**FOREIGN KEY** = दूसरे table की primary key का reference। `orders.customer_id` बताता है कि order किस customer का है। Database check करता है कि वह customer सच में exist करे।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Foreign key link",
+      "steps": [
+       "orders.customer_id",
+       "point करता है",
+       "customers.id"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "अब Python से देख, rule तोड़ने पे क्या होता है:"
+    ],
+    [
+     "code",
+     "python",
+     "import sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.execute(\"CREATE TABLE users(id INTEGER PRIMARY KEY, email TEXT UNIQUE NOT NULL)\")\ncon.execute(\"INSERT INTO users(email) VALUES ('akash@geep.in')\")\ntry:\n    con.execute(\"INSERT INTO users(email) VALUES ('akash@geep.in')\")\nexcept sqlite3.IntegrityError as e:\n    print(\"Error:\", e)\ntry:\n    con.execute(\"INSERT INTO users(email) VALUES (NULL)\")\nexcept sqlite3.IntegrityError as e:\n    print(\"Error:\", e)",
+     "Error: UNIQUE constraint failed: users.email\nError: NOT NULL constraint failed: users.email"
+    ],
+    [
+     "p",
+     "Database ने गलत data अंदर आने ही नहीं दिया। यही constraints का फ़ायदा है: data हमेशा साफ़ रहता है, चाहे 10 अलग apps लिख रहे हों।"
+    ],
+    [
+     "code",
+     "python",
+     "import sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.execute(\"PRAGMA foreign_keys = ON\")   # SQLite में FK check on करना पड़ता है\ncon.execute(\"CREATE TABLE customers(id INTEGER PRIMARY KEY, name TEXT)\")\ncon.execute(\"\"\"CREATE TABLE orders(id INTEGER PRIMARY KEY,\n    customer_id INTEGER REFERENCES customers(id), amount INTEGER)\"\"\")\ncon.execute(\"INSERT INTO customers VALUES (1, 'Sharma')\")\ncon.execute(\"INSERT INTO orders VALUES (1, 1, 5000)\")\ntry:\n    con.execute(\"INSERT INTO orders VALUES (2, 99, 700)\")\nexcept sqlite3.IntegrityError as e:\n    print(\"Error:\", e)",
+     "Error: FOREIGN KEY constraint failed"
+    ],
+    [
+     "tip",
+     "ध्यान से देख: SQLite में foreign key check by default बंद होता है, `PRAGMA foreign_keys = ON` से चालू करो। PostgreSQL में यह हमेशा चालू रहता है।"
+    ],
+    [
+     "warn",
+     "आम गलती: `id` को primary key न बनाना। फिर duplicate rows आ जाती हैं और किसी एक row को update/delete करना मुश्किल हो जाता है।"
+    ]
+   ]
+  },
+  {
+   "title": "CRUD और filtering: INSERT, SELECT, UPDATE, DELETE, WHERE",
+   "blocks": [
+    [
+     "p",
+     "Database के 4 basic काम = **CRUD**: Create (INSERT), Read (SELECT), Update (UPDATE), Delete (DELETE)। हर app में यही 4 काम होते हैं।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "CRUD",
+      "head": [
+       "काम",
+       "SQL",
+       "मतलब"
+      ],
+      "rows": [
+       [
+        "Create",
+        "INSERT",
+        "नया data डालो"
+       ],
+       [
+        "Read",
+        "SELECT",
+        "data पढ़ो"
+       ],
+       [
+        "Update",
+        "UPDATE",
+        "data बदलो"
+       ],
+       [
+        "Delete",
+        "DELETE",
+        "data हटाओ"
+       ]
+      ]
+     }
+    ],
+    [
+     "code",
+     "sql",
+     "INSERT INTO products (name, category, rate, stock) VALUES ('Copper Wire', 'Wire', 850, 40);\nSELECT name, rate FROM products WHERE category = 'Cable';\nUPDATE products SET rate = 900 WHERE id = 1;\nDELETE FROM products WHERE stock = 0;",
+     ""
+    ],
+    [
+     "p",
+     "अब एक products table पे Python से चला के देखते हैं। `SELECT *` = सारे columns, लेकिन काम में सिर्फ़ ज़रूरी columns माँगो।"
+    ],
+    [
+     "code",
+     "python",
+     "import sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.executescript(\"\"\"\nCREATE TABLE products(id INTEGER PRIMARY KEY, name TEXT, category TEXT, rate INTEGER, stock INTEGER);\nINSERT INTO products VALUES\n (1,'Copper Wire','Wire',850,40),\n (2,'PVC Cable','Cable',420,0),\n (3,'Armoured Cable','Cable',1600,12),\n (4,'Aluminium Wire','Wire',300,75),\n (5,'Flexible Cable','Cable',650,30);\n\"\"\")\nfor row in con.execute(\"SELECT name, rate FROM products WHERE category = 'Cable'\"):\n    print(row)",
+     "('PVC Cable', 420)\n('Armoured Cable', 1600)\n('Flexible Cable', 650)"
+    ],
+    [
+     "p",
+     "**WHERE** = filter, सिर्फ़ वो rows जो condition पूरी करें। Operators: `=`, `!=` (या `<>`), `>`, `<`, `>=`, `<=`, `AND`, `OR`, `NOT`, `BETWEEN`, `IN`, `LIKE`।"
+    ],
+    [
+     "code",
+     "python",
+     "import sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.executescript(\"\"\"\nCREATE TABLE products(id INTEGER PRIMARY KEY, name TEXT, category TEXT, rate INTEGER, stock INTEGER);\nINSERT INTO products VALUES\n (1,'Copper Wire','Wire',850,40),\n (2,'PVC Cable','Cable',420,0),\n (3,'Armoured Cable','Cable',1600,12),\n (4,'Aluminium Wire','Wire',300,75),\n (5,'Flexible Cable','Cable',650,30);\n\"\"\")\nq1 = \"SELECT name FROM products WHERE rate BETWEEN 400 AND 900\"\nq2 = \"SELECT name FROM products WHERE name LIKE '%Wire'\"\nq3 = \"SELECT name FROM products WHERE category = 'Cable' AND stock > 0\"\nfor q in (q1, q2, q3):\n    print([r[0] for r in con.execute(q)])",
+     "['Copper Wire', 'PVC Cable', 'Flexible Cable']\n['Copper Wire', 'Aluminium Wire']\n['Armoured Cable', 'Flexible Cable']"
+    ],
+    [
+     "tip",
+     "`LIKE '%Wire'` = जो `Wire` पे खत्म हो। `%` = कितने भी characters, `_` = exactly एक character। Text हमेशा single quotes `' '` में।"
+    ],
+    [
+     "p",
+     "**ORDER BY** = sort (ASC छोटे से बड़ा, DESC बड़े से छोटा)। **LIMIT** = कितनी rows। **OFFSET** = कितनी skip। **DISTINCT** = repeat हटाओ।"
+    ],
+    [
+     "code",
+     "python",
+     "import sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.executescript(\"\"\"\nCREATE TABLE products(id INTEGER PRIMARY KEY, name TEXT, category TEXT, rate INTEGER, stock INTEGER);\nINSERT INTO products VALUES\n (1,'Copper Wire','Wire',850,40),\n (2,'PVC Cable','Cable',420,0),\n (3,'Armoured Cable','Cable',1600,12),\n (4,'Aluminium Wire','Wire',300,75),\n (5,'Flexible Cable','Cable',650,30);\n\"\"\")\nprint(con.execute(\"SELECT name, rate FROM products ORDER BY rate DESC LIMIT 2\").fetchall())\nprint(con.execute(\"SELECT DISTINCT category FROM products ORDER BY category\").fetchall())",
+     "[('Armoured Cable', 1600), ('Copper Wire', 850)]\n[('Cable',), ('Wire',)]"
+    ],
+    [
+     "analogy",
+     "Pagination = किताब के page। Page 3, हर page पे 10 rows: `LIMIT 10 OFFSET 20`। Formula: OFFSET = (page - 1) * size।"
+    ],
+    [
+     "p",
+     "अब UPDATE और DELETE। Python में बदलाव के बाद `con.commit()` ज़रूर करो, वरना file database में save नहीं होगा।"
+    ],
+    [
+     "code",
+     "python",
+     "import sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.executescript(\"\"\"\nCREATE TABLE products(id INTEGER PRIMARY KEY, name TEXT, category TEXT, rate INTEGER, stock INTEGER);\nINSERT INTO products VALUES\n (1,'Copper Wire','Wire',850,40),\n (2,'PVC Cable','Cable',420,0),\n (3,'Armoured Cable','Cable',1600,12),\n (4,'Aluminium Wire','Wire',300,75),\n (5,'Flexible Cable','Cable',650,30);\n\"\"\")\ncon.execute(\"UPDATE products SET rate = rate + 50 WHERE category = 'Wire'\")\ncur = con.execute(\"DELETE FROM products WHERE stock = 0\")\nprint(\"Deleted:\", cur.rowcount)\ncon.commit()\nprint(con.execute(\"SELECT name, rate FROM products\").fetchall())",
+     "Deleted: 1\n[('Copper Wire', 900), ('Armoured Cable', 1600), ('Aluminium Wire', 350), ('Flexible Cable', 650)]"
+    ],
+    [
+     "warn",
+     "सबसे खतरनाक गलती: `DELETE FROM products;` या `UPDATE products SET rate = 0;` बिना WHERE के। पूरा table बर्बाद! Safe आदत: पहले वही WHERE के साथ `SELECT` चला के देखो कौन सी rows आएँगी, फिर DELETE।"
+    ],
+    [
+     "p",
+     "**NULL** = \"पता नहीं / value ही नहीं\"। यह 0 या खाली text नहीं है। NULL को `=` से compare नहीं कर सकते।"
+    ],
+    [
+     "code",
+     "python",
+     "import sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.executescript(\"CREATE TABLE t(name TEXT, phone TEXT); INSERT INTO t VALUES ('A','98'),('B',NULL);\")\nprint(con.execute(\"SELECT name FROM t WHERE phone = NULL\").fetchall())\nprint(con.execute(\"SELECT name FROM t WHERE phone IS NULL\").fetchall())",
+     "[]\n[('B',)]"
+    ],
+    [
+     "tip",
+     "ध्यान से देख: `= NULL` ने कुछ नहीं दिया, `IS NULL` ने सही row दी। क्योंकि दो \"पता नहीं\" बराबर हैं या नहीं, यह भी \"पता नहीं\" है। यह IQ का favourite trap है।"
+    ]
+   ]
+  },
+  {
+   "title": "JOIN: दो tables को जोड़ना",
+   "blocks": [
+    [
+     "p",
+     "असली database में data अलग tables में तोड़ा जाता है (customers अलग, orders अलग) और **id से link** किया जाता है। Report चाहिए तो उन्हें **JOIN** से जोड़ते हैं। IQ में यह सबसे important SQL topic है।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "दो tables",
+      "left": {
+       "title": "customers",
+       "items": [
+        "1 Sharma Elec.",
+        "2 Gupta Traders",
+        "3 Verma Cables"
+       ]
+      },
+      "right": {
+       "title": "orders",
+       "items": [
+        "1 cust=1 50000",
+        "2 cust=1 30000",
+        "3 cust=2 75000"
+       ]
+      }
+     }
+    ],
+    [
+     "p",
+     "`orders.customer_id` foreign key है। ध्यान दो: Verma Cables (id 3) का कोई order नहीं है।"
+    ],
+    [
+     "p",
+     "**INNER JOIN** = सिर्फ़ वो rows जिनका **दोनों तरफ़ match** हो।"
+    ],
+    [
+     "code",
+     "python",
+     "import sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.executescript(\"\"\"\nCREATE TABLE customers(id INTEGER PRIMARY KEY, name TEXT, city TEXT);\nINSERT INTO customers VALUES (1,'Sharma Electricals','Delhi'),\n (2,'Gupta Traders','Jaipur'), (3,'Verma Cables','Delhi');\nCREATE TABLE orders(id INTEGER PRIMARY KEY, customer_id INTEGER, amount INTEGER);\nINSERT INTO orders VALUES (1,1,50000),(2,1,30000),(3,2,75000);\n\"\"\")\nq = \"\"\"SELECT c.name, o.amount\nFROM customers c\nINNER JOIN orders o ON o.customer_id = c.id\nORDER BY o.id\"\"\"\nfor row in con.execute(q):\n    print(row)",
+     "('Sharma Electricals', 50000)\n('Sharma Electricals', 30000)\n('Gupta Traders', 75000)"
+    ],
+    [
+     "p",
+     "Verma Cables गायब है, क्योंकि उसका match orders में नहीं मिला। `c` और `o` **alias** (छोटे नाम) हैं, ताकि बार बार पूरा table नाम न लिखना पड़े। `ON` बताता है कौन से column से जोड़ना है।"
+    ],
+    [
+     "p",
+     "**LEFT JOIN** = left table की **सारी** rows, right से जो match मिले। Match न मिले तो right के columns **NULL** (Python में `None`)।"
+    ],
+    [
+     "code",
+     "python",
+     "import sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.executescript(\"\"\"\nCREATE TABLE customers(id INTEGER PRIMARY KEY, name TEXT, city TEXT);\nINSERT INTO customers VALUES (1,'Sharma Electricals','Delhi'),\n (2,'Gupta Traders','Jaipur'), (3,'Verma Cables','Delhi');\nCREATE TABLE orders(id INTEGER PRIMARY KEY, customer_id INTEGER, amount INTEGER);\nINSERT INTO orders VALUES (1,1,50000),(2,1,30000),(3,2,75000);\n\"\"\")\nq = \"\"\"SELECT c.name, o.amount\nFROM customers c\nLEFT JOIN orders o ON o.customer_id = c.id\nORDER BY c.id, o.id\"\"\"\nfor row in con.execute(q):\n    print(row)",
+     "('Sharma Electricals', 50000)\n('Sharma Electricals', 30000)\n('Gupta Traders', 75000)\n('Verma Cables', None)"
+    ],
+    [
+     "analogy",
+     "LEFT JOIN = शादी की guest list (left) और gift register (right)। हर guest का नाम आएगा; जिसने gift नहीं दिया उसके आगे खाली (NULL)।"
+    ],
+    [
+     "p",
+     "LEFT JOIN का सबसे famous use: **\"कौन से customers ने कभी order नहीं किया?\"** यह IQ में बहुत आता है, रट लो:"
+    ],
+    [
+     "code",
+     "python",
+     "import sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.executescript(\"\"\"\nCREATE TABLE customers(id INTEGER PRIMARY KEY, name TEXT, city TEXT);\nINSERT INTO customers VALUES (1,'Sharma Electricals','Delhi'),\n (2,'Gupta Traders','Jaipur'), (3,'Verma Cables','Delhi');\nCREATE TABLE orders(id INTEGER PRIMARY KEY, customer_id INTEGER, amount INTEGER);\nINSERT INTO orders VALUES (1,1,50000),(2,1,30000),(3,2,75000);\n\"\"\")\nq = \"\"\"SELECT c.name FROM customers c\nLEFT JOIN orders o ON o.customer_id = c.id\nWHERE o.id IS NULL\"\"\"\nprint(con.execute(q).fetchall())",
+     "[('Verma Cables',)]"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "JOIN types",
+      "head": [
+       "JOIN",
+       "क्या देता"
+      ],
+      "rows": [
+       [
+        "INNER",
+        "सिर्फ़ match"
+       ],
+       [
+        "LEFT",
+        "left सारे + match"
+       ],
+       [
+        "RIGHT",
+        "right सारे + match"
+       ],
+       [
+        "FULL OUTER",
+        "दोनों के सारे"
+       ],
+       [
+        "CROSS",
+        "हर row x हर row"
+       ]
+      ]
+     }
+    ],
+    [
+     "tip",
+     "याद रखने का तरीका: LEFT JOIN = \"left वाला पूरा चाहिए, right जितना मिले उतना\"। तीन tables भी जोड़ सकते हो: customers → orders → order_items, एक के बाद एक JOIN।"
+    ],
+    [
+     "warn",
+     "आम गलती: `ON` condition भूल जाना या गलत column जोड़ना। फिर हर customer हर order से जुड़ जाता है (CROSS JOIN जैसा) और rows बेकार में गुणा हो जाती हैं। Result की row count हमेशा check करो।"
+    ]
+   ]
+  },
+  {
+   "title": "GROUP BY, HAVING और aggregates: report बनाना",
+   "blocks": [
+    [
+     "p",
+     "**Aggregate function** = बहुत सारी rows से एक number निकालना: `COUNT()`, `SUM()`, `AVG()`, `MIN()`, `MAX()`।"
+    ],
+    [
+     "code",
+     "python",
+     "import sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.executescript(\"\"\"\nCREATE TABLE products(id INTEGER PRIMARY KEY, name TEXT, category TEXT, rate INTEGER, stock INTEGER);\nINSERT INTO products VALUES\n (1,'Copper Wire','Wire',850,40),\n (2,'PVC Cable','Cable',420,0),\n (3,'Armoured Cable','Cable',1600,12),\n (4,'Aluminium Wire','Wire',300,75),\n (5,'Flexible Cable','Cable',650,30);\n\"\"\")\nq = \"SELECT COUNT(*), SUM(stock), MIN(rate), MAX(rate), AVG(rate) FROM products\"\nprint(con.execute(q).fetchone())",
+     "(5, 157, 300, 1600, 764.0)"
+    ],
+    [
+     "p",
+     "**GROUP BY** = rows को group में बाँटो, फिर **हर group** का अलग हिसाब। जैसे हर category का count और average rate।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "GROUP BY कैसे",
+      "steps": [
+       "सारी rows",
+       "Category से बाँटो",
+       "हर group का SUM",
+       "एक row per group"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "code",
+     "python",
+     "import sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.executescript(\"\"\"\nCREATE TABLE products(id INTEGER PRIMARY KEY, name TEXT, category TEXT, rate INTEGER, stock INTEGER);\nINSERT INTO products VALUES\n (1,'Copper Wire','Wire',850,40),\n (2,'PVC Cable','Cable',420,0),\n (3,'Armoured Cable','Cable',1600,12),\n (4,'Aluminium Wire','Wire',300,75),\n (5,'Flexible Cable','Cable',650,30);\n\"\"\")\nq = \"\"\"SELECT category, COUNT(*) AS items, AVG(rate) AS avg_rate\nFROM products GROUP BY category ORDER BY category\"\"\"\nfor row in con.execute(q):\n    print(row)",
+     "('Cable', 3, 890.0)\n('Wire', 2, 575.0)"
+    ],
+    [
+     "analogy",
+     "दुकान का हिसाब: सारे bills एक ढेर में हैं। GROUP BY = bills को customer के नाम के डिब्बों में डालना। SUM = हर डिब्बे का total।"
+    ],
+    [
+     "p",
+     "JOIN + GROUP BY मिलाके असली report: हर customer का total business।"
+    ],
+    [
+     "code",
+     "python",
+     "import sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.executescript(\"\"\"\nCREATE TABLE customers(id INTEGER PRIMARY KEY, name TEXT, city TEXT);\nINSERT INTO customers VALUES (1,'Sharma Electricals','Delhi'),\n (2,'Gupta Traders','Jaipur'), (3,'Verma Cables','Delhi');\nCREATE TABLE orders(id INTEGER PRIMARY KEY, customer_id INTEGER, amount INTEGER);\nINSERT INTO orders VALUES (1,1,50000),(2,1,30000),(3,2,75000);\n\"\"\")\nq = \"\"\"SELECT c.name, COUNT(o.id) AS orders, COALESCE(SUM(o.amount), 0) AS total\nFROM customers c LEFT JOIN orders o ON o.customer_id = c.id\nGROUP BY c.id ORDER BY total DESC\"\"\"\nfor row in con.execute(q):\n    print(row)",
+     "('Sharma Electricals', 2, 80000)\n('Gupta Traders', 1, 75000)\n('Verma Cables', 0, 0)"
+    ],
+    [
+     "tip",
+     "`COALESCE(x, 0)` = x NULL हो तो 0 दो। `COUNT(o.id)` NULL को नहीं गिनता, इसलिए Verma का 0 आया। `COUNT(*)` होता तो 1 आता (NULL वाली row भी गिनती)। यह फ़र्क IQ में पूछा जाता है।"
+    ],
+    [
+     "p",
+     "**HAVING** = group बनने के **बाद** groups पे filter। **WHERE** = group बनने से **पहले** rows पे filter।"
+    ],
+    [
+     "code",
+     "python",
+     "import sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.executescript(\"\"\"\nCREATE TABLE customers(id INTEGER PRIMARY KEY, name TEXT, city TEXT);\nINSERT INTO customers VALUES (1,'Sharma Electricals','Delhi'),\n (2,'Gupta Traders','Jaipur'), (3,'Verma Cables','Delhi');\nCREATE TABLE orders(id INTEGER PRIMARY KEY, customer_id INTEGER, amount INTEGER);\nINSERT INTO orders VALUES (1,1,50000),(2,1,30000),(3,2,75000);\n\"\"\")\nq = \"\"\"SELECT customer_id, SUM(amount) AS total FROM orders\nGROUP BY customer_id HAVING SUM(amount) > 60000 ORDER BY customer_id\"\"\"\nprint(con.execute(q).fetchall())",
+     "[(1, 80000), (2, 75000)]"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Query चलने का order",
+      "steps": [
+       "FROM/JOIN",
+       "WHERE",
+       "GROUP BY",
+       "HAVING",
+       "SELECT",
+       "ORDER BY/LIMIT"
+      ],
+      "dir": "v"
+     }
+    ],
+    [
+     "p",
+     "लिखते हम `SELECT` पहले हैं, लेकिन database चलाता है FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT। इसलिए WHERE में `SUM()` नहीं लगा सकते (groups अभी बने ही नहीं), और SELECT का alias WHERE में काम नहीं करता।"
+    ],
+    [
+     "warn",
+     "आम गलती: `WHERE SUM(amount) > 60000` लिखना। Error आएगा। Aggregate पे filter हमेशा HAVING से।"
+    ],
+    [
+     "tip",
+     "ML के लिए: GROUP BY से ही **features** बनते हैं, जैसे हर user के `total_orders`, `avg_amount`, `last_order_date`। यह table फिर model को जाता है।"
+    ]
+   ]
+  },
+  {
+   "title": "Index, transaction, SQL injection और Python से safe queries",
+   "blocks": [
+    [
+     "p",
+     "**Index** = किताब के पीछे वाला index। बिना index के database को पूरा table पढ़ना पड़ता है (**full table scan**)। Index से सीधा सही row मिल जाती है।"
+    ],
+    [
+     "analogy",
+     "Phone की contact list A-Z sorted है, इसलिए \"Ravi\" तुरंत मिल जाता है। अगर random order होता तो एक-एक नाम पढ़ना पड़ता। Index = sorted list (असल में एक B-tree)।"
+    ],
+    [
+     "code",
+     "sql",
+     "CREATE INDEX idx_orders_customer ON orders(customer_id);\nCREATE INDEX idx_orders_cust_date ON orders(customer_id, order_date);  -- combined index",
+     ""
+    ],
+    [
+     "code",
+     "python",
+     "import sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.execute(\"CREATE TABLE orders(id INTEGER PRIMARY KEY, customer_id INTEGER, amount INTEGER)\")\nq = \"SELECT * FROM orders WHERE customer_id = 5\"\nprint(con.execute(\"EXPLAIN QUERY PLAN \" + q).fetchone()[-1])\ncon.execute(\"CREATE INDEX idx_cust ON orders(customer_id)\")\nprint(con.execute(\"EXPLAIN QUERY PLAN \" + q).fetchone()[-1])",
+     "SCAN orders\nSEARCH orders USING INDEX idx_cust (customer_id=?)"
+    ],
+    [
+     "p",
+     "पहले `SCAN` (पूरा table पढ़ा), index के बाद `SEARCH ... USING INDEX` (सीधा ढूँढा)। PostgreSQL में यही काम `EXPLAIN ANALYZE` करता है।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "Index: फ़ायदा vs नुकसान",
+      "left": {
+       "title": "फ़ायदा",
+       "items": [
+        "SELECT तेज़",
+        "WHERE/JOIN तेज़",
+        "ORDER BY तेज़"
+       ]
+      },
+      "right": {
+       "title": "नुकसान",
+       "items": [
+        "INSERT/UPDATE slow",
+        "Disk space ज़्यादा",
+        "हर column पे मत लगाओ"
+       ]
+      }
+     }
+    ],
+    [
+     "tip",
+     "Index कहाँ लगाओ: foreign key columns (JOIN), जो columns WHERE में बार बार आते हैं, और ORDER BY वाले columns। Primary key पे index अपने आप होता है।"
+    ],
+    [
+     "p",
+     "**Transaction** = \"सब या कुछ नहीं\"। पैसा एक account से निकला लेकिन दूसरे में नहीं पहुँचा, ऐसा नहीं होना चाहिए। बीच में error आए तो `rollback()` सब वापस कर देता है।"
+    ],
+    [
+     "code",
+     "python",
+     "import sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.execute(\"CREATE TABLE acc(name TEXT PRIMARY KEY, bal INTEGER CHECK(bal >= 0))\")\ncon.execute(\"INSERT INTO acc VALUES ('A', 100), ('B', 0)\")\ncon.commit()\ntry:\n    with con:   # with = success पे commit, error पे rollback\n        con.execute(\"UPDATE acc SET bal = bal + 500 WHERE name = 'B'\")\n        con.execute(\"UPDATE acc SET bal = bal - 500 WHERE name = 'A'\")\nexcept sqlite3.IntegrityError:\n    print(\"Transfer fail, rollback hua\")\nprint(con.execute(\"SELECT * FROM acc\").fetchall())",
+     "Transfer fail, rollback hua\n[('A', 100), ('B', 0)]"
+    ],
+    [
+     "p",
+     "B को 500 मिल गए थे, लेकिन A का balance negative हो रहा था (CHECK fail)। इसलिए **दोनों** update वापस हो गए। यही **ACID** का A (Atomicity) है। बाकी: Consistency (rules न टूटें), Isolation (transactions एक दूसरे को disturb न करें), Durability (commit के बाद data पक्का)।"
+    ],
+    [
+     "p",
+     "**SQL injection** = user का input सीधा query string में जोड़ दिया, और user ने input में ही SQL code डाल दिया। यह सबसे पुराना और सबसे खतरनाक security bug है।"
+    ],
+    [
+     "code",
+     "python",
+     "import sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.executescript(\"CREATE TABLE users(name TEXT, pin TEXT); INSERT INTO users VALUES ('akash','1234'),('ravi','9999');\")\nuser_input = \"' OR '1'='1\"\n# गलत: f-string से query बनाना\nbad = f\"SELECT name FROM users WHERE pin = '{user_input}'\"\nprint(bad)\nprint(\"Galat:\", con.execute(bad).fetchall())\n# सही: parameterized query (? placeholder)\ngood = con.execute(\"SELECT name FROM users WHERE pin = ?\", (user_input,)).fetchall()\nprint(\"Sahi:\", good)",
+     "SELECT name FROM users WHERE pin = '' OR '1'='1'\nGalat: [('akash',), ('ravi',)]\nSahi: []"
+    ],
+    [
+     "p",
+     "गलत तरीके में `OR '1'='1'` हमेशा True है, इसलिए बिना PIN के सारे users निकल आए। Parameterized query में database input को सिर्फ़ **data** मानता है, **code** नहीं। इसलिए कुछ नहीं मिला।"
+    ],
+    [
+     "warn",
+     "आम गलती: `f\"... WHERE name = '{name}'\"` या `\"...\" + name`। कभी नहीं! हमेशा `?` (sqlite3) या `%s` (psycopg2/PostgreSQL) placeholder, और values अलग tuple में। ORM (SQLAlchemy) यह अपने आप करता है।"
+    ],
+    [
+     "p",
+     "एक साथ कई rows डालने के लिए `executemany`, और column नाम से पढ़ने के लिए `row_factory`:"
+    ],
+    [
+     "code",
+     "python",
+     "import sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.row_factory = sqlite3.Row   # row को dict जैसा पढ़ो\ncon.execute(\"CREATE TABLE readings(machine TEXT, temp REAL)\")\ndata = [(\"M1\", 71.5), (\"M2\", 88.0), (\"M1\", 69.5)]\ncon.executemany(\"INSERT INTO readings VALUES (?, ?)\", data)\ncon.commit()\nfor r in con.execute(\"SELECT machine, AVG(temp) AS avg_t FROM readings GROUP BY machine ORDER BY machine\"):\n    print(r[\"machine\"], r[\"avg_t\"])\ncon.close()",
+     "M1 70.5\nM2 88.0"
+    ],
+    [
+     "tip",
+     "ML project में यही pattern है: SQL से data निकालो (`pd.read_sql(query, con)` Pandas में सीधा DataFrame देता है, stage 8 में देखेंगे), features बनाओ, model train करो।"
+    ]
+   ]
+  }
+ ],
+ "teach": [
+  {
+   "say": "Database को एक godown समझो। हर अलमारी एक table, हर shelf एक row, और shelf के label columns।",
+   "sketch": {
+    "k": "table",
+    "head": [
+     "id",
+     "name",
+     "city"
+    ],
+    "rows": [
+     [
+      "1",
+      "Sharma",
+      "Delhi"
+     ],
+     [
+      "2",
+      "Gupta",
+      "Jaipur"
+     ]
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "SQL से हम database से बात करते हैं। सबसे पहला सवाल: SELECT, यानी मुझे यह data दिखाओ।",
+   "sketch": null,
+   "code": "SELECT name, city FROM customers WHERE city = 'Delhi';"
+  },
+  {
+   "say": "हर table पे rules लगते हैं। Primary key पक्की पहचान, NOT NULL खाली नहीं, UNIQUE repeat नहीं, foreign key दूसरे table से link।",
+   "sketch": {
+    "k": "boxes",
+    "items": [
+     {
+      "label": "PRIMARY KEY",
+      "value": "id"
+     },
+     {
+      "label": "NOT NULL",
+      "value": "name"
+     },
+     {
+      "label": "UNIQUE",
+      "value": "email"
+     },
+     {
+      "label": "FOREIGN KEY",
+      "value": "customer_id"
+     }
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "हर app के चार काम: Create, Read, Update, Delete। SQL में INSERT, SELECT, UPDATE, DELETE।",
+   "sketch": {
+    "k": "cycle",
+    "steps": [
+     "INSERT",
+     "SELECT",
+     "UPDATE",
+     "DELETE"
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "DELETE या UPDATE बिना WHERE के कभी मत चलाओ। पहले SELECT से देखो, फिर बदलो।",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "SELECT ... WHERE",
+     "Rows check करो",
+     "DELETE ... WHERE"
+    ],
+    "dir": "h"
+   },
+   "code": null
+  },
+  {
+   "say": "INNER JOIN सिर्फ़ match वाली rows देता है। LEFT JOIN left table की सारी rows देता है, match न मिले तो NULL।",
+   "sketch": {
+    "k": "compare",
+    "left": {
+     "title": "INNER",
+     "items": [
+      "Sharma 50000",
+      "Sharma 30000",
+      "Gupta 75000"
+     ]
+    },
+    "right": {
+     "title": "LEFT",
+     "items": [
+      "Sharma 50000",
+      "Sharma 30000",
+      "Gupta 75000",
+      "Verma NULL"
+     ]
+    }
+   },
+   "code": null
+  },
+  {
+   "say": "GROUP BY rows को डिब्बों में बाँट देता है, और SUM, COUNT हर डिब्बे का हिसाब निकालते हैं। HAVING डिब्बों पे filter लगाता है।",
+   "sketch": {
+    "k": "chart",
+    "type": "bar",
+    "points": [
+     [
+      "Sharma",
+      80000
+     ],
+     [
+      "Gupta",
+      75000
+     ],
+     [
+      "Verma",
+      0
+     ]
+    ],
+    "xl": "customer",
+    "yl": "total"
+   },
+   "code": "SELECT customer_id, SUM(amount)\nFROM orders GROUP BY customer_id\nHAVING SUM(amount) > 60000;"
+  },
+  {
+   "say": "याद रखो, database query को इस order में चलाता है। इसलिए WHERE में SUM नहीं चलता।",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "FROM",
+     "WHERE",
+     "GROUP BY",
+     "HAVING",
+     "SELECT",
+     "ORDER BY"
+    ],
+    "dir": "v"
+   },
+   "code": null
+  },
+  {
+   "say": "Index किताब के index जैसा है: पढ़ना तेज़, लेकिन लिखना थोड़ा slow। सिर्फ़ ज़रूरी columns पे लगाओ।",
+   "sketch": {
+    "k": "compare",
+    "left": {
+     "title": "बिना index",
+     "items": [
+      "पूरा table scan",
+      "Slow SELECT"
+     ]
+    },
+    "right": {
+     "title": "Index के साथ",
+     "items": [
+      "सीधा search",
+      "तेज़ SELECT",
+      "Slow INSERT"
+     ]
+    }
+   },
+   "code": "CREATE INDEX idx_cust ON orders(customer_id);"
+  },
+  {
+   "say": "आखिरी और सबसे ज़रूरी: user का input कभी query string में मत जोड़ो। हमेशा question mark placeholder use करो, ताकि SQL injection न हो।",
+   "sketch": {
+    "k": "compare",
+    "left": {
+     "title": "गलत",
+     "items": [
+      "f\"...'{pin}'\"",
+      "string जोड़ना"
+     ]
+    },
+    "right": {
+     "title": "सही",
+     "items": [
+      "\"... = ?\"",
+      "(pin,) अलग"
+     ]
+    }
+   },
+   "code": "cur.execute(\"SELECT * FROM users WHERE pin = ?\", (pin,))"
+  }
+ ],
+ "practice": [
+  {
+   "q": "sqlite3 से `students(name TEXT, marks INTEGER)` table बनाओ, यह data डालो: Akash 82, Ravi 65, Neha 91, Aman 74। फिर जिनके marks 70 से ज़्यादा हैं उनके नाम और marks, **बड़े से छोटे** order में print करो:\nNeha 91\nAkash 82\nAman 74",
+   "starter": "import sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.execute(\"CREATE TABLE students(name TEXT, marks INTEGER)\")\ndata = [(\"Akash\", 82), (\"Ravi\", 65), (\"Neha\", 91), (\"Aman\", 74)]\n# TODO: executemany से data डालो\n# TODO: WHERE marks > 70 ORDER BY marks DESC वाली query चलाओ\n# TODO: हर row का name और marks print करो\n",
+   "expect": "Neha 91\nAkash 82\nAman 74",
+   "hint": "con.executemany(\"INSERT INTO students VALUES (?, ?)\", data), फिर for name, marks in con.execute(...): print(name, marks)",
+   "solution": "import sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.execute(\"CREATE TABLE students(name TEXT, marks INTEGER)\")\ndata = [(\"Akash\", 82), (\"Ravi\", 65), (\"Neha\", 91), (\"Aman\", 74)]\ncon.executemany(\"INSERT INTO students VALUES (?, ?)\", data)\nfor name, marks in con.execute(\"SELECT name, marks FROM students WHERE marks > 70 ORDER BY marks DESC\"):\n    print(name, marks)"
+  },
+  {
+   "q": "customers और orders tables दिए हैं। LEFT JOIN + GROUP BY से **हर** customer का total order amount निकालो (जिनका order नहीं है उनका 0), नाम के alphabetical order में:\nGupta Traders 75000\nSharma Electricals 80000\nVerma Cables 0",
+   "starter": "import sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.executescript(\"\"\"\nCREATE TABLE customers(id INTEGER PRIMARY KEY, name TEXT);\nINSERT INTO customers VALUES (1,'Sharma Electricals'),(2,'Gupta Traders'),(3,'Verma Cables');\nCREATE TABLE orders(id INTEGER PRIMARY KEY, customer_id INTEGER, amount INTEGER);\nINSERT INTO orders VALUES (1,1,50000),(2,1,30000),(3,2,75000);\n\"\"\")\n# TODO: query लिखो: c.name, COALESCE(SUM(o.amount), 0)\n#       FROM customers c LEFT JOIN orders o ON ...\n#       GROUP BY c.id ORDER BY c.name\n# TODO: हर row print करो: name total\n",
+   "expect": "Gupta Traders 75000\nSharma Electricals 80000\nVerma Cables 0",
+   "hint": "LEFT JOIN orders o ON o.customer_id = c.id। COALESCE NULL को 0 बना देता है।",
+   "solution": "import sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.executescript(\"\"\"\nCREATE TABLE customers(id INTEGER PRIMARY KEY, name TEXT);\nINSERT INTO customers VALUES (1,'Sharma Electricals'),(2,'Gupta Traders'),(3,'Verma Cables');\nCREATE TABLE orders(id INTEGER PRIMARY KEY, customer_id INTEGER, amount INTEGER);\nINSERT INTO orders VALUES (1,1,50000),(2,1,30000),(3,2,75000);\n\"\"\")\nq = \"\"\"SELECT c.name, COALESCE(SUM(o.amount), 0)\nFROM customers c LEFT JOIN orders o ON o.customer_id = c.id\nGROUP BY c.id ORDER BY c.name\"\"\"\nfor name, total in con.execute(q):\n    print(name, total)"
+  },
+  {
+   "q": "एक safe function `find_user(con, name)` लिखो जो **parameterized query** से user का city लौटा दे (न मिले तो `None`)। फिर 3 calls का result print करो। Injection वाला input भी safe रहना चाहिए:\nDelhi\nNone\nNone",
+   "starter": "import sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.executescript(\"CREATE TABLE users(name TEXT, city TEXT); INSERT INTO users VALUES ('akash','Delhi'),('ravi','Bhiwadi');\")\n\ndef find_user(con, name):\n    # TODO: \"SELECT city FROM users WHERE name = ?\" और (name,) से query चलाओ\n    # TODO: row None हो तो None लौटाओ, वरना row[0]\n    pass\n\nprint(find_user(con, \"akash\"))\nprint(find_user(con, \"neha\"))\nprint(find_user(con, \"x' OR '1'='1\"))\n",
+   "expect": "Delhi\nNone\nNone",
+   "hint": "row = con.execute(\"SELECT city FROM users WHERE name = ?\", (name,)).fetchone() लिखो, फिर row None है या नहीं check करो।",
+   "solution": "import sqlite3\ncon = sqlite3.connect(\":memory:\")\ncon.executescript(\"CREATE TABLE users(name TEXT, city TEXT); INSERT INTO users VALUES ('akash','Delhi'),('ravi','Bhiwadi');\")\n\ndef find_user(con, name):\n    row = con.execute(\"SELECT city FROM users WHERE name = ?\", (name,)).fetchone()\n    if row is None:\n        return None\n    return row[0]\n\nprint(find_user(con, \"akash\"))\nprint(find_user(con, \"neha\"))\nprint(find_user(con, \"x' OR '1'='1\"))"
+  }
+ ],
+ "quiz": [
+  {
+   "q": "Table में एक **row** क्या होती है?",
+   "o": [
+    "एक property जैसे नाम",
+    "एक चीज़ का पूरा record",
+    "पूरा database",
+    "एक query"
+   ],
+   "a": 1,
+   "why": "Row = एक record (जैसे एक customer की पूरी info)। Column = एक property।"
+  },
+  {
+   "q": "PRIMARY KEY के बारे में कौन सी बात सही है?",
+   "o": [
+    "एक table में कई हो सकती हैं",
+    "NULL हो सकती है",
+    "Unique और NOT NULL होती है",
+    "सिर्फ़ text हो सकती है"
+   ],
+   "a": 2,
+   "why": "Primary key हर row की पक्की पहचान है: unique और कभी NULL नहीं, और table में एक ही।"
+  },
+  {
+   "q": "Phone number खाली न रह पाए, इसके लिए कौन सा constraint?",
+   "o": [
+    "NOT NULL",
+    "UNIQUE",
+    "DEFAULT",
+    "INDEX"
+   ],
+   "a": 0,
+   "why": "NOT NULL column को खाली (NULL) छोड़ने नहीं देता।"
+  },
+  {
+   "q": "`DELETE FROM orders;` (बिना WHERE) क्या करेगा?",
+   "o": [
+    "Error देगा",
+    "सिर्फ़ पहली row हटाएगा",
+    "Table का structure हटा देगा",
+    "सारी rows हटा देगा"
+   ],
+   "a": 3,
+   "why": "बिना WHERE के DELETE हर row पे लगता है। Table बचता है, data खत्म।"
+  },
+  {
+   "q": "जिन rows में phone NULL है, उन्हें कैसे ढूँढोगे?",
+   "o": [
+    "WHERE phone = NULL",
+    "WHERE phone IS NULL",
+    "WHERE phone = ''",
+    "WHERE phone == NULL"
+   ],
+   "a": 1,
+   "why": "NULL को = से compare नहीं कर सकते; IS NULL use होता है।"
+  },
+  {
+   "q": "\"कौन से customers ने कभी order नहीं किया\" के लिए best तरीका?",
+   "o": [
+    "INNER JOIN",
+    "CROSS JOIN",
+    "LEFT JOIN + WHERE o.id IS NULL",
+    "GROUP BY बिना JOIN"
+   ],
+   "a": 2,
+   "why": "LEFT JOIN सारे customers रखता है; जिनका match नहीं मिला उनके order columns NULL होते हैं।"
+  },
+  {
+   "q": "WHERE और HAVING में फ़र्क?",
+   "o": [
+    "कोई फ़र्क नहीं",
+    "WHERE groups पे, HAVING rows पे",
+    "HAVING सिर्फ़ JOIN में चलता है",
+    "WHERE grouping से पहले rows पे, HAVING grouping के बाद groups पे"
+   ],
+   "a": 3,
+   "why": "इसलिए aggregate (SUM, COUNT) पे filter HAVING से लगता है।"
+  },
+  {
+   "q": "Page 3, हर page 10 rows। सही clause?",
+   "o": [
+    "LIMIT 10 OFFSET 20",
+    "LIMIT 3 OFFSET 10",
+    "LIMIT 30",
+    "OFFSET 30 LIMIT 10"
+   ],
+   "a": 0,
+   "why": "OFFSET = (page - 1) * size = 20, और LIMIT 10।"
+  },
+  {
+   "q": "Index का नुकसान क्या है?",
+   "o": [
+    "SELECT slow हो जाता है",
+    "INSERT/UPDATE slow और disk ज़्यादा",
+    "JOIN बंद हो जाता है",
+    "Data delete हो जाता है"
+   ],
+   "a": 1,
+   "why": "हर write पे index भी update होता है, और index अलग जगह लेता है।"
+  },
+  {
+   "q": "Python sqlite3 में SQL injection से कैसे बचोगे?",
+   "o": [
+    "f-string से query बनाओ",
+    "Input को upper() कर दो",
+    "Placeholder `?` और values अलग tuple में",
+    "Query को try/except में डालो"
+   ],
+   "a": 2,
+   "why": "Parameterized query में database input को data समझता है, code नहीं।"
+  }
+ ],
+ "iq": [
+  {
+   "q": "SQL क्या है और एक ML engineer के लिए क्यों ज़रूरी है?",
+   "a": "SQL relational database से data पढ़ने-लिखने की language है। Company का असली data (users, orders, logs) database में होता है, तो training data निकालना, filter करना, tables JOIN करना और GROUP BY से features बनाना SQL से ही होता है। बिना SQL के ML engineer data के लिए दूसरों पे depend रहता है।"
+  },
+  {
+   "q": "Primary key और unique key में फ़र्क?",
+   "a": "Primary key row की main पहचान है: table में एक ही, कभी NULL नहीं। Unique key कई हो सकती हैं और (ज़्यादातर databases में) NULL allow करती हैं। दोनों duplicate values रोकती हैं।"
+  },
+  {
+   "q": "Foreign key क्या है?",
+   "a": "एक table का column जो दूसरे table की primary key को point करता है, जैसे `orders.customer_id → customers.id`। Database ensure करता है कि ऐसा customer exist करे (referential integrity), और `ON DELETE CASCADE` जैसे rules भी लगा सकते हैं।"
+  },
+  {
+   "q": "INNER JOIN और LEFT JOIN में फ़र्क? Example दो।",
+   "a": "INNER JOIN सिर्फ़ वो rows देता है जिनका दोनों tables में match हो। LEFT JOIN left table की सारी rows देता है और match न मिले तो right के columns NULL। Example: बिना order वाले customers ढूँढने के लिए `LEFT JOIN orders o ... WHERE o.id IS NULL`।"
+  },
+  {
+   "q": "WHERE और HAVING में क्या फ़र्क है?",
+   "a": "WHERE grouping से पहले individual rows filter करता है; HAVING GROUP BY के बाद groups filter करता है। इसलिए aggregate जैसे `SUM(amount) > 60000` HAVING में लिखते हैं। Execution order: FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT।"
+  },
+  {
+   "q": "COUNT(*) और COUNT(column) में फ़र्क?",
+   "a": "`COUNT(*)` सारी rows गिनता है, NULL वाली भी। `COUNT(column)` सिर्फ़ वो rows गिनता है जहाँ उस column में NULL नहीं है। LEFT JOIN के बाद zero orders सही गिनने के लिए `COUNT(o.id)` use करते हैं।"
+  },
+  {
+   "q": "DELETE, TRUNCATE और DROP में फ़र्क?",
+   "a": "DELETE rows हटाता है, WHERE लगा सकते हो, transaction में rollback हो सकता है, लेकिन slow है। TRUNCATE सारी rows एक झटके में हटाता है, तेज़ है, WHERE नहीं लगता। DROP पूरा table ही structure समेत खत्म कर देता है।"
+  },
+  {
+   "q": "Index क्या है, कैसे काम करता है, और कब नहीं लगाना चाहिए?",
+   "a": "Index एक अलग sorted structure (ज़्यादातर B-tree) है जिससे database पूरा table scan किए बिना log-time में row ढूँढ लेता है। WHERE, JOIN और ORDER BY वाले columns पे लगाते हैं। नुकसान: INSERT/UPDATE slow और ज़्यादा disk, इसलिए हर column पे या बहुत कम unique values वाले column पे नहीं लगाते।"
+  },
+  {
+   "q": "Slow query को कैसे fix करोगे?",
+   "a": "पहले `EXPLAIN` / `EXPLAIN ANALYZE` से देखूँगा कि full scan हो रहा है या index use हो रहा है। फिर WHERE/JOIN columns पे index बनाऊँगा, `SELECT *` की जगह सिर्फ़ ज़रूरी columns लूँगा, LIMIT/pagination लगाऊँगा, और N+1 queries हों तो उन्हें एक JOIN में बदलूँगा।"
+  },
+  {
+   "q": "SQL injection क्या है और कैसे रोकते हो?",
+   "a": "जब user input सीधा query string में जोड़ दिया जाता है और input में छुपा SQL चल जाता है, जैसे `' OR '1'='1`। रोकने के लिए parameterized queries: `cur.execute(\"SELECT * FROM users WHERE pin = ?\", (pin,))`। ORM जैसे SQLAlchemy by default यही करते हैं। String formatting से query कभी नहीं बनानी।"
+  },
+  {
+   "q": "Transaction और ACID समझाओ।",
+   "a": "Transaction कई statements को एक unit बनाता है: या सब commit होंगे या error पे सब rollback। ACID: Atomicity (सब या कुछ नहीं), Consistency (constraints valid रहें), Isolation (parallel transactions एक दूसरे को disturb न करें), Durability (commit के बाद crash पे भी data safe)।"
+  },
+  {
+   "q": "पैसे store करने के लिए कौन सा data type?",
+   "a": "`NUMERIC(10,2)` / `DECIMAL` जैसा exact type, या पैसे को integer paisa में रखना। FLOAT नहीं, क्योंकि binary float में 0.1 + 0.2 exactly 0.3 नहीं होता और costing/billing में rounding error जुड़ जाता है।"
+  }
+ ]
+}

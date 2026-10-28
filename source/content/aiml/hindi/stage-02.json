@@ -1,0 +1,1045 @@
+{
+ "n": 2,
+ "id": "aiml-02",
+ "title": "Conditions और Loops",
+ "goal": "Comparison और logical operators से सवाल पूछना, if/elif/else से फ़ैसले लेना, और for/while loops, break/continue और nested loops से काम बार-बार करवाना सीखोगे।",
+ "lessons": [
+  {
+   "title": "Comparison और logical operators — सवाल पूछना",
+   "blocks": [
+    [
+     "p",
+     "Stage 1 में हमने values को डिब्बों (variables) में रखना सीखा। अब program को **सोचना** सिखाना है। सोचने के लिए पहले **सवाल** पूछना पड़ता है: \"क्या marks 90 से ज़्यादा हैं?\", \"क्या cable defective है?\""
+    ],
+    [
+     "p",
+     "हर सवाल का जवाब सिर्फ़ दो में से एक होता है: **True** (हाँ) या **False** (ना)। यह `bool` type है, जो Stage 1 में देखा था।"
+    ],
+    [
+     "analogy",
+     "Factory gate पर guard पूछता है: \"ID card है?\" जवाब हाँ या ना। हाँ तो अंदर, ना तो बाहर। Program भी हर फ़ैसला ऐसे ही हाँ/ना वाले सवाल से लेता है।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Comparison operators",
+      "head": [
+       "Operator",
+       "मतलब",
+       "उदाहरण",
+       "नतीजा"
+      ],
+      "rows": [
+       [
+        "==",
+        "बराबर?",
+        "5 == 5",
+        "True"
+       ],
+       [
+        "!=",
+        "बराबर नहीं?",
+        "5 != 3",
+        "True"
+       ],
+       [
+        ">",
+        "बड़ा?",
+        "7 > 9",
+        "False"
+       ],
+       [
+        "<",
+        "छोटा?",
+        "2 < 4",
+        "True"
+       ],
+       [
+        ">=",
+        "बड़ा या बराबर",
+        "18 >= 18",
+        "True"
+       ],
+       [
+        "<=",
+        "छोटा या बराबर",
+        "3 <= 1",
+        "False"
+       ]
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "marks = 85\nprint(marks > 90)\nprint(marks >= 85)\nprint(marks == 85)\nprint(marks != 100)",
+     "False\nTrue\nTrue\nTrue"
+    ],
+    [
+     "warn",
+     "आम गलती: `=` और `==` में confusion। `marks = 85` डिब्बे में value **रखता** है। `marks == 85` सिर्फ़ **पूछता** है \"क्या बराबर है?\"। `if marks = 85:` लिखोगे तो SyntaxError आएगा।"
+    ],
+    [
+     "code",
+     "python",
+     "print(\"apple\" == \"apple\")\nprint(\"Apple\" == \"apple\")\nprint(\"10\" == 10)",
+     "True\nFalse\nFalse"
+    ],
+    [
+     "tip",
+     "ध्यान से देखो: text compare करते समय छोटा-बड़ा letter मायने रखता है। और `\"10\"` (text) कभी `10` (number) के बराबर नहीं होता।"
+    ],
+    [
+     "p",
+     "कभी एक सवाल काफ़ी नहीं होता। \"Age 18+ **और** ID card है?\" इसके लिए **logical operators** हैं: `and`, `or`, `not`।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "and / or / not",
+      "head": [
+       "Operator",
+       "कब True?",
+       "उदाहरण"
+      ],
+      "rows": [
+       [
+        "and",
+        "दोनों True",
+        "True and False -> False"
+       ],
+       [
+        "or",
+        "कोई एक True",
+        "True or False -> True"
+       ],
+       [
+        "not",
+        "उल्टा कर दो",
+        "not True -> False"
+       ]
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "age = 22\nhas_id = True\nprint(age >= 18 and has_id)\nprint(age < 18 or has_id)\nprint(not has_id)",
+     "True\nTrue\nFalse"
+    ],
+    [
+     "analogy",
+     "`and` = दो तालों वाला दरवाज़ा: दोनों चाबियाँ लगेंगी तभी खुलेगा। `or` = दो दरवाज़े: कोई भी एक खुला हो तो अंदर जा सकते हो।"
+    ],
+    [
+     "code",
+     "python",
+     "temp = 75\nprint(60 <= temp <= 80)",
+     "True"
+    ],
+    [
+     "tip",
+     "Python में range check सीधा लिख सकते हो: `60 <= temp <= 80`। यह `temp >= 60 and temp <= 80` के बराबर है, और पढ़ने में आसान है।"
+    ],
+    [
+     "p",
+     "**Truthy और Falsy:** Python में कुछ values को condition में False माना जाता है: `0`, `0.0`, `\"\"` (खाली text), `None`, और खाली list `[]`। बाकी सब True माना जाता है।"
+    ],
+    [
+     "code",
+     "python",
+     "print(bool(0), bool(5))\nprint(bool(\"\"), bool(\"Akash\"))\nprint(bool(None))",
+     "False True\nFalse True\nFalse"
+    ]
+   ]
+  },
+  {
+   "title": "if, elif, else — program का फ़ैसला",
+   "blocks": [
+    [
+     "p",
+     "अब सवाल का जवाब **फ़ैसला** लेने के लिए use करते हैं। `if` कहता है: \"अगर condition True है, तो यह काम करो\"।"
+    ],
+    [
+     "code",
+     "python",
+     "age = 21\nif age >= 18:\n    print(\"Adult ho! Vote de sakte ho.\")\nprint(f\"Tumhari age {age} hai.\")",
+     "Adult ho! Vote de sakte ho.\nTumhari age 21 hai."
+    ],
+    [
+     "p",
+     "अगर condition False हो तो कुछ और करना है? उसके लिए `else`:"
+    ],
+    [
+     "code",
+     "python",
+     "age = 15\nif age >= 18:\n    print(\"Adult ho! Vote de sakte ho.\")\nelse:\n    print(\"Minor ho! Abhi wait karo.\")",
+     "Minor ho! Abhi wait karo."
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "if / else का रास्ता",
+      "steps": [
+       "Condition check",
+       "True: if block",
+       "False: else block",
+       "आगे का code"
+      ],
+      "dir": "v"
+     }
+    ],
+    [
+     "p",
+     "दो से ज़्यादा रास्ते? `elif` (else if) लगाओ। Python **ऊपर से नीचे** check करता है, और **पहली True** condition मिलते ही उसका block चलाकर बाकी सब छोड़ देता है।"
+    ],
+    [
+     "code",
+     "python",
+     "marks = 72\nif marks >= 90:\n    print(\"Grade A - Excellent!\")\nelif marks >= 80:\n    print(\"Grade B - Very Good!\")\nelif marks >= 70:\n    print(\"Grade C - Good\")\nelif marks >= 60:\n    print(\"Grade D - Average\")\nelse:\n    print(\"Grade F - Fail\")",
+     "Grade C - Good"
+    ],
+    [
+     "sketch",
+     {
+      "k": "tree",
+      "title": "Grade का फ़ैसला",
+      "root": {
+       "label": "marks?",
+       "children": [
+        {
+         "label": ">= 90: A",
+         "children": []
+        },
+        {
+         "label": ">= 80: B",
+         "children": []
+        },
+        {
+         "label": ">= 70: C",
+         "children": []
+        },
+        {
+         "label": "वरना: F",
+         "children": []
+        }
+       ]
+      }
+     }
+    ],
+    [
+     "tip",
+     "ध्यान से देखो: 72 के लिए `marks >= 60` भी True है, लेकिन \"Grade D\" print नहीं हुआ। क्योंकि `>= 70` पहले True हो गया और बाकी chain छोड़ दी गई।"
+    ],
+    [
+     "warn",
+     "आम गलती: order उल्टा लिखना। अगर पहले `if marks >= 60:` लिखा, तो 95 marks वाले को भी \"D\" मिल जाएगा, क्योंकि 95 >= 60 पहले ही True है। **सबसे strict condition सबसे ऊपर।**"
+    ],
+    [
+     "p",
+     "**Indentation** = line की शुरुआत में spaces। Python में यह सजावट नहीं, **rule** है। `if` के बाद `:` लगता है, और उसके अंदर की हर line **4 spaces** आगे होती है। इससे Python को पता चलता है कि कौन-सी lines if के अंदर हैं।"
+    ],
+    [
+     "code",
+     "python",
+     "defects = 0\nif defects == 0:\n    print(\"Cable PASS\")\n    print(\"Packing mein bhejo\")\nprint(\"Check khatam\")",
+     "Cable PASS\nPacking mein bhejo\nCheck khatam"
+    ],
+    [
+     "p",
+     "दोनों print 4 spaces अंदर हैं, इसलिए दोनों if के अंदर हैं। आखिरी print 0 spaces पर है, वह हमेशा चलेगा।"
+    ],
+    [
+     "warn",
+     "आम गलती: `if` के बाद `:` भूल जाना (SyntaxError), या अंदर वाली line को space न देना (`IndentationError: expected an indented block`)। Tabs और spaces mix मत करो, हमेशा 4 spaces।"
+    ],
+    [
+     "p",
+     "**One-line if/else (ternary):** छोटे फ़ैसले एक line में:"
+    ],
+    [
+     "code",
+     "python",
+     "defects = 3\nquality = \"PASS\" if defects == 0 else \"FAIL\"\nprint(quality)",
+     "FAIL"
+    ]
+   ]
+  },
+  {
+   "title": "Nested if और असली ज़िंदगी के फ़ैसले",
+   "blocks": [
+    [
+     "p",
+     "**Nested if** = if के अंदर if। जब पहले सवाल का जवाब हाँ हो, तभी दूसरा सवाल पूछना हो।"
+    ],
+    [
+     "analogy",
+     "Bank loan: पहले पूछो \"salary 30,000+ है?\" हाँ तो फिर पूछो \"credit score 700+ है?\"। Salary ही कम है तो credit score पूछने का कोई फ़ायदा नहीं।"
+    ],
+    [
+     "code",
+     "python",
+     "salary = 45000\nscore = 680\nif salary >= 30000:\n    if score >= 700:\n        print(\"Loan approved\")\n    else:\n        print(\"Score kam hai, loan reject\")\nelse:\n    print(\"Salary kam hai, loan reject\")",
+     "Score kam hai, loan reject"
+    ],
+    [
+     "sketch",
+     {
+      "k": "tree",
+      "title": "Nested if",
+      "root": {
+       "label": "salary >= 30000?",
+       "children": [
+        {
+         "label": "हाँ: score?",
+         "children": [
+          {
+           "label": ">= 700: Approve",
+           "children": []
+          },
+          {
+           "label": "वरना: Reject",
+           "children": []
+          }
+         ]
+        },
+        {
+         "label": "ना: Reject",
+         "children": []
+        }
+       ]
+      }
+     }
+    ],
+    [
+     "p",
+     "Spaces गिनो: पहले `if` के अंदर 4 spaces, अंदर वाले `if` के अंदर 8 spaces (4 + 4)। हर level पर 4 और।"
+    ],
+    [
+     "tip",
+     "बहुत गहरी nesting (3-4 level) पढ़ने में मुश्किल होती है। अक्सर `and` से flat कर सकते हो: `if salary >= 30000 and score >= 700:`।"
+    ],
+    [
+     "code",
+     "python",
+     "salary = 45000\nscore = 720\nif salary >= 30000 and score >= 700:\n    print(\"Loan approved\")\nelse:\n    print(\"Loan reject\")",
+     "Loan approved"
+    ],
+    [
+     "p",
+     "ML में भी यही सोच है। एक model probability देता है (0 से 1 के बीच), और हम **threshold** लगाकर फ़ैसला करते हैं। यह असल में एक `if` ही है!"
+    ],
+    [
+     "code",
+     "python",
+     "prob = 0.83\nif prob >= 0.5:\n    label = \"Spam\"\nelse:\n    label = \"Not spam\"\nprint(label)",
+     "Spam"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Model से फ़ैसला",
+      "steps": [
+       "Email",
+       "Model",
+       "prob = 0.83",
+       "if >= 0.5",
+       "Spam"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "**Decision Tree** नाम का ML model (Stage 10 में आएगा) बिल्कुल nested if-else की तरह काम करता है: हर node पर एक सवाल, और नीचे जाते-जाते फ़ैसला।"
+    ],
+    [
+     "warn",
+     "आम गलती: `if x == 1 or 2:` लिखना। यह हमेशा True होगा, क्योंकि `2` खुद truthy है। सही: `if x == 1 or x == 2:`।"
+    ]
+   ]
+  },
+  {
+   "title": "for loop और range — काम बार-बार",
+   "blocks": [
+    [
+     "p",
+     "**Loop** = एक काम बार-बार करना। Factory में 100 cables का quality check, हर cable के लिए same process। 100 बार code नहीं लिखोगे, loop लगाओगे।"
+    ],
+    [
+     "p",
+     "दो type के loop: **for** (जब पता हो कितनी बार) और **while** (जब तक condition True है)।"
+    ],
+    [
+     "code",
+     "python",
+     "for i in range(1, 6):\n    print(f\"Cable {i}: Inspection Done\")",
+     "Cable 1: Inspection Done\nCable 2: Inspection Done\nCable 3: Inspection Done\nCable 4: Inspection Done\nCable 5: Inspection Done"
+    ],
+    [
+     "p",
+     "हर round में `i` नाम के डिब्बे में नया number आता है: 1, फिर 2, फिर 3... Loop की body (अंदर वाली lines) हर round में चलती है।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "cycle",
+      "title": "for loop का चक्कर",
+      "steps": [
+       "अगला number लो",
+       "i में रखो",
+       "Body चलाओ",
+       "Number बचे?"
+      ]
+     }
+    ],
+    [
+     "p",
+     "`range(start, stop, step)` numbers बनाता है। **start** से शुरू, **stop से पहले** रुको, **step** जितना आगे कूदो।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "array",
+      "title": "range(2, 10, 3)",
+      "items": [
+       "2",
+       "5",
+       "8"
+      ],
+      "index": true
+     }
+    ],
+    [
+     "code",
+     "python",
+     "print(list(range(5)))\nprint(list(range(1, 6)))\nprint(list(range(2, 10, 3)))\nprint(list(range(10, 0, -2)))",
+     "[0, 1, 2, 3, 4]\n[1, 2, 3, 4, 5]\n[2, 5, 8]\n[10, 8, 6, 4, 2]"
+    ],
+    [
+     "tip",
+     "ध्यान से देखो: `range(5)` 0 से शुरू होता है और 4 पर खत्म। Stop number **कभी include नहीं** होता। 1 से 10 चाहिए तो `range(1, 11)`।"
+    ],
+    [
+     "p",
+     "`print(..., end=\" \")` से सब एक ही line में आता है (नई line की जगह space):"
+    ],
+    [
+     "code",
+     "python",
+     "for i in range(2, 11, 2):\n    print(i, end=\" \")\nprint()",
+     "2 4 6 8 10 "
+    ],
+    [
+     "p",
+     "Loop का सबसे common use: **total जोड़ना**। एक डिब्बा 0 से शुरू करो, हर round में उसमें जोड़ते जाओ। इसे **accumulator** pattern कहते हैं।"
+    ],
+    [
+     "code",
+     "python",
+     "total = 0\nfor i in range(1, 101):\n    total = total + i\nprint(total)",
+     "5050"
+    ],
+    [
+     "analogy",
+     "जैसे गुल्लक: पहले खाली (0), फिर रोज़ पैसे डालते गए, आखिर में पूरा total।"
+    ],
+    [
+     "p",
+     "for loop सिर्फ़ numbers पर नहीं, किसी भी **sequence** पर चलता है: text के हर letter पर, या list की हर value पर (list Stage 4 में detail से)।"
+    ],
+    [
+     "code",
+     "python",
+     "for ch in \"GEEP\":\n    print(ch, end=\"-\")\nprint()\nfruits = [\"Apple\", \"Banana\", \"Mango\"]\nfor i, fruit in enumerate(fruits):\n    print(f\"{i}: {fruit}\")",
+     "G-E-E-P-\n0: Apple\n1: Banana\n2: Mango"
+    ],
+    [
+     "tip",
+     "`enumerate` index और value दोनों देता है। यह `range(len(fruits))` लिखने से ज़्यादा साफ़ है।"
+    ]
+   ]
+  },
+  {
+   "title": "while loop, break और continue",
+   "blocks": [
+    [
+     "p",
+     "**while** loop तब तक चलता है जब तक condition True है। जब पता न हो कितने round लगेंगे, तब while।"
+    ],
+    [
+     "analogy",
+     "Machine तब तक चलाओ जब तक production target पूरा न हो। कितनी देर लगेगी, पहले से नहीं पता।"
+    ],
+    [
+     "code",
+     "python",
+     "target = 5\nproduced = 0\nwhile produced < target:\n    produced += 1\n    print(f\"Cable {produced} produced\")\nprint(f\"Target {target} complete!\")",
+     "Cable 1 produced\nCable 2 produced\nCable 3 produced\nCable 4 produced\nCable 5 produced\nTarget 5 complete!"
+    ],
+    [
+     "sketch",
+     {
+      "k": "cycle",
+      "title": "while का चक्कर",
+      "steps": [
+       "Condition check",
+       "True: body चलाओ",
+       "Value update",
+       "वापस check"
+      ]
+     }
+    ],
+    [
+     "p",
+     "`produced += 1` मतलब `produced = produced + 1`। यह line condition को धीरे-धीरे False की तरफ़ ले जाती है।"
+    ],
+    [
+     "warn",
+     "आम गलती: **infinite loop**। अगर update line (`count -= 1`) भूल गए तो condition हमेशा True रहेगी और loop कभी नहीं रुकेगा। रोकने के लिए Ctrl+C। Rule: while में condition को False बनाने वाली line ज़रूर होनी चाहिए।"
+    ],
+    [
+     "p",
+     "**break** = loop **तुरंत बंद**, बाहर निकलो। **continue** = **सिर्फ़ यह round skip**, अगले round पर जाओ।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "break vs continue",
+      "left": {
+       "title": "break",
+       "items": [
+        "पूरा loop बंद",
+        "Defective मिली: STOP",
+        "आगे के round नहीं"
+       ]
+      },
+      "right": {
+       "title": "continue",
+       "items": [
+        "सिर्फ़ यह round skip",
+        "Even मिला: छोड़ो",
+        "Loop चलता रहता"
+       ]
+      }
+     }
+    ],
+    [
+     "code",
+     "python",
+     "for i in range(1, 11):\n    if i == 6:\n        print(f\"Cable {i}: DEFECTIVE! STOP!\")\n        break\n    print(f\"Cable {i}: OK\")\nprint(\"Production stopped!\")",
+     "Cable 1: OK\nCable 2: OK\nCable 3: OK\nCable 4: OK\nCable 5: OK\nCable 6: DEFECTIVE! STOP!\nProduction stopped!"
+    ],
+    [
+     "p",
+     "Cable 7 से 10 check ही नहीं हुईं। break ने loop वहीं खत्म कर दिया, और सीधे loop के बाद वाली line चली।"
+    ],
+    [
+     "code",
+     "python",
+     "for i in range(1, 11):\n    if i % 2 == 0:\n        continue\n    print(f\"Cable {i}: Checked\")",
+     "Cable 1: Checked\nCable 3: Checked\nCable 5: Checked\nCable 7: Checked\nCable 9: Checked"
+    ],
+    [
+     "p",
+     "`i % 2` = 2 से divide करने पर remainder। 0 है तो even। continue के बाद नीचे का print skip हुआ, सिर्फ़ odd cables print हुईं।"
+    ],
+    [
+     "p",
+     "**while True + break** एक बहुत common pattern है: जब रुकने की शर्त loop के बीच में पता चलती है।"
+    ],
+    [
+     "code",
+     "python",
+     "balance = 1000\nmonth = 0\nwhile True:\n    month += 1\n    balance = balance * 2\n    if balance >= 10000:\n        break\nprint(f\"{month} mahine mein {balance}\")",
+     "4 mahine mein 16000"
+    ],
+    [
+     "p",
+     "ML training भी ऐसा ही loop है: हर **epoch** में model थोड़ा सीखता है, और जब loss सुधरना बंद कर दे तो हम `break` से training रोक देते हैं। इसे **early stopping** कहते हैं।"
+    ],
+    [
+     "tip",
+     "Bonus: loop के साथ `else` भी लग सकता है। वह तभी चलता है जब loop **बिना break** के पूरा खत्म हो। Search के लिए काम आता है: \"नहीं मिला\" वाला message else में।"
+    ],
+    [
+     "code",
+     "python",
+     "for n in range(2, 7):\n    if n == 9:\n        print(\"Mil gaya\")\n        break\nelse:\n    print(\"9 nahi mila\")",
+     "9 nahi mila"
+    ]
+   ]
+  },
+  {
+   "title": "Nested loops, patterns और आम loop bugs",
+   "blocks": [
+    [
+     "p",
+     "**Nested loop** = loop के अंदर loop। बाहर वाला loop एक round चलता है, तो अंदर वाला **पूरा** चलता है।"
+    ],
+    [
+     "analogy",
+     "घड़ी: घंटे की सुई एक बार आगे बढ़ती है, तब तक मिनट की सुई पूरे 60 चक्कर लगा लेती है।"
+    ],
+    [
+     "code",
+     "python",
+     "for row in range(1, 4):\n    for col in range(1, 4):\n        print(row * col, end=\" \")\n    print()",
+     "1 2 3 \n2 4 6 \n3 6 9 "
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Table: row x col",
+      "head": [
+       "",
+       "col 1",
+       "col 2",
+       "col 3"
+      ],
+      "rows": [
+       [
+        "row 1",
+        "1",
+        "2",
+        "3"
+       ],
+       [
+        "row 2",
+        "2",
+        "4",
+        "6"
+       ],
+       [
+        "row 3",
+        "3",
+        "6",
+        "9"
+       ]
+      ]
+     }
+    ],
+    [
+     "p",
+     "अंदर का `print()` (खाली) हर row के बाद नई line देता है। बाहर 3 round x अंदर 3 round = 9 बार body चली।"
+    ],
+    [
+     "p",
+     "**Patterns** IQ और practice के लिए favourite हैं। Text को number से गुणा करो तो वह repeat होता है: `\"*\" * 3` = `***`।"
+    ],
+    [
+     "code",
+     "python",
+     "for i in range(1, 5):\n    print(\"*\" * i)",
+     "*\n**\n***\n****"
+    ],
+    [
+     "code",
+     "python",
+     "n = 4\nfor i in range(1, n + 1):\n    print(\" \" * (n - i) + \"*\" * (2 * i - 1))",
+     "   *\n  ***\n *****\n*******"
+    ],
+    [
+     "tip",
+     "Pattern की trick: हर row के लिए सोचो \"कितने space, कितने star?\" और `i` के formula में लिखो। Row 1: 3 space + 1 star, row 2: 2 space + 3 star..."
+    ],
+    [
+     "p",
+     "Nested loop का एक असली use: **pairs** बनाना। जैसे दो models की हर setting try करना (Stage 10 में **grid search** यही करता है)।"
+    ],
+    [
+     "code",
+     "python",
+     "for lr in [0.1, 0.01]:\n    for depth in [2, 4]:\n        print(f\"lr={lr}, depth={depth}\")",
+     "lr=0.1, depth=2\nlr=0.1, depth=4\nlr=0.01, depth=2\nlr=0.01, depth=4"
+    ],
+    [
+     "warn",
+     "Nested loop slow हो सकता है: 1000 x 1000 = 10 लाख rounds। इसलिए ML में बड़े data पर loop की जगह NumPy (Stage 8) use करते हैं।"
+    ],
+    [
+     "p",
+     "**आम loop bugs** — इन्हें पहचान लो, आधी debugging खत्म:"
+    ],
+    [
+     "list",
+     [
+      "**Off-by-one:** 1 से 10 चाहिए था, `range(1, 10)` लिखा, 10 छूट गया। सही: `range(1, 11)`।",
+      "**Infinite while:** update line भूल गए।",
+      "**गलत indentation:** total वाला print loop के अंदर चला गया, हर round में print हुआ।",
+      "**Accumulator का loop के अंदर reset:** `total = 0` loop के अंदर लिख दिया, हर बार 0 हो गया।",
+      "**Loop variable को अंदर बदलना:** for में `i = i + 2` लिखने से भी अगला round range का अगला number ही लेगा।"
+     ]
+    ],
+    [
+     "code",
+     "python",
+     "# Bug: total = 0 loop के अंदर\nfor i in range(1, 4):\n    total = 0\n    total += i\nprint(\"Galat:\", total)\n\n# Fix: total = 0 loop से पहले\ntotal = 0\nfor i in range(1, 4):\n    total += i\nprint(\"Sahi:\", total)",
+     "Galat: 3\nSahi: 6"
+    ],
+    [
+     "tip",
+     "Debug का आसान तरीका: loop के अंदर `print(i, total)` लगाओ और देखो हर round में क्या हो रहा है। Professional भी यही करते हैं।"
+    ]
+   ]
+  }
+ ],
+ "teach": [
+  {
+   "say": "Stage 2 में program को सोचना सिखाएँगे। सोचने के लिए पहले सवाल, और सवाल का जवाब सिर्फ़ True या False।",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "सवाल",
+     "True / False",
+     "फ़ैसला"
+    ],
+    "dir": "h"
+   },
+   "code": "print(85 > 90)   # False"
+  },
+  {
+   "say": "दो बराबर के निशान मतलब पूछना, एक बराबर का निशान मतलब रखना। यह फ़र्क IQ में भी पूछा जाता है।",
+   "sketch": {
+    "k": "compare",
+    "left": {
+     "title": "=",
+     "items": [
+      "Value रखो",
+      "x = 5"
+     ]
+    },
+    "right": {
+     "title": "==",
+     "items": [
+      "बराबर है?",
+      "x == 5 -> True"
+     ]
+    }
+   },
+   "code": null
+  },
+  {
+   "say": "and मतलब दोनों सच, or मतलब कोई एक सच, not मतलब उल्टा।",
+   "sketch": {
+    "k": "table",
+    "head": [
+     "A",
+     "B",
+     "A and B",
+     "A or B"
+    ],
+    "rows": [
+     [
+      "T",
+      "T",
+      "T",
+      "T"
+     ],
+     [
+      "T",
+      "F",
+      "F",
+      "T"
+     ],
+     [
+      "F",
+      "F",
+      "F",
+      "F"
+     ]
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "अब फ़ैसला: if के बाद condition, फिर colon। अंदर की lines 4 spaces आगे। True हुआ तो if block, वरना else block।",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "age >= 18?",
+     "हाँ: Vote",
+     "ना: Wait"
+    ],
+    "dir": "v"
+   },
+   "code": "if age >= 18:\n    print(\"Vote\")\nelse:\n    print(\"Wait\")"
+  },
+  {
+   "say": "ज़्यादा रास्ते हों तो elif। ऊपर से नीचे check होता है, पहली True condition जीत जाती है। इसलिए strict condition सबसे ऊपर।",
+   "sketch": {
+    "k": "stack",
+    "items": [
+     ">= 90: A",
+     ">= 80: B",
+     ">= 70: C",
+     "else: F"
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "अब loop। for loop range के हर number के लिए body चलाता है। range का stop number कभी include नहीं होता।",
+   "sketch": {
+    "k": "array",
+    "title": "range(1, 6)",
+    "items": [
+     "1",
+     "2",
+     "3",
+     "4",
+     "5"
+    ],
+    "index": true
+   },
+   "code": "for i in range(1, 6):\n    print(i)"
+  },
+  {
+   "say": "range के तीन हिस्से: start, stop, step। range 2 से 10, step 3 देता है 2, 5, 8। अगला 11 होता, जो 10 से आगे है।",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "2",
+     "5",
+     "8",
+     "11? रुको"
+    ],
+    "dir": "h"
+   },
+   "code": null
+  },
+  {
+   "say": "while तब तक चलता है जब तक condition True है। Update line भूल गए तो infinite loop।",
+   "sketch": {
+    "k": "cycle",
+    "steps": [
+     "Check",
+     "Body",
+     "Update"
+    ]
+   },
+   "code": "count = 3\nwhile count > 0:\n    print(count)\n    count -= 1"
+  },
+  {
+   "say": "break पूरा loop बंद करता है, continue सिर्फ़ यह round छोड़ता है। Defective cable मिली तो break, even cable skip करनी है तो continue।",
+   "sketch": {
+    "k": "compare",
+    "left": {
+     "title": "break",
+     "items": [
+      "1 2 3 STOP"
+     ]
+    },
+    "right": {
+     "title": "continue",
+     "items": [
+      "1 _ 3 _ 5"
+     ]
+    }
+   },
+   "code": null
+  },
+  {
+   "say": "Loop के अंदर loop: बाहर का एक round, अंदर का पूरा चक्कर। Patterns और tables ऐसे ही बनते हैं। अब practice करो!",
+   "sketch": {
+    "k": "array",
+    "title": "Star pattern",
+    "items": [
+     "*",
+     "**",
+     "***",
+     "****"
+    ],
+    "index": false
+   },
+   "code": "for i in range(1, 5):\n    print(\"*\" * i)"
+  }
+ ],
+ "practice": [
+  {
+   "q": "1 से 50 तक के numbers पर loop चलाओ। दो चीज़ें निकालो: सारे **even** numbers का total, और कितने numbers **3 से divisible** हैं। Output:\nEven total: 650\nDivisible by 3: 16",
+   "starter": "even_total = 0\ncount3 = 0\nfor n in range(1, 51):\n    # TODO: even है तो even_total में जोड़ो\n    # TODO: 3 से divisible है तो count3 बढ़ाओ\n    pass\nprint(f\"Even total: {even_total}\")\nprint(f\"Divisible by 3: {count3}\")\n",
+   "expect": "Even total: 650\nDivisible by 3: 16",
+   "hint": "दो अलग `if` लगाओ (elif नहीं), क्योंकि 6 जैसा number even भी है और 3 से divisible भी। Even के लिए `n % 2 == 0`।",
+   "solution": "even_total = 0\ncount3 = 0\nfor n in range(1, 51):\n    if n % 2 == 0:\n        even_total += n\n    if n % 3 == 0:\n        count3 += 1\nprint(f\"Even total: {even_total}\")\nprint(f\"Divisible by 3: {count3}\")"
+  },
+  {
+   "q": "Model ने 8 emails पर prediction दिया। Loop से **accuracy** निकालो (कितने predictions सही थे)। Output:\nCorrect: 6/8\nAccuracy: 75.0%",
+   "starter": "pred = [1, 0, 1, 1, 0, 1, 0, 0]\nactual = [1, 0, 0, 1, 0, 1, 1, 0]\ncorrect = 0\nfor i in range(len(pred)):\n    # TODO: pred[i] और actual[i] बराबर हैं तो correct बढ़ाओ\n    pass\n# TODO: Correct और Accuracy print करो\n",
+   "expect": "Correct: 6/8\nAccuracy: 75.0%",
+   "hint": "`pred[i]` से i-th value मिलती है। Accuracy = correct / total * 100।",
+   "solution": "pred = [1, 0, 1, 1, 0, 1, 0, 0]\nactual = [1, 0, 0, 1, 0, 1, 1, 0]\ncorrect = 0\nfor i in range(len(pred)):\n    if pred[i] == actual[i]:\n        correct += 1\nprint(f\"Correct: {correct}/{len(pred)}\")\nprint(f\"Accuracy: {correct / len(pred) * 100}%\")"
+  },
+  {
+   "q": "**Early stopping** बनाओ: हर epoch का loss दिया है। जब तक loss पिछले best से कम हो रहा है, print करो। जैसे ही loss बढ़े, \"Early stop\" print करके `break` करो। Output:\nEpoch 1: loss 0.9\nEpoch 2: loss 0.7\nEpoch 3: loss 0.55\nEpoch 4: loss 0.5\nEarly stop at epoch 5, best loss 0.5",
+   "starter": "losses = [0.9, 0.7, 0.55, 0.5, 0.52, 0.6, 0.45]\nbest = 999\nfor epoch in range(1, len(losses) + 1):\n    loss = losses[epoch - 1]\n    # TODO: loss < best हो तो best update करो और print करो\n    # TODO: वरना Early stop message print करके break\n",
+   "expect": "Epoch 1: loss 0.9\nEpoch 2: loss 0.7\nEpoch 3: loss 0.55\nEpoch 4: loss 0.5\nEarly stop at epoch 5, best loss 0.5",
+   "hint": "if/else loop के अंदर। else में print के बाद `break`। ध्यान दो: 0.45 कभी नहीं दिखेगा, क्योंकि break पहले हो गया।",
+   "solution": "losses = [0.9, 0.7, 0.55, 0.5, 0.52, 0.6, 0.45]\nbest = 999\nfor epoch in range(1, len(losses) + 1):\n    loss = losses[epoch - 1]\n    if loss < best:\n        best = loss\n        print(f\"Epoch {epoch}: loss {loss}\")\n    else:\n        print(f\"Early stop at epoch {epoch}, best loss {best}\")\n        break"
+  }
+ ],
+ "quiz": [
+  {
+   "q": "`print(7 >= 7 and 3 > 5)` का output क्या होगा?",
+   "o": [
+    "True",
+    "False",
+    "Error",
+    "7"
+   ],
+   "a": 1,
+   "why": "`7 >= 7` True है लेकिन `3 > 5` False। `and` को दोनों True चाहिए, इसलिए False।"
+  },
+  {
+   "q": "`list(range(2, 10, 3))` क्या देगा?",
+   "o": [
+    "[2, 5, 8]",
+    "[2, 4, 6, 8]",
+    "[3, 6, 9]",
+    "[2, 5, 8, 11]"
+   ],
+   "a": 0,
+   "why": "2 से शुरू, 3-3 का step, 10 से पहले रुको: 2, 5, 8।"
+  },
+  {
+   "q": "marks = 95 हो, और पहली condition `if marks >= 60:` (Grade D) हो, फिर `elif marks >= 90:` (Grade A)। क्या print होगा?",
+   "o": [
+    "Grade A",
+    "दोनों",
+    "Grade D",
+    "कुछ नहीं"
+   ],
+   "a": 2,
+   "why": "elif chain में पहली True condition जीत जाती है। 95 >= 60 पहले True हो गया, इसलिए D। Strict condition ऊपर होनी चाहिए।"
+  },
+  {
+   "q": "`for i in range(5): print(i)` में आखिरी कौन-सा number print होगा?",
+   "o": [
+    "5",
+    "0",
+    "6",
+    "4"
+   ],
+   "a": 3,
+   "why": "range(5) = 0, 1, 2, 3, 4। Stop number include नहीं होता।"
+  },
+  {
+   "q": "while loop में update line (`count -= 1`) भूल गए तो क्या होगा?",
+   "o": [
+    "SyntaxError",
+    "Loop एक बार चलेगा",
+    "Infinite loop",
+    "Loop चलेगा ही नहीं"
+   ],
+   "a": 2,
+   "why": "Condition कभी False नहीं होगी, इसलिए loop कभी नहीं रुकेगा।"
+  },
+  {
+   "q": "`break` और `continue` में सही फ़र्क क्या है?",
+   "o": [
+    "break round skip करता, continue loop बंद",
+    "break loop बंद करता, continue सिर्फ़ round skip",
+    "दोनों same",
+    "दोनों सिर्फ़ while में चलते"
+   ],
+   "a": 1,
+   "why": "break पूरा loop खत्म करता है; continue बस current round छोड़कर अगले पर जाता है। दोनों for और while दोनों में चलते हैं।"
+  },
+  {
+   "q": "कौन-सी value condition में **False** मानी जाती है?",
+   "o": [
+    "\"0\"",
+    "[0]",
+    "-1",
+    "\"\""
+   ],
+   "a": 3,
+   "why": "खाली text `\"\"` falsy है। `\"0\"` text non-empty है, `[0]` list non-empty है, और -1 non-zero है, तीनों truthy।"
+  },
+  {
+   "q": "Nested loop: बाहर `range(3)`, अंदर `range(4)`। अंदर की body कितनी बार चलेगी?",
+   "o": [
+    "12",
+    "7",
+    "4",
+    "3"
+   ],
+   "a": 0,
+   "why": "बाहर के हर round में अंदर वाला पूरा चलता है: 3 x 4 = 12।"
+  },
+  {
+   "q": "`if x == 1 or 2:` के बारे में सही बात कौन-सी है?",
+   "o": [
+    "x 1 या 2 हो तभी True",
+    "हमेशा True, क्योंकि 2 truthy है",
+    "SyntaxError",
+    "हमेशा False"
+   ],
+   "a": 1,
+   "why": "Python इसे `(x == 1) or 2` पढ़ता है, और `2` खुद True माना जाता है। सही: `x == 1 or x == 2`।"
+  },
+  {
+   "q": "`\"PASS\" if defects == 0 else \"FAIL\"` का नतीजा क्या होगा जब defects = 2 हो?",
+   "o": [
+    "PASS",
+    "Error",
+    "FAIL",
+    "None"
+   ],
+   "a": 2,
+   "why": "Ternary: condition False है (2 != 0), इसलिए else वाली value FAIL।"
+  }
+ ],
+ "iq": [
+  {
+   "q": "`==` और `is` में क्या फ़र्क है?",
+   "a": "`==` value compare करता है (दोनों का content same है क्या)। `is` identity compare करता है (दोनों बिल्कुल same object हैं क्या, memory में एक ही जगह)। `None` check के लिए हमेशा `is` use करते हैं: `if x is None:`।"
+  },
+  {
+   "q": "Python में indentation का क्या role है?",
+   "a": "Python में indentation ही block बनाता है; C/Java की तरह `{ }` नहीं होते। if, for, while, def के बाद `:` और अंदर की lines एक जैसी indent (PEP 8: 4 spaces)। गलत indentation पर IndentationError आता है या logic चुपचाप गलत हो जाता है।"
+  },
+  {
+   "q": "for loop और while loop कब use करते हो?",
+   "a": "for तब, जब sequence या count पहले से पता हो (list के items, range(10))। while तब, जब रुकने की शर्त पहले से न पता हो, जैसे user सही input दे तब तक, या loss converge होने तक। for में infinite loop का risk कम होता है।"
+  },
+  {
+   "q": "break, continue और pass में फ़र्क बताओ।",
+   "a": "break loop तुरंत बंद करता है। continue current iteration skip करके अगले पर जाता है। pass कुछ नहीं करता, बस placeholder है जहाँ syntax को कोई statement चाहिए (जैसे खाली if या function)।"
+  },
+  {
+   "q": "Loop के साथ else कब चलता है?",
+   "a": "for/while का else तभी चलता है जब loop normal तरीके से खत्म हो, यानी break न हुआ हो। Search में useful है: break से मिला, वरना else में \"not found\"।"
+  },
+  {
+   "q": "Truthy और falsy values क्या हैं?",
+   "a": "Condition में कुछ values अपने-आप False मानी जाती हैं: 0, 0.0, \"\", None, [], {}, (), set()। बाकी सब truthy। इसलिए `if my_list:` लिखकर check कर सकते हो कि list खाली नहीं है।"
+  },
+  {
+   "q": "Short-circuit evaluation क्या है?",
+   "a": "`and` में पहली value False हो तो दूसरी check ही नहीं होती; `or` में पहली True हो तो दूसरी skip। इससे safe checks लिख सकते हो: `if count > 0 and total / count > 5:` में zero से divide का error नहीं आएगा।"
+  },
+  {
+   "q": "FizzBuzz लिखो (1 से 15)।",
+   "a": "सबसे पहले 15 वाला (दोनों) check, फिर 3, फिर 5:\n`for i in range(1, 16):\n    if i % 15 == 0: print(\"FizzBuzz\")\n    elif i % 3 == 0: print(\"Fizz\")\n    elif i % 5 == 0: print(\"Buzz\")\n    else: print(i)`\nयह elif order की समझ का test है।"
+  },
+  {
+   "q": "Nested loop की time complexity क्या होती है?",
+   "a": "अगर दोनों loop n बार चलते हैं तो body n x n = O(n^2) बार चलती है। n = 10,000 पर 10 करोड़ operations, बहुत slow। इसलिए बड़े data पर vectorized NumPy या बेहतर algorithm (जैसे set/dict lookup) use करते हैं।"
+  },
+  {
+   "q": "ML में loops और conditions कहाँ आते हैं?",
+   "a": "Training loop (हर epoch, हर batch), early stopping (`if val_loss` बढ़ा तो break), threshold से class तय करना (`1 if prob >= 0.5 else 0`), hyperparameter grid search (nested loops)। Decision tree model भी अंदर से nested if-else ही है।"
+  },
+  {
+   "q": "क्या Python में switch-case है?",
+   "a": "पुराने Python में नहीं था, if/elif/else या dict mapping use करते थे। Python 3.10 से `match`/`case` आया है (structural pattern matching), जो switch जैसा काम करता है और patterns भी match कर सकता है।"
+  }
+ ]
+}

@@ -1,0 +1,1074 @@
+{
+ "n": 7,
+ "id": "aiml-07",
+ "title": "APIs, HTTP & FastAPI",
+ "goal": "Client-server, HTTP methods, status codes, headers aur JSON samjhoge; requests se API call karoge (API key, timeout, error handling ke saath); REST design seekhoge, aur FastAPI se apna API bana ke ML model ko endpoint ke peeche serve karoge.",
+ "lessons": [
+  {
+   "title": "API aur client-server: do software ki baatcheet",
+   "blocks": [
+    [
+     "p",
+     "**API** (Application Programming Interface) = do software ke beech baat karne ka tareeka. Ek program dusre se kehta hai \"yeh do\" ya \"yeh karo\", aur jawab leta hai."
+    ],
+    [
+     "analogy",
+     "Restaurant mein tu kitchen mein nahi ghusta. **Waiter** ko order deta hai, woh kitchen se khaana laata hai. Tu = **client**, kitchen = **server**, waiter + menu = **API**. Menu batata hai kya maang sakte ho, aur kaise."
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Client-server",
+      "steps": [
+       "Client (app)",
+       "Request",
+       "Server",
+       "Response"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "Zomato app restaurant se baat karta hai = API. Weather app weather data laata hai = API. Tera Python code Claude/OpenAI ko prompt bhejta hai = API. Aur jab tu apna ML model banayega, mobile app ya website use **tere API** se hi use karegi."
+    ],
+    [
+     "p",
+     "**HTTP** = internet pe client aur server ke baat karne ke **rules** (protocol). Har baat do hisson mein hoti hai: **request** (client bhejta hai) aur **response** (server lautata hai)."
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "Request vs Response",
+      "left": {
+       "title": "Request",
+       "items": [
+        "Method (GET/POST)",
+        "URL",
+        "Headers",
+        "Body (optional)"
+       ]
+      },
+      "right": {
+       "title": "Response",
+       "items": [
+        "Status code (200)",
+        "Headers",
+        "Body (JSON)"
+       ]
+      }
+     }
+    ],
+    [
+     "p",
+     "**URL** ke bhi hisse hote hain. Python ka `urllib.parse` (stdlib) URL ko tod ke dikhata hai:"
+    ],
+    [
+     "code",
+     "python",
+     "from urllib.parse import urlparse, parse_qs\n\nurl = \"https://api.geep.in:8000/v1/products?category=cable&limit=5\"\np = urlparse(url)\nprint(p.scheme)\nprint(p.netloc)\nprint(p.path)\nprint(parse_qs(p.query))",
+     "https\napi.geep.in:8000\n/v1/products\n{'category': ['cable'], 'limit': ['5']}"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "URL ke hisse",
+      "head": [
+       "Hissa",
+       "Example"
+      ],
+      "rows": [
+       [
+        "scheme",
+        "https"
+       ],
+       [
+        "host:port",
+        "api.geep.in:8000"
+       ],
+       [
+        "path",
+        "/v1/products"
+       ],
+       [
+        "query",
+        "category=cable&limit=5"
+       ]
+      ]
+     }
+    ],
+    [
+     "p",
+     "**Path** batata hai *kaunsi cheez* (resource). **Query** (`?` ke baad, `&` se alag) batata hai *kaise* (filter, page, limit)."
+    ],
+    [
+     "p",
+     "**HTTP methods** = kaam ka type:"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "HTTP methods",
+      "head": [
+       "Method",
+       "Kaam",
+       "Idempotent?"
+      ],
+      "rows": [
+       [
+        "GET",
+        "data lena",
+        "Haan"
+       ],
+       [
+        "POST",
+        "naya banana",
+        "Nahi"
+       ],
+       [
+        "PUT",
+        "poora replace",
+        "Haan"
+       ],
+       [
+        "PATCH",
+        "kuch fields badlo",
+        "Nahi*"
+       ],
+       [
+        "DELETE",
+        "hatana",
+        "Haan"
+       ]
+      ]
+     }
+    ],
+    [
+     "tip",
+     "Dhyan se dekh: **Idempotent** = ek hi request 10 baar bhejo, result wahi rahega. GET 10 baar = same data. POST 10 baar = 10 naye records! Isliye payment jaisi POST request ko retry karte waqt dhyan rakhte hain."
+    ],
+    [
+     "warn",
+     "Common galti: data badalne ke liye GET use karna (jaise `GET /delete?id=5`). GET sirf padhne ke liye hai; browser/cache GET ko kabhi bhi dobara bhej sakte hain."
+    ]
+   ]
+  },
+  {
+   "title": "Status codes, headers aur JSON",
+   "blocks": [
+    [
+     "p",
+     "Har response ke saath ek **status code** aata hai: 3 digit ka number jo batata hai kya hua. Pehla digit family batata hai."
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Status code families",
+      "head": [
+       "Range",
+       "Matlab"
+      ],
+      "rows": [
+       [
+        "2xx",
+        "Success"
+       ],
+       [
+        "3xx",
+        "Redirect"
+       ],
+       [
+        "4xx",
+        "Client ki galti"
+       ],
+       [
+        "5xx",
+        "Server ki galti"
+       ]
+      ]
+     }
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Ratt lo",
+      "head": [
+       "Code",
+       "Naam",
+       "Kab"
+      ],
+      "rows": [
+       [
+        "200",
+        "OK",
+        "sab theek"
+       ],
+       [
+        "201",
+        "Created",
+        "POST se bana"
+       ],
+       [
+        "400/422",
+        "Bad/Invalid",
+        "galat data"
+       ],
+       [
+        "401 / 403",
+        "Unauth/Forbidden",
+        "login/permission"
+       ],
+       [
+        "404",
+        "Not Found",
+        "cheez nahi mili"
+       ],
+       [
+        "500",
+        "Server Error",
+        "server mein bug"
+       ]
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "from http import HTTPStatus\n\nfor code in (200, 201, 401, 403, 404, 500):\n    print(code, HTTPStatus(code).phrase)",
+     "200 OK\n201 Created\n401 Unauthorized\n403 Forbidden\n404 Not Found\n500 Internal Server Error"
+    ],
+    [
+     "tip",
+     "IQ trap: **401 vs 403**. 401 = tumne pehchaan hi nahi batayi (token nahi/galat). 403 = pehchaan sahi hai, lekin is kaam ki permission nahi. Gate pass nahi = 401; gate pass hai par admin floor pe nahi ja sakte = 403."
+    ],
+    [
+     "p",
+     "**Headers** = request/response ke saath extra info, jaise lifafe ke upar likha pata. Body ke andar data, header pe uske baare mein info."
+    ],
+    [
+     "sketch",
+     {
+      "k": "boxes",
+      "title": "Common headers",
+      "items": [
+       {
+        "label": "Content-Type",
+        "value": "application/json"
+       },
+       {
+        "label": "Authorization",
+        "value": "Bearer sk-..."
+       },
+       {
+        "label": "Accept",
+        "value": "application/json"
+       }
+      ]
+     }
+    ],
+    [
+     "p",
+     "**JSON** (JavaScript Object Notation) = API ki common bhasha. Bilkul Python dict/list jaisa dikhta hai, lekin yeh ek **text** hai. Python ka `json` module (stdlib) dono taraf badalta hai:"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "json module",
+      "steps": [
+       "Python dict",
+       "json.dumps()",
+       "JSON text",
+       "json.loads()",
+       "Python dict"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "code",
+     "python",
+     "import json\n\nprofile = {\"name\": \"Akash\", \"age\": 25, \"ml\": True, \"skills\": [\"Python\", \"SQL\"], \"manager\": None}\ntext = json.dumps(profile)\nprint(text)\nprint(type(text))\nback = json.loads(text)\nprint(back[\"skills\"][1], type(back))",
+     "{\"name\": \"Akash\", \"age\": 25, \"ml\": true, \"skills\": [\"Python\", \"SQL\"], \"manager\": null}\n<class 'str'>\nSQL <class 'dict'>"
+    ],
+    [
+     "tip",
+     "Dhyan se dekh: JSON mein `True` → `true`, `None` → `null`, aur hamesha **double quotes**. Tuple JSON mein list ban jaata hai."
+    ],
+    [
+     "p",
+     "Asli API response zyadatar **nested** hota hai (dict ke andar list, list ke andar dict). Neeche ek ML prediction API ka response parse karte hain:"
+    ],
+    [
+     "code",
+     "python",
+     "import json\n\nraw = '''{\"model\": \"churn-v2\", \"status\": \"ok\",\n \"predictions\": [\n   {\"customer\": \"Sharma\", \"label\": \"stay\", \"score\": 0.91},\n   {\"customer\": \"Gupta\", \"label\": \"leave\", \"score\": 0.77},\n   {\"customer\": \"Verma\", \"label\": \"leave\", \"score\": 0.64}\n ]}'''\ndata = json.loads(raw)\nprint(data[\"model\"], len(data[\"predictions\"]))\nleaving = [p[\"customer\"] for p in data[\"predictions\"] if p[\"label\"] == \"leave\"]\nprint(leaving)\nprint(round(max(p[\"score\"] for p in data[\"predictions\"]), 2))",
+     "churn-v2 3\n['Gupta', 'Verma']\n0.91"
+    ],
+    [
+     "p",
+     "Agar key na ho to `data[\"x\"]` KeyError dega. API data pe bharosa mat karo; `.get()` default ke saath use karo. Aur kharab JSON pe `json.JSONDecodeError` aata hai:"
+    ],
+    [
+     "code",
+     "python",
+     "import json\n\nresp = json.loads('{\"name\": \"Akash\"}')\nprint(resp.get(\"city\", \"N/A\"))\ntry:\n    json.loads(\"{name: Akash}\")\nexcept json.JSONDecodeError as e:\n    print(\"Bad JSON:\", e.msg)",
+     "N/A\nBad JSON: Expecting property name enclosed in double quotes"
+    ],
+    [
+     "warn",
+     "Common galti: JSON string ko dict samajh ke `text[\"name\"]` likhna. Pehle `json.loads()` karo. Aur `json.dumps` mein Hindi text ke liye `ensure_ascii=False` do, warna `\\u0905` jaisa dikhega."
+    ]
+   ]
+  },
+  {
+   "title": "requests library: API call, API key, timeout, error handling",
+   "blocks": [
+    [
+     "p",
+     "Python mein API call karne ki sabse popular library `requests` hai (`pip install requests`). Yeh internet maangta hai, isliye in examples ka output yahan nahi diya; neeche likha hai kya aata hai."
+    ],
+    [
+     "code",
+     "python",
+     "import requests\n\nresponse = requests.get(\"https://api.github.com/users/octocat\", timeout=10)\nprint(response.status_code)          # 200\ndata = response.json()               # JSON text -> Python dict\nprint(data[\"name\"], data[\"public_repos\"])",
+     ""
+    ],
+    [
+     "p",
+     "Chalaoge to `200` aur octocat ka naam aur repos count aayega. `requests.get()` = GET request; `response.json()` = body ko dict mein badalta hai (andar `json.loads` hi hai)."
+    ],
+    [
+     "p",
+     "**Query params** khud mat jodo, `params=` do. **POST** mein data `json=` se bhejo, requests khud JSON banata hai aur `Content-Type` header lagata hai."
+    ],
+    [
+     "code",
+     "python",
+     "import requests\n\nr = requests.get(\"https://jsonplaceholder.typicode.com/posts\",\n                 params={\"userId\": 1}, timeout=10)\nprint(r.url)        # ...posts?userId=1\n\nnew_post = {\"title\": \"GEEP\", \"body\": \"Hello\", \"userId\": 1}\nr = requests.post(\"https://jsonplaceholder.typicode.com/posts\", json=new_post, timeout=10)\nprint(r.status_code)   # 201 Created",
+     ""
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "requests ka safar",
+      "steps": [
+       "requests.get()",
+       "Server",
+       "status + JSON",
+       ".json() dict"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "**API key** = API ka ID card. Paid APIs (OpenAI, Claude, weather) bina key ke `401` dete hain. Key **header** mein jaati hai, aur code mein kabhi likhi nahi jaati; environment variable (`.env` file) se aati hai."
+    ],
+    [
+     "code",
+     "python",
+     "import os\nimport requests\n\napi_key = os.getenv(\"API_KEY\")          # .env / environment se\nheaders = {\"Authorization\": f\"Bearer {api_key}\",\n           \"Content-Type\": \"application/json\"}\nr = requests.get(\"https://api.example.com/data\", headers=headers, timeout=30)",
+     ""
+    ],
+    [
+     "warn",
+     "Security rule: `api_key = \"sk-abc123\"` code mein likh ke GitHub pe push kiya to koi bhi use kar lega aur bill tera aayega. `.env` ko `.gitignore` mein daalo."
+    ],
+    [
+     "p",
+     "**Timeout** = itne second se zyada wait mat karo. Bina timeout ke, server atak gaya to tera program hamesha ke liye latka rahega."
+    ],
+    [
+     "analogy",
+     "ATM pe card daala aur internet chala gaya. ATM crash nahi hota, \"Please try again\" dikhata hai. Yahi **error handling** hai: problem aaye to crash mat karo, sambhalo."
+    ],
+    [
+     "code",
+     "python",
+     "import requests\n\ndef safe_get(url):\n    try:\n        r = requests.get(url, timeout=30)\n        r.raise_for_status()          # 4xx/5xx pe HTTPError\n        return r.json()\n    except requests.exceptions.Timeout:\n        print(\"Server slow hai - timeout\")\n    except requests.exceptions.ConnectionError:\n        print(\"Internet / server band\")\n    except requests.exceptions.HTTPError as e:\n        print(\"HTTP error:\", e.response.status_code)\n    return None",
+     ""
+    ],
+    [
+     "p",
+     "Server kabhi kabhi thodi der ke liye fail hota hai (503, 429 rate limit). Tab **retry with backoff** karte hain: har baar thoda zyada ruk ke dobara try. Neeche ek nakli (fake) server se logic samjho, internet ki zaroorat nahi:"
+    ],
+    [
+     "code",
+     "python",
+     "replies = iter([503, 503, 200])        # fake server: 2 baar fail, phir OK\n\ndef call_api():\n    return next(replies)\n\ndef with_retry(max_tries=4):\n    wait = 1\n    for attempt in range(1, max_tries + 1):\n        status = call_api()\n        print(f\"try {attempt}: {status}\")\n        if status < 500:\n            return status\n        print(f\"  {wait}s ruk ke retry\")\n        wait *= 2                      # 1, 2, 4 ... (exponential backoff)\n    return None\n\nprint(\"final:\", with_retry())",
+     "try 1: 503\n  1s ruk ke retry\ntry 2: 503\n  2s ruk ke retry\ntry 3: 200\nfinal: 200"
+    ],
+    [
+     "tip",
+     "Sirf 5xx, 429 aur timeout pe retry karo. 400/401/404 pe retry bekaar hai, request hi galat hai. Real code mein yahan `time.sleep(wait)` lagta hai."
+    ],
+    [
+     "warn",
+     "Common galti: bare `requests.get(url)` bina `timeout` aur bina try/except. Code review mein yeh reject hota hai."
+    ]
+   ]
+  },
+  {
+   "title": "REST API design: achha API kaisa dikhta hai",
+   "blocks": [
+    [
+     "p",
+     "**REST** = API design ka ek style. Idea simple hai: har cheez ek **resource** hai (product, order, user) jiska ek URL hai, aur kaam HTTP method batata hai. URL mein **noun**, method mein **verb**."
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "REST: products resource",
+      "head": [
+       "Method",
+       "URL",
+       "Kaam",
+       "Status"
+      ],
+      "rows": [
+       [
+        "GET",
+        "/products",
+        "list",
+        "200"
+       ],
+       [
+        "GET",
+        "/products/7",
+        "ek product",
+        "200/404"
+       ],
+       [
+        "POST",
+        "/products",
+        "naya banao",
+        "201"
+       ],
+       [
+        "PUT/PATCH",
+        "/products/7",
+        "update",
+        "200"
+       ],
+       [
+        "DELETE",
+        "/products/7",
+        "hatao",
+        "204"
+       ]
+      ]
+     }
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "URL design",
+      "left": {
+       "title": "Galat",
+       "items": [
+        "/getProducts",
+        "/createProduct",
+        "/deleteProduct?id=7",
+        "/product_list_all"
+       ]
+      },
+      "right": {
+       "title": "Sahi",
+       "items": [
+        "GET /products",
+        "POST /products",
+        "DELETE /products/7",
+        "GET /products?page=2"
+       ]
+      }
+     }
+    ],
+    [
+     "list",
+     [
+      "Resource naam **plural noun**: `/products`, `/orders`.",
+      "Nesting relation ke liye: `/customers/3/orders` (customer 3 ke orders).",
+      "Filter, sort, page **query** mein: `/products?category=cable&sort=rate&page=2&limit=20`.",
+      "Version URL mein: `/v1/predict`, taaki naya version purane clients ko na tode.",
+      "Sahi status code lautao, sirf 200 nahi. Error ka body bhi JSON: `{\"detail\": \"Product not found\"}`."
+     ]
+    ],
+    [
+     "p",
+     "**Stateless**: har request apne aap mein poori hoti hai (token bhi har baar header mein). Server pichli request yaad nahi rakhta. Isliye ek server ki jagah 10 server laga ke load baant sakte ho."
+    ],
+    [
+     "analogy",
+     "Railway enquiry counter: har baar tujhe PNR batana padta hai, clerk yaad nahi rakhta tu pehle aaya tha. Isi wajah se koi bhi khaali counter tera kaam kar sakta hai."
+    ],
+    [
+     "p",
+     "Ek chhota in-memory REST jaisa router bana ke dekhte hain, taaki method + path → status ka logic dimaag mein baith jaaye (yeh sirf Python hai, server nahi):"
+    ],
+    [
+     "code",
+     "python",
+     "products = {1: {\"name\": \"Copper Wire\", \"rate\": 850}}\n\ndef handle(method, path, body=None):\n    parts = path.strip(\"/\").split(\"/\")\n    if parts[0] != \"products\":\n        return 404, {\"detail\": \"Not found\"}\n    if method == \"GET\" and len(parts) == 1:\n        return 200, list(products.values())\n    if method == \"POST\" and len(parts) == 1:\n        if not body or \"name\" not in body:\n            return 422, {\"detail\": \"name required\"}\n        new_id = max(products) + 1\n        products[new_id] = body\n        return 201, {\"id\": new_id}\n    pid = int(parts[1])\n    if pid not in products:\n        return 404, {\"detail\": \"Product not found\"}\n    if method == \"GET\":\n        return 200, products[pid]\n    if method == \"DELETE\":\n        del products[pid]\n        return 204, None\n    return 405, {\"detail\": \"Method not allowed\"}\n\nprint(handle(\"POST\", \"/products\", {\"name\": \"PVC Cable\", \"rate\": 420}))\nprint(handle(\"POST\", \"/products\", {\"rate\": 10}))\nprint(handle(\"GET\", \"/products/2\"))\nprint(handle(\"DELETE\", \"/products/2\"))\nprint(handle(\"GET\", \"/products/2\"))",
+     "(201, {'id': 2})\n(422, {'detail': 'name required'})\n(200, {'name': 'PVC Cable', 'rate': 420})\n(204, None)\n(404, {'detail': 'Product not found'})"
+    ],
+    [
+     "tip",
+     "FastAPI yahi sab kaam (path todna, id ko int banana, validation, status code) tere liye apne aap karta hai. Agle lesson mein dekhenge."
+    ],
+    [
+     "warn",
+     "Common galti: har response pe 200 bhejna aur body mein `{\"error\": true}` likhna. Client (aur monitoring tools) status code dekhte hain; galti pe 4xx/5xx hi bhejo."
+    ]
+   ]
+  },
+  {
+   "title": "FastAPI basics: apna API banana",
+   "blocks": [
+    [
+     "p",
+     "**FastAPI** = Python se API server banane ka modern framework. Model bana liya, lekin mobile app ya website use kaise karegi? API se. FastAPI aaj AI/ML APIs ka industry standard hai."
+    ],
+    [
+     "analogy",
+     "AI model = kitchen ka chef. FastAPI = restaurant ka counter, jahan order aata hai, check hota hai, aur khaana bahar jaata hai. Uvicorn = restaurant ki building jisme counter chalta hai."
+    ],
+    [
+     "list",
+     [
+      "**Fast**: Starlette + async pe bana hai.",
+      "**Automatic validation**: Pydantic se galat data apne aap reject (422).",
+      "**Automatic docs**: `/docs` pe Swagger UI apne aap, bina kuch likhe test kar sakte ho."
+     ]
+    ],
+    [
+     "code",
+     "bash",
+     "pip install fastapi uvicorn\nuvicorn main:app --reload        # main = file, app = FastAPI object",
+     ""
+    ],
+    [
+     "code",
+     "python",
+     "# main.py\nfrom fastapi import FastAPI\n\napp = FastAPI(title=\"GEEP AI Service\")\n\n@app.get(\"/health\")\ndef health():\n    return {\"status\": \"running\"}       # dict apne aap JSON ban jaata hai",
+     ""
+    ],
+    [
+     "p",
+     "Server chala ke browser mein `http://localhost:8000/health` khologe to `{\"status\":\"running\"}` dikhega, aur `http://localhost:8000/docs` pe poora interactive documentation."
+    ],
+    [
+     "p",
+     "**Path parameter** = URL ka hissa (`{}` mein). **Query parameter** = function ka baaki argument, URL mein `?` ke baad. Type hint (`int`, `bool`) dene se FastAPI khud convert aur check karta hai."
+    ],
+    [
+     "code",
+     "python",
+     "@app.get(\"/products/{product_id}\")\ndef get_product(product_id: int):\n    return {\"id\": product_id}\n# /products/5    -> {\"id\": 5}\n# /products/abc  -> 422 error, apne aap\n\n@app.get(\"/products\")\ndef list_products(category: str | None = None, skip: int = 0, limit: int = 10):\n    return {\"category\": category, \"skip\": skip, \"limit\": limit}\n# /products?category=cable&limit=5",
+     ""
+    ],
+    [
+     "tip",
+     "Rule: argument ka naam path ke `{}` mein hai to path parameter, warna query parameter. Default value di to optional, nahi di to required."
+    ],
+    [
+     "p",
+     "**Pydantic model** = request body ka exact structure. Galat data aaye (type galat, field missing, range ke bahar) to FastAPI tera function chalne se pehle hi `422` laut deta hai."
+    ],
+    [
+     "code",
+     "python",
+     "from fastapi import FastAPI, HTTPException\nfrom pydantic import BaseModel, Field\n\napp = FastAPI()\n\nclass ProductIn(BaseModel):\n    name: str = Field(..., min_length=2)\n    rate: float = Field(..., gt=0)\n    stock: int = 0\n\nclass ProductOut(BaseModel):\n    id: int\n    name: str\n\nDB = {}\n\n@app.post(\"/products\", response_model=ProductOut, status_code=201)\ndef create_product(p: ProductIn):\n    new_id = len(DB) + 1\n    DB[new_id] = p\n    return {\"id\": new_id, \"name\": p.name}\n\n@app.get(\"/products/{pid}\", response_model=ProductOut)\ndef read_product(pid: int):\n    if pid not in DB:\n        raise HTTPException(status_code=404, detail=\"Product not found\")\n    return {\"id\": pid, \"name\": DB[pid].name}",
+     ""
+    ],
+    [
+     "p",
+     "`{\"name\": \"PVC\", \"rate\": -5}` bhejoge to 422 aayega (`rate` 0 se bada hona chahiye). `response_model` output ko bhi filter karta hai, taaki password jaisi internal field galti se bahar na jaaye."
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Request ka safar",
+      "steps": [
+       "Uvicorn",
+       "Routing",
+       "Pydantic check",
+       "Tera function",
+       "response_model",
+       "JSON"
+      ],
+      "dir": "v"
+     }
+    ],
+    [
+     "p",
+     "**async**: jab function kisi cheez ka **intezaar** karta hai (database, dusra API, LLM call), tab `async def` + `await` se server us beech dusri requests sambhal leta hai."
+    ],
+    [
+     "code",
+     "python",
+     "import httpx\n\n@app.get(\"/weather/{city}\")\nasync def weather(city: str):\n    async with httpx.AsyncClient(timeout=10) as client:\n        r = await client.get(f\"https://api.example.com/weather/{city}\")\n    return r.json()",
+     ""
+    ],
+    [
+     "warn",
+     "Common galti: `async def` ke andar blocking cheez (jaise `requests.get` ya `time.sleep`, ya bhaari model calculation) chalana. Yeh poore event loop ko rok deta hai. Blocking kaam ho to normal `def` likho; FastAPI use threadpool mein chala deta hai."
+    ]
+   ]
+  },
+  {
+   "title": "ML model ko API ke peeche serve karna",
+   "blocks": [
+    [
+     "p",
+     "Asli kaam: model train ho gaya, ab duniya use kaise kare? **Model ko ek baar load karo, `/predict` endpoint banao, input Pydantic se validate karo, prediction JSON mein lautao.**"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Model serving",
+      "steps": [
+       "Client JSON",
+       "/predict",
+       "Pydantic check",
+       "model.predict",
+       "JSON result"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "code",
+     "python",
+     "# serve.py\nimport joblib\nfrom fastapi import FastAPI\nfrom pydantic import BaseModel, Field\n\napp = FastAPI(title=\"Churn Model API\", version=\"1.0\")\nmodel = joblib.load(\"churn_model.joblib\")   # startup pe EK baar load\n\nclass Customer(BaseModel):\n    orders_last_90d: int = Field(..., ge=0)\n    avg_amount: float = Field(..., ge=0)\n    days_since_last_order: int = Field(..., ge=0)\n\nclass Prediction(BaseModel):\n    will_leave: bool\n    probability: float\n    model_version: str\n\n@app.post(\"/v1/predict\", response_model=Prediction)\ndef predict(c: Customer):\n    X = [[c.orders_last_90d, c.avg_amount, c.days_since_last_order]]\n    prob = float(model.predict_proba(X)[0][1])\n    return Prediction(will_leave=prob >= 0.5, probability=round(prob, 3),\n                      model_version=\"1.0\")",
+     ""
+    ],
+    [
+     "p",
+     "Request bhejoge `{\"orders_last_90d\": 1, \"avg_amount\": 4000, \"days_since_last_order\": 75}` to jawab kuch aisa aayega: `{\"will_leave\": true, \"probability\": 0.81, \"model_version\": \"1.0\"}` (number model pe depend karega)."
+    ],
+    [
+     "tip",
+     "Dhyan se dekh: model **har request pe load mat karo**. Load karne mein second lagte hain; global variable ya startup (`lifespan`) mein ek baar load karo. `predict` normal `def` hai kyunki model calculation CPU ka kaam hai, intezaar nahi."
+    ],
+    [
+     "list",
+     [
+      "Input validation (Pydantic) = galat data model tak pahunchta hi nahi.",
+      "`/health` endpoint rakho, taaki load balancer check kar sake server zinda hai.",
+      "Version URL aur response mein (`/v1`, `model_version`), taaki naya model aaye to pata rahe kisne kya diya.",
+      "Har prediction log karo (input, output, time), baad mein model monitoring ke kaam aata hai.",
+      "Batch endpoint (list of inputs) se ek call mein kai predictions: tez aur sasta."
+     ]
+    ],
+    [
+     "p",
+     "Client side se call kaise hoga (requests se):"
+    ],
+    [
+     "code",
+     "python",
+     "import requests\n\npayload = {\"orders_last_90d\": 1, \"avg_amount\": 4000, \"days_since_last_order\": 75}\nr = requests.post(\"http://localhost:8000/v1/predict\", json=payload, timeout=10)\nprint(r.status_code, r.json())",
+     ""
+    ],
+    [
+     "p",
+     "Server ke bina bhi test likh sakte ho FastAPI ke `TestClient` se. Yeh pytest mein chalta hai:"
+    ],
+    [
+     "code",
+     "python",
+     "from fastapi.testclient import TestClient\nfrom serve import app\n\nclient = TestClient(app)\n\ndef test_predict_ok():\n    r = client.post(\"/v1/predict\", json={\"orders_last_90d\": 3, \"avg_amount\": 900, \"days_since_last_order\": 4})\n    assert r.status_code == 200\n    assert 0 <= r.json()[\"probability\"] <= 1\n\ndef test_predict_bad_input():\n    r = client.post(\"/v1/predict\", json={\"orders_last_90d\": -1})\n    assert r.status_code == 422",
+     ""
+    ],
+    [
+     "sketch",
+     {
+      "k": "stack",
+      "title": "Production stack",
+      "items": [
+       "Client (app/web)",
+       "Nginx",
+       "Gunicorn + Uvicorn workers",
+       "FastAPI app",
+       "Model + Database"
+      ]
+     }
+    ],
+    [
+     "p",
+     "Production mein: Docker image, Gunicorn ke andar Uvicorn workers, aage Nginx. Yeh stage 14 mein detail se karenge. Abhi itna yaad rakho: **model + FastAPI + Pydantic + /docs = ek ML microservice.**"
+    ],
+    [
+     "warn",
+     "Common galti: training aur serving mein features ka order ya preprocessing alag ho jaana (training mein scaling ki, serving mein bhool gaye). Preprocessing ko model ke saath ek pipeline mein save karo (stage 10 mein `Pipeline`)."
+    ]
+   ]
+  }
+ ],
+ "teach": [
+  {
+   "say": "API matlab do software ki baatcheet. Tera app request bhejta hai, server response lautata hai. Jaise waiter order le jaata hai aur khaana laata hai.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Client",
+     "Request",
+     "Server",
+     "Response"
+    ],
+    "dir": "h"
+   },
+   "code": null
+  },
+  {
+   "say": "Request mein method batata hai kaam kya hai. GET lena, POST banana, PUT/PATCH badalna, DELETE hatana.",
+   "sketch": {
+    "k": "table",
+    "head": [
+     "Method",
+     "Kaam"
+    ],
+    "rows": [
+     [
+      "GET",
+      "lena"
+     ],
+     [
+      "POST",
+      "banana"
+     ],
+     [
+      "PUT/PATCH",
+      "badalna"
+     ],
+     [
+      "DELETE",
+      "hatana"
+     ]
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "Response ke saath status code aata hai. 2 se shuru to success, 4 se shuru to client ki galti, 5 se shuru to server ki galti.",
+   "sketch": {
+    "k": "boxes",
+    "items": [
+     {
+      "label": "200",
+      "value": "OK"
+     },
+     {
+      "label": "201",
+      "value": "Created"
+     },
+     {
+      "label": "404",
+      "value": "Not Found"
+     },
+     {
+      "label": "500",
+      "value": "Server Error"
+     }
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "Data JSON mein aata-jaata hai. Python mein json.loads se text dict banta hai, json.dumps se dict text.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "JSON text",
+     "json.loads",
+     "dict",
+     "json.dumps",
+     "JSON text"
+    ],
+    "dir": "h"
+   },
+   "code": "data = json.loads('{\"name\": \"Akash\"}')\nprint(data[\"name\"])"
+  },
+  {
+   "say": "requests se call karo, lekin hamesha timeout ke saath, aur API key header mein, environment se.",
+   "sketch": {
+    "k": "boxes",
+    "items": [
+     {
+      "label": "timeout",
+      "value": "30"
+     },
+     {
+      "label": "Authorization",
+      "value": "Bearer KEY"
+     }
+    ]
+   },
+   "code": "r = requests.get(url, headers=headers, timeout=30)\nr.raise_for_status()"
+  },
+  {
+   "say": "Network kabhi bhi fail ho sakta hai. Try except lagao, aur 5xx pe thoda ruk ke retry karo.",
+   "sketch": {
+    "k": "cycle",
+    "steps": [
+     "Call",
+     "5xx?",
+     "Ruko (1,2,4s)",
+     "Retry"
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "REST mein URL noun hota hai aur method verb. slash products pe GET list deta hai, POST naya banata hai.",
+   "sketch": {
+    "k": "compare",
+    "left": {
+     "title": "Galat",
+     "items": [
+      "/getProducts",
+      "/deleteProduct?id=7"
+     ]
+    },
+    "right": {
+     "title": "Sahi",
+     "items": [
+      "GET /products",
+      "DELETE /products/7"
+     ]
+    }
+   },
+   "code": null
+  },
+  {
+   "say": "FastAPI mein decorator se endpoint banta hai. Type hint do, baaki validation aur docs FastAPI khud karta hai.",
+   "sketch": null,
+   "code": "@app.get(\"/products/{pid}\")\ndef read(pid: int, limit: int = 10):\n    return {\"pid\": pid}"
+  },
+  {
+   "say": "Pydantic model input ka darwaza hai. Galat data aaya to 422, tera function chalega hi nahi.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "JSON body",
+     "Pydantic",
+     "Sahi: function",
+     "Galat: 422"
+    ],
+    "dir": "h"
+   },
+   "code": "class Customer(BaseModel):\n    avg_amount: float = Field(..., ge=0)"
+  },
+  {
+   "say": "Aakhir mein ML model: ek baar load karo, slash predict endpoint banao, aur JSON mein prediction lautao. Bas, tera model ab duniya use kar sakti hai.",
+   "sketch": {
+    "k": "stack",
+    "items": [
+     "Client",
+     "FastAPI /v1/predict",
+     "Pydantic",
+     "model.predict",
+     "JSON"
+    ]
+   },
+   "code": null
+  }
+ ],
+ "practice": [
+  {
+   "q": "Ek API ka JSON response string diya hai. `json` module se parse karo aur print karo: user ka naam, kitne repos hain, aur saare repos ke stars ka total:\nAkash\n3\n42",
+   "starter": "import json\n\nraw = '{\"user\": {\"name\": \"Akash\"}, \"repos\": [{\"name\": \"costing\", \"stars\": 25}, {\"name\": \"gds\", \"stars\": 12}, {\"name\": \"tutor\", \"stars\": 5}]}'\n# TODO: json.loads se dict banao\n# TODO: data[\"user\"][\"name\"] print karo\n# TODO: repos ki ginti print karo\n# TODO: stars ka total print karo\n",
+   "expect": "Akash\n3\n42",
+   "hint": "data = json.loads(raw); sum(r[\"stars\"] for r in data[\"repos\"])",
+   "solution": "import json\n\nraw = '{\"user\": {\"name\": \"Akash\"}, \"repos\": [{\"name\": \"costing\", \"stars\": 25}, {\"name\": \"gds\", \"stars\": 12}, {\"name\": \"tutor\", \"stars\": 5}]}'\ndata = json.loads(raw)\nprint(data[\"user\"][\"name\"])\nprint(len(data[\"repos\"]))\nprint(sum(r[\"stars\"] for r in data[\"repos\"]))"
+  },
+  {
+   "q": "Function `status_message(code)` likho jo status code ki family bataye: 2xx → \"Success\", 4xx → \"Client error\", 5xx → \"Server error\", baaki → \"Other\". Phir list `[200, 201, 404, 422, 503, 302]` ke har code ke liye `code: message` print karo:\n200: Success\n201: Success\n404: Client error\n422: Client error\n503: Server error\n302: Other",
+   "starter": "def status_message(code):\n    # TODO: 200-299 Success, 400-499 Client error, 500-599 Server error, warna Other\n    pass\n\nfor c in [200, 201, 404, 422, 503, 302]:\n    print(f\"{c}: {status_message(c)}\")\n",
+   "expect": "200: Success\n201: Success\n404: Client error\n422: Client error\n503: Server error\n302: Other",
+   "hint": "code // 100 se pehla digit milta hai: 2, 4 ya 5.",
+   "solution": "def status_message(code):\n    family = code // 100\n    if family == 2:\n        return \"Success\"\n    if family == 4:\n        return \"Client error\"\n    if family == 5:\n        return \"Server error\"\n    return \"Other\"\n\nfor c in [200, 201, 404, 422, 503, 302]:\n    print(f\"{c}: {status_message(c)}\")"
+  },
+  {
+   "q": "Ek mini \"predict API\" handler banao (server nahi, sirf function). `predict(body_json)` ek JSON string lega jisme `orders` aur `days` hon. Validation: dono keys honi chahiye aur 0 ya usse bade int hon, warna `(422, {\"detail\": \"invalid input\"})`. Rule-based model: `score = days * 2 - orders * 10`; score > 50 ho to label \"leave\", warna \"stay\". Success pe `(200, {\"label\": ..., \"score\": ...})` lautao. Har result ko `json.dumps` karke status ke saath print karo:\n200 {\"label\": \"leave\", \"score\": 130}\n200 {\"label\": \"stay\", \"score\": -20}\n422 {\"detail\": \"invalid input\"}\n422 {\"detail\": \"invalid input\"}",
+   "starter": "import json\n\ndef predict(body_json):\n    data = json.loads(body_json)\n    # TODO: check karo: \"orders\" aur \"days\" dono hain, int hain, aur >= 0\n    #       galat ho to return 422, {\"detail\": \"invalid input\"}\n    # TODO: score = days * 2 - orders * 10\n    # TODO: label = \"leave\" agar score > 50, warna \"stay\"\n    # TODO: return 200, {\"label\": label, \"score\": score}\n    pass\n\nrequests_in = [\n    '{\"orders\": 1, \"days\": 70}',\n    '{\"orders\": 4, \"days\": 10}',\n    '{\"orders\": -2, \"days\": 10}',\n    '{\"days\": 10}',\n]\nfor body in requests_in:\n    status, resp = predict(body)\n    print(status, json.dumps(resp))\n",
+   "expect": "200 {\"label\": \"leave\", \"score\": 130}\n200 {\"label\": \"stay\", \"score\": -20}\n422 {\"detail\": \"invalid input\"}\n422 {\"detail\": \"invalid input\"}",
+   "hint": "Har key ke liye: `k in data and isinstance(data[k], int) and data[k] >= 0`. `all(...)` se dono check ek line mein.",
+   "solution": "import json\n\ndef predict(body_json):\n    data = json.loads(body_json)\n    ok = all(k in data and isinstance(data[k], int) and data[k] >= 0 for k in (\"orders\", \"days\"))\n    if not ok:\n        return 422, {\"detail\": \"invalid input\"}\n    score = data[\"days\"] * 2 - data[\"orders\"] * 10\n    label = \"leave\" if score > 50 else \"stay\"\n    return 200, {\"label\": label, \"score\": score}\n\nrequests_in = [\n    '{\"orders\": 1, \"days\": 70}',\n    '{\"orders\": 4, \"days\": 10}',\n    '{\"orders\": -2, \"days\": 10}',\n    '{\"days\": 10}',\n]\nfor body in requests_in:\n    status, resp = predict(body)\n    print(status, json.dumps(resp))"
+  }
+ ],
+ "quiz": [
+  {
+   "q": "Client-server mein \"server\" kya karta hai?",
+   "o": [
+    "Request bhejta hai",
+    "Request leke response lautata hai",
+    "Sirf data store karta hai, jawab nahi deta",
+    "Browser chalata hai"
+   ],
+   "a": 1,
+   "why": "Client request bhejta hai, server use process karke response (status + data) lautata hai."
+  },
+  {
+   "q": "Naya record banane ke liye kaunsa HTTP method?",
+   "o": [
+    "GET",
+    "DELETE",
+    "POST",
+    "HEAD"
+   ],
+   "a": 2,
+   "why": "POST naya resource banata hai; success pe aksar 201 Created aata hai."
+  },
+  {
+   "q": "Token sahi hai lekin user ko admin page ki permission nahi. Status code?",
+   "o": [
+    "403",
+    "401",
+    "404",
+    "500"
+   ],
+   "a": 0,
+   "why": "401 = pehchaan nahi; 403 = pehchaan hai lekin permission nahi."
+  },
+  {
+   "q": "`json.loads('{\"ok\": true}')` kya deta hai?",
+   "o": [
+    "String '{\"ok\": true}'",
+    "Error, kyunki true chhota hai",
+    "List [True]",
+    "Dict {'ok': True}"
+   ],
+   "a": 3,
+   "why": "loads JSON text ko Python object banata hai, aur JSON ka true Python ka True ban jaata hai."
+  },
+  {
+   "q": "API key rakhne ka sahi tareeka?",
+   "o": [
+    "Code mein variable",
+    "Environment variable / .env, header mein bhejo",
+    "URL mein hamesha",
+    "GitHub README mein"
+   ],
+   "a": 1,
+   "why": "Key code mein likhi to leak ho jaati hai; environment se padho aur Authorization header mein bhejo."
+  },
+  {
+   "q": "`requests.get(url)` mein `timeout` kyun dena chahiye?",
+   "o": [
+    "Request tez ho jaati hai",
+    "Status code 200 aata hai",
+    "Server atke to program hamesha latka na rahe",
+    "JSON apne aap parse ho"
+   ],
+   "a": 2,
+   "why": "Bina timeout ke slow/atka server tere program ko hamesha ke liye rok sakta hai."
+  },
+  {
+   "q": "REST style mein product 7 delete karne ka sahi URL?",
+   "o": [
+    "GET /deleteProduct?id=7",
+    "POST /products/delete/7",
+    "DELETE /product_delete",
+    "DELETE /products/7"
+   ],
+   "a": 3,
+   "why": "URL resource (noun) batata hai, method (DELETE) kaam batata hai."
+  },
+  {
+   "q": "FastAPI mein `def get(pid: int)` aur route `/items/{pid}`. `/items/abc` pe kya hoga?",
+   "o": [
+    "422 validation error apne aap",
+    "pid = 'abc' chal jaayega",
+    "500 server crash",
+    "404 hamesha"
+   ],
+   "a": 0,
+   "why": "Type hint int hai, 'abc' convert nahi hota, toh FastAPI function chalaye bina 422 deta hai."
+  },
+  {
+   "q": "Pydantic model ka FastAPI mein main kaam?",
+   "o": [
+    "Database banana",
+    "Request/response data ka structure aur validation",
+    "Server chalana",
+    "HTML page banana"
+   ],
+   "a": 1,
+   "why": "BaseModel fields, types aur limits define karta hai; galat input pe 422."
+  },
+  {
+   "q": "ML model serve karte waqt model kab load karna chahiye?",
+   "o": [
+    "Har request pe",
+    "Har 10 request pe",
+    "App start pe ek baar",
+    "Client ke computer pe"
+   ],
+   "a": 2,
+   "why": "Load mehnga hai; ek baar load karke har request pe reuse karo."
+  }
+ ],
+ "iq": [
+  {
+   "q": "API kya hai? Ek real example do.",
+   "a": "API do software ke beech baat karne ka contract hai: kaunsa URL, kaunsa method, kya input, kya output. Jaise mera Python code Claude/OpenAI API ko prompt POST karta hai aur JSON mein jawab leta hai, ya mobile app mere FastAPI `/predict` endpoint se prediction leti hai."
+  },
+  {
+   "q": "GET aur POST mein farak? Idempotent ka matlab?",
+   "a": "GET data padhne ke liye, data URL/query mein, cache ho sakta hai, idempotent hai. POST naya resource banane ke liye, data body mein, idempotent nahi (10 baar bhejo to 10 records). Idempotent = same request kitni bhi baar bhejo, server ki state ek hi baar jitni badalti hai. PUT aur DELETE bhi idempotent hain."
+  },
+  {
+   "q": "PUT aur PATCH mein farak?",
+   "a": "PUT poore resource ko naye data se replace karta hai (saari fields bhejni padti hain). PATCH sirf di gayi fields update karta hai, jaise sirf `rate` badalna."
+  },
+  {
+   "q": "Common status codes batao, aur 401 vs 403?",
+   "a": "200 OK, 201 Created, 204 No Content, 400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 409 Conflict, 422 validation fail, 429 rate limit, 500 server error, 503 unavailable. 401 = authentication fail (token nahi/galat); 403 = authenticated hai lekin permission nahi."
+  },
+  {
+   "q": "REST API kya hota hai? Achhe REST design ke principles?",
+   "a": "REST ek architecture style hai jisme har cheez resource hai jiska URL hota hai, aur HTTP methods se uspe kaam hota hai. Principles: plural noun URLs (`/products/7`), sahi methods aur status codes, stateless requests, JSON responses, filter/pagination query params mein, aur versioning (`/v1`)."
+  },
+  {
+   "q": "External API call ko production-ready kaise banaoge?",
+   "a": "Har call pe timeout, try/except (Timeout, ConnectionError, HTTPError), `raise_for_status()`, 5xx/429 pe exponential backoff ke saath limited retries, API key environment se, aur logging. Response ko `.get()` se padhna taaki missing keys pe crash na ho."
+  },
+  {
+   "q": "FastAPI kyun? Flask/Django se kaise alag?",
+   "a": "FastAPI API-first framework hai: type hints se automatic validation (Pydantic), automatic Swagger docs `/docs` pe, aur native async support (ASGI). Flask minimal hai, sab khud jodna padta hai. Django full-stack hai, ORM aur admin built-in, bade web apps ke liye. ML model serving ke liye FastAPI sabse common hai."
+  },
+  {
+   "q": "Path parameter aur query parameter mein farak?",
+   "a": "Path parameter URL ka hissa hai aur resource identify karta hai: `/products/{id}`. Query parameter `?` ke baad aata hai aur filter/sort/pagination ke liye hota hai: `/products?category=cable&limit=10`. FastAPI mein jo argument path ke `{}` mein hai woh path param, baaki query param."
+  },
+  {
+   "q": "Pydantic kya karta hai, aur response_model kyun use karte ho?",
+   "a": "Pydantic request data ko types aur rules (`Field(gt=0)`, `min_length`) ke hisaab se validate aur convert karta hai; galat pe FastAPI 422 deta hai. `response_model` output ka structure fix karta hai, docs mein dikhata hai, aur extra fields (jaise password hash) filter kar deta hai taaki leak na ho."
+  },
+  {
+   "q": "async def kab use karoge aur kab nahi?",
+   "a": "Jab endpoint I/O ka intezaar karta hai (database, dusra API, LLM call) aur us library ka async version hai (httpx, asyncpg), tab `async def` + `await`. CPU-heavy kaam (model inference, image processing) ya blocking library ho to normal `def`, kyunki async ke andar blocking call poore event loop ko rok deti hai; FastAPI `def` ko threadpool mein chalata hai."
+  },
+  {
+   "q": "Ek trained ML model ko API ke roop mein kaise deploy karoge?",
+   "a": "Model ko joblib/pickle (ya ONNX) mein save karo, FastAPI app mein startup pe ek baar load karo, Pydantic se input schema banao, `/v1/predict` POST endpoint banao jo prediction aur model version JSON mein lautaye, `/health` endpoint rakho. Phir TestClient se tests, Docker image, Uvicorn/Gunicorn workers aur Nginx ke peeche deploy, aur predictions log karke monitoring."
+  },
+  {
+   "q": "CORS kya hai?",
+   "a": "Browser ka security rule: ek origin (domain+port) ka JavaScript dusre origin pe request tabhi bhej sakta hai jab server allow kare. Jaise React frontend port 5173 pe aur FastAPI 8000 pe, toh backend mein `CORSMiddleware` se allowed origins batane padte hain. Yeh sirf browser pe lagta hai, Python requests pe nahi."
+  }
+ ]
+}

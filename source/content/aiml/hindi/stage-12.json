@@ -1,0 +1,1302 @@
+{
+ "n": 12,
+ "id": "aiml-12",
+ "title": "LLMs, Prompting, LangChain और RAG",
+ "goal": "LLM कैसे काम करता है, यह समझकर तुम OpenAI/Claude API से app बनाओगे, अच्छे prompts लिखकर JSON output लोगे, LangChain chains लिखोगे, और अपने documents पर RAG chatbot (embeddings + vector DB) बनाकर उसे evaluate कर पाओगे।",
+ "lessons": [
+  {
+   "title": "LLM क्या है — tokens, context window, temperature",
+   "blocks": [
+    [
+     "p",
+     "**LLM = Large Language Model.** एक बहुत बड़ा model जो internet की किताबों, websites, code जैसे **huge text** पर train हुआ है। उसका एक ही काम है: **अगला token predict करना** (अगले शब्द का टुकड़ा)।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "LLM अगला word चुनता है",
+      "steps": [
+       "भारत की राजधानी",
+       "New",
+       "Delhi",
+       "है"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "analogy",
+     "Mobile keyboard का autocomplete देखा है? \"Good\" लिखो तो \"morning\" suggest करता है। LLM वही है, बस 1000 गुना बड़ा और समझदार। ChatGPT, Claude, Gemini, Llama सब LLM हैं।"
+    ],
+    [
+     "p",
+     "इससे दो ज़रूरी बातें समझ आती हैं:\n1. LLM सच check नहीं करता, **pattern से सबसे likely word** चुनता है।\n2. इसलिए कभी-कभी **confidently गलत** भी बोल देता है। इसे **hallucination** कहते हैं (Lesson 3 में detail)।"
+    ],
+    [
+     "p",
+     "**Token** = text का छोटा टुकड़ा। LLM words नहीं, tokens पढ़ता है। English में लगभग **1 token ≈ ¾ word** (100 words ≈ 130 tokens)। Hindi/Hinglish में वही बात कहने में ज़्यादा tokens लगते हैं।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "array",
+      "title": "\"Cable costing\" = 3 tokens",
+      "items": [
+       "Cable",
+       " cost",
+       "ing"
+      ],
+      "index": true
+     }
+    ],
+    [
+     "p",
+     "असली tokenizer (जैसे `tiktoken`) model के साथ आता है। लेकिन मोटा अंदाज़ा हम खुद लगा सकते हैं:"
+    ],
+    [
+     "code",
+     "python",
+     "text = \"Cable costing ka hisaab Python se karo\"\nwords = text.split()\nprint(\"Words:\", len(words))\nprint(\"Approx tokens:\", round(len(words) / 0.75))",
+     "Words: 7\nApprox tokens: 9"
+    ],
+    [
+     "analogy",
+     "Taxi meter जैसा: kilometer (tokens) के हिसाब से पैसा लगता है। **Input tokens + output tokens** दोनों का bill बनता है, और model की limit भी tokens में होती है।"
+    ],
+    [
+     "p",
+     "**Context window** = model एक बार में कितने tokens पढ़ सकता है: system prompt + पूरी history + तुम्हारे documents + जवाब, सब मिलाकर। छोटे models ~8K tokens, बड़े models 1 लाख से 10 लाख+ tokens। Limit पार हुई तो error, या पुराना हिस्सा कट जाता है।"
+    ],
+    [
+     "analogy",
+     "Student की desk जैसा: desk (context window) पर जितने pages आते हैं, उतने ही एक साथ पढ़ सकता है। पूरी library desk पर नहीं आ सकती। इसी problem का हल है **RAG** (Lesson 6)।"
+    ],
+    [
+     "p",
+     "**Temperature** = randomness का knob। Model हर possible अगले word को एक score देता है। Temperature से तय होता है कि सिर्फ़ top word चुने या दूसरे words को भी मौका दे। ध्यान से देखो, यह pure Python में simulation है:"
+    ],
+    [
+     "code",
+     "python",
+     "import math\n\nscores = {\"Delhi\": 4.0, \"Mumbai\": 2.0, \"Patna\": 1.0}\n\ndef probs(t):\n    exps = {w: math.exp(s / t) for w, s in scores.items()}\n    total = sum(exps.values())\n    return {w: round(e / total, 2) for w, e in exps.items()}\n\nprint(\"t=0.5\", probs(0.5))\nprint(\"t=1.0\", probs(1.0))\nprint(\"t=2.0\", probs(2.0))",
+     "t=0.5 {'Delhi': 0.98, 'Mumbai': 0.02, 'Patna': 0.0}\nt=1.0 {'Delhi': 0.84, 'Mumbai': 0.11, 'Patna': 0.04}\nt=2.0 {'Delhi': 0.63, 'Mumbai': 0.23, 'Patna': 0.14}"
+    ],
+    [
+     "p",
+     "Temperature कम (0.5) → \"Delhi\" का chance 98%, जवाब हर बार same। Temperature ज़्यादा (2.0) → दूसरे words को भी मौका, जवाब creative लेकिन unpredictable। Temperature 0 = हमेशा top word।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Temperature कब कितना",
+      "head": [
+       "Temp",
+       "जवाब",
+       "कब"
+      ],
+      "rows": [
+       [
+        "0",
+        "हर बार same",
+        "extraction, तथ्य"
+       ],
+       [
+        "0.7",
+        "थोड़ा creative",
+        "chat, writing"
+       ],
+       [
+        "1+",
+        "बहुत random",
+        "कविता, ideas"
+       ]
+      ]
+     }
+    ],
+    [
+     "tip",
+     "ध्यान से देखो: tender से cable size निकालना, document की category बताना, JSON बनाना → **temperature 0**। वहाँ हर बार same, भरोसेमंद जवाब चाहिए।"
+    ],
+    [
+     "p",
+     "**Messages के 3 roles** — यह हर API का base है:"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "3 roles",
+      "head": [
+       "Role",
+       "क्या है"
+      ],
+      "rows": [
+       [
+        "system",
+        "AI का role + rules"
+       ],
+       [
+        "user",
+        "इंसान का सवाल"
+       ],
+       [
+        "assistant",
+        "AI का पिछला जवाब"
+       ]
+      ]
+     }
+    ],
+    [
+     "analogy",
+     "नया employee: system prompt = joining पर दी गई rulebook (\"तुम GEEP के assistant हो, सिर्फ़ Hinglish\")। User = customer का सवाल। Assistant = employee ने पहले क्या बोला था।"
+    ],
+    [
+     "warn",
+     "आम गलती: सोचना कि LLM को पिछली बात याद है। **हर API call बिल्कुल अलग है, model की कोई memory नहीं।** ChatGPT \"याद\" इसलिए रखता है क्योंकि हर बार पूरी history दोबारा भेजता है। गजनी जैसा — हर बार diary दिखानी पड़ती है।"
+    ]
+   ]
+  },
+  {
+   "title": "OpenAI और Claude API — code से AI से बात",
+   "blocks": [
+    [
+     "p",
+     "जब तुम ChatGPT या Claude पर message लिखते हो, अंदर एक **API call** जाती है: तुम्हारा message POST request में जाता है, AI का जवाब JSON response में आता है। यही काम हम Python से करेंगे। (Stage 7 का HTTP/API याद है न? वही।)"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "API call का सफ़र",
+      "steps": [
+       "तुम्हारा code",
+       "POST + key",
+       "LLM server",
+       "JSON जवाब"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "हर AI API को **3 चीज़ें** चाहिए:\n1. **API key** — तुम्हारी पहचान (signup करके मिलती है, इसी पर bill बनता है)\n2. **Model name** — कौन-सा दिमाग (gpt-4o-mini, claude-sonnet...)\n3. **Messages** — system + user (+ पुरानी history)"
+    ],
+    [
+     "warn",
+     "आम गलती: API key सीधे code में लिख देना और GitHub पर push कर देना। Bots minutes में key चुरा लेते हैं और तुम्हारा bill हज़ारों में। Key हमेशा **environment variable** या `.env` file में रखो (और `.env` को `.gitignore` में डालो)।"
+    ],
+    [
+     "code",
+     "bash",
+     "# Terminal mein (Linux/Mac). Windows: setx OPENAI_API_KEY \"...\"\nexport OPENAI_API_KEY=\"sk-...apni-key...\"\nexport ANTHROPIC_API_KEY=\"sk-ant-...apni-key...\"\npip install openai anthropic",
+     ""
+    ],
+    [
+     "p",
+     "**OpenAI (GPT) API:**"
+    ],
+    [
+     "code",
+     "python",
+     "import os\nfrom openai import OpenAI\n\nclient = OpenAI(api_key=os.getenv(\"OPENAI_API_KEY\"))\n\nresponse = client.chat.completions.create(\n    model=\"gpt-4o-mini\",\n    messages=[\n        {\"role\": \"system\", \"content\": \"Tum ek Python teacher ho. Hinglish mein jawab do.\"},\n        {\"role\": \"user\", \"content\": \"List comprehension kya hai?\"},\n    ],\n    temperature=0.7,\n    max_tokens=300,\n)\n\nprint(response.choices[0].message.content)\nprint(\"Tokens used:\", response.usage.total_tokens)",
+     ""
+    ],
+    [
+     "p",
+     "इसे चलाने पर AI का Hinglish जवाब print होगा, फिर कितने tokens लगे (जैसे `Tokens used: 182`)। `max_tokens` जवाब की लंबाई (और खर्चा) को limit करता है।"
+    ],
+    [
+     "p",
+     "**Anthropic (Claude) API:**"
+    ],
+    [
+     "code",
+     "python",
+     "import os\nimport anthropic\n\nclient = anthropic.Anthropic(api_key=os.getenv(\"ANTHROPIC_API_KEY\"))\n\nresponse = client.messages.create(\n    model=\"claude-sonnet-4-5\",          # model naam docs se check karo, badalte rehte hain\n    max_tokens=500,                     # Claude mein zaroori hai\n    system=\"Tum GEEP Polymers ke AI assistant ho. Hinglish mein jawab do.\",\n    messages=[\n        {\"role\": \"user\", \"content\": \"XLPE cable PVC se behtar kyun hai?\"},\n    ],\n)\n\nprint(response.content[0].text)\nprint(\"Tokens:\", response.usage.input_tokens + response.usage.output_tokens)",
+     ""
+    ],
+    [
+     "p",
+     "Output में Claude का जवाब और total tokens आएँगे। Pattern बिल्कुल same है: client बनाओ → model + messages भेजो → जवाब निकालो।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "OpenAI vs Claude",
+      "head": [
+       "चीज़",
+       "OpenAI",
+       "Claude"
+      ],
+      "rows": [
+       [
+        "System",
+        "messages के अंदर",
+        "अलग system="
+       ],
+       [
+        "जवाब",
+        "choices[0].message",
+        "content[0].text"
+       ],
+       [
+        "max_tokens",
+        "optional",
+        "ज़रूरी"
+       ],
+       [
+        "Tokens",
+        "total_tokens",
+        "input + output"
+       ]
+      ]
+     }
+    ],
+    [
+     "p",
+     "**Streaming** = पूरा जवाब एक साथ आने का इंतज़ार मत करो, word-by-word दिखाओ (जैसे ChatGPT typing करता दिखता है)। User को लगता है app तेज़ है।"
+    ],
+    [
+     "code",
+     "python",
+     "with client.messages.stream(\n    model=\"claude-sonnet-4-5\",\n    max_tokens=500,\n    messages=[{\"role\": \"user\", \"content\": \"Python kya hai? 3 lines.\"}],\n) as stream:\n    for text in stream.text_stream:\n        print(text, end=\"\", flush=True)   # end=\"\" = nayi line nahi, flush = turant dikhao\nprint()",
+     ""
+    ],
+    [
+     "p",
+     "इसमें जवाब screen पर टुकड़ों में आता दिखेगा। OpenAI में `stream=True` देते हैं और `chunk.choices[0].delta.content` पढ़ते हैं।"
+    ],
+    [
+     "p",
+     "**Conversation history (memory):** model को memory नहीं है, इसलिए हम एक list में सारे messages रखते हैं और हर बार **पूरी list** भेजते हैं।"
+    ],
+    [
+     "code",
+     "python",
+     "history = []\nquestions = [\"Mera naam Akash hai.\", \"Mera naam kya hai?\"]\n\nfor q in questions:\n    history.append({\"role\": \"user\", \"content\": q})\n    response = client.messages.create(\n        model=\"claude-sonnet-4-5\", max_tokens=300,\n        system=\"Tum ek helpful assistant ho.\",\n        messages=history,                 # POORI history\n    )\n    answer = response.content[0].text\n    history.append({\"role\": \"assistant\", \"content\": answer})\n    print(\"AI:\", answer)",
+     ""
+    ],
+    [
+     "p",
+     "दूसरे सवाल पर AI बोलेगा \"Tumhara naam Akash hai\", क्योंकि पहला message भी history में गया। History लंबी = tokens ज़्यादा = पैसा ज़्यादा। इसलिए production में पुराने messages **trim** या **summarize** करते हैं:"
+    ],
+    [
+     "code",
+     "python",
+     "history = [{\"role\": \"user\" if i % 2 else \"assistant\", \"content\": f\"msg {i}\"} for i in range(1, 11)]\nMAX_MESSAGES = 4\n\ntrimmed = history[-MAX_MESSAGES:]\nprint(\"Pehle:\", len(history), \"Ab:\", len(trimmed))\nprint([m[\"content\"] for m in trimmed])\nprint(\"Pehla role:\", trimmed[0][\"role\"])",
+     "Pehle: 10 Ab: 4\n['msg 7', 'msg 8', 'msg 9', 'msg 10']\nPehla role: user"
+    ],
+    [
+     "tip",
+     "ध्यान से देखो: Claude में history का पहला message `user` होना चाहिए और roles बारी-बारी (user, assistant, user...) चलने चाहिए। इसलिए trim हमेशा **जोड़ी (pair)** में करो।"
+    ],
+    [
+     "p",
+     "Production के 3 और rules: **timeout** लगाओ, fail हो तो **retry with exponential backoff** (हर बार दोगुना इंतज़ार), और एक provider fail हो तो दूसरा (**fallback**)। Backoff के wait time:"
+    ],
+    [
+     "code",
+     "python",
+     "waits = [2 ** attempt for attempt in range(5)]\nprint(\"Wait seconds:\", waits)\nprint(\"Total wait:\", sum(waits))",
+     "Wait seconds: [1, 2, 4, 8, 16]\nTotal wait: 31"
+    ],
+    [
+     "analogy",
+     "दुकान बंद मिली तो तुरंत 100 बार दरवाज़ा नहीं खटखटाते। 1 मिनट रुको, फिर 2, फिर 4। Server को भी साँस लेने दो (rate limit error 429 आए तो यही करो)।"
+    ]
+   ]
+  },
+  {
+   "title": "Prompt engineering और hallucination",
+   "blocks": [
+    [
+     "p",
+     "**Prompt** = जो instruction तुम LLM को देते हो। Same model, अच्छा prompt = अच्छा जवाब, बेकार prompt = बेकार जवाब। Garbage in, garbage out।"
+    ],
+    [
+     "analogy",
+     "नए helper को \"कुछ ले आओ\" बोलो तो कुछ भी ले आएगा। \"Market से 2 kg आलू, 50 रुपये तक, receipt के साथ\" बोलो तो सही काम होगा। Prompt में भी इतना ही साफ़ बोलो।"
+    ],
+    [
+     "p",
+     "**अच्छे prompt के 7 हिस्से** (IQ में नाम और example बोलो):"
+    ],
+    [
+     "list",
+     [
+      "**Role** — जैसे \"You are an assistant for a cable manufacturer.\"",
+      "**Clear task** — जैसे \"Summarise in 5 bullet points.\"",
+      "**Rules** — जैसे \"Use only the given text. If not found, say you don't know.\"",
+      "**Output format** — जैसे \"Return JSON with keys: cable_type, size.\"",
+      "**Delimiters** — data को `<<< >>>` या `<doc></doc>` में बंद करो",
+      "**Examples (few-shot)** — 2-3 sample input → output",
+      "**Step by step** — जैसे \"Think step by step, then give the final answer.\""
+     ]
+    ],
+    [
+     "sketch",
+     {
+      "k": "stack",
+      "title": "Prompt की building",
+      "items": [
+       "Role",
+       "Task",
+       "Rules",
+       "Format",
+       "Examples",
+       "Data <<< >>>"
+      ]
+     }
+    ],
+    [
+     "p",
+     "Prompt बस एक string है, इसलिए Python में f-string से template बना सकते हो:"
+    ],
+    [
+     "code",
+     "python",
+     "def build_prompt(tender_text):\n    return f\"\"\"You are an assistant for a cable company.\nTask: extract cable type and size.\nRules: use only the text. If missing, use null.\nFormat: JSON with keys cable_type, size_sqmm.\nText:\n<<<\n{tender_text}\n>>>\"\"\"\n\np = build_prompt(\"Supply of 2C x 16 sqmm XLPE armoured cable, 500 m\")\nprint(p.splitlines()[0])\nprint(p.splitlines()[-2])\nprint(\"Lines:\", len(p.splitlines()))",
+     "You are an assistant for a cable company.\nSupply of 2C x 16 sqmm XLPE armoured cable, 500 m\nLines: 8"
+    ],
+    [
+     "p",
+     "**Zero-shot vs Few-shot:** zero-shot = बिना example सीधा सवाल। Few-shot = पहले 2-3 examples दिखाओ, फिर सवाल। Model को pattern दिख जाता है कि कैसा जवाब चाहिए।"
+    ],
+    [
+     "code",
+     "text",
+     "Classify the document category. Answer with one word.\n\n\"Invoice No 123, Amount Rs 5000\"            -> Invoice\n\"4 core cable, voltage test passed\"         -> QualityReport\n\"Please quote for 500 m copper cable\"       -> Enquiry\n\n\"Purchase order for 2C x 16 sqmm cable\"     ->",
+     ""
+    ],
+    [
+     "p",
+     "Model यहाँ `PurchaseOrder` जैसा एक word देगा, क्योंकि examples ने format सिखा दिया।"
+    ],
+    [
+     "p",
+     "**Chain-of-thought (CoT):** मुश्किल सवाल पर बोलो \"step by step सोचो\"। Model बीच के steps लिखता है तो गलती कम होती है, जैसे exam में rough work करने से। लेकिन tokens (और latency) बढ़ते हैं, इसलिए सिर्फ़ reasoning वाले काम पर use करो।"
+    ],
+    [
+     "p",
+     "**Structured JSON output:** app को जवाब text नहीं, **data** चाहिए। Prompt में JSON माँगो (और API में JSON mode / structured output on करो), फिर code में `json.loads` से check करो:"
+    ],
+    [
+     "code",
+     "python",
+     "import json\n\nreply = '{\"cable_type\": \"XLPE\", \"size_sqmm\": 16, \"cores\": 2, \"quantity_m\": null}'\ndata = json.loads(reply)\n\nrequired = [\"cable_type\", \"size_sqmm\", \"cores\", \"quantity_m\"]\nmissing = [k for k in required if k not in data]\nprint(data[\"cable_type\"], data[\"size_sqmm\"])\nprint(\"Missing keys:\", missing)\nprint(\"Quantity:\", data[\"quantity_m\"])",
+     "XLPE 16\nMissing keys: []\nQuantity: None"
+    ],
+    [
+     "p",
+     "Model कभी-कभी JSON के साथ फ़ालतू text भी बोल देता है। तब `json.loads` fail होगा, और हम उसे पकड़कर **human review** में भेजते हैं, database में नहीं:"
+    ],
+    [
+     "code",
+     "python",
+     "import json\n\nreply = \"Sure! Here is the data: {cable_type: XLPE}\"\ntry:\n    data = json.loads(reply)\n    print(\"OK\", data)\nexcept json.JSONDecodeError:\n    print(\"Invalid JSON -> human review\")",
+     "Invalid JSON -> human review"
+    ],
+    [
+     "tip",
+     "ध्यान से देखो: prompt में \"Use null if missing. Do not guess.\" लिखना बहुत काम की line है। वरना model अपनी तरफ़ से quantity बना देगा। Production में Pydantic model से types भी validate करते हैं।"
+    ],
+    [
+     "p",
+     "**Hallucination** = LLM का confidently गलत या बनाया हुआ जवाब। Example: \"IS 694 की clause 12.3 क्या कहती है?\" → model बोलेगा \"Clause 12.3 states...\" जबकि शायद ऐसी clause है ही नहीं। क्यों? उसका काम likely word देना है, सच check करना नहीं।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "tree",
+      "title": "Hallucination से बचाव",
+      "root": {
+       "label": "कम करो",
+       "children": [
+        {
+         "label": "RAG grounding",
+         "children": []
+        },
+        {
+         "label": "नहीं पता = बोलो",
+         "children": []
+        },
+        {
+         "label": "Temp 0 + JSON",
+         "children": []
+        },
+        {
+         "label": "इंसान verify करे",
+         "children": []
+        }
+       ]
+      }
+     }
+    ],
+    [
+     "list",
+     [
+      "RAG — अपने documents से जवाब दिलाओ, sources दिखाओ",
+      "Prompt: \"If not in context, say you don't know\"",
+      "Temperature 0, structured output + validation",
+      "Choices limit करो — \"सिर्फ़ इन 10 categories में से चुनो\"",
+      "Important decision पर इंसान approve करे"
+     ]
+    ],
+    [
+     "warn",
+     "आम गलती: LLM से पैसे का हिसाब करवाना (costing, GST, copper weight)। **Exact calculation हमेशा Python code में**, LLM सिर्फ़ समझने, निकालने और लिखने के लिए।"
+    ]
+   ]
+  },
+  {
+   "title": "LangChain — models, prompts, chains, output parsers",
+   "blocks": [
+    [
+     "p",
+     "अभी तक OpenAI का अलग code, Claude का अलग। **LangChain** एक framework है जो LLM apps के common टुकड़े ready देता है: **models, prompt templates, output parsers, document loaders, text splitters, vector store connectors, agents**।"
+    ],
+    [
+     "analogy",
+     "हर phone brand का अलग charger = हर AI का अलग SDK। LangChain = universal charger। Model बदलना हो तो बस एक line बदलो।"
+    ],
+    [
+     "code",
+     "bash",
+     "pip install langchain langchain-openai langchain-anthropic",
+     ""
+    ],
+    [
+     "p",
+     "LangChain के 4 basic टुकड़े:"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "LangChain blocks",
+      "head": [
+       "टुकड़ा",
+       "काम"
+      ],
+      "rows": [
+       [
+        "Model",
+        "ChatOpenAI / ChatAnthropic"
+       ],
+       [
+        "Prompt",
+        "{vars} वाला template"
+       ],
+       [
+        "Chain",
+        "prompt | llm | parser"
+       ],
+       [
+        "Parser",
+        "जवाब → str / JSON"
+       ]
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "from langchain_openai import ChatOpenAI\nfrom langchain_core.prompts import ChatPromptTemplate\nfrom langchain_core.output_parsers import StrOutputParser\n\nllm = ChatOpenAI(model=\"gpt-4o-mini\", temperature=0)\n\nprompt = ChatPromptTemplate.from_messages([\n    (\"system\", \"Tum ek {role} ho. {language} mein jawab do.\"),\n    (\"human\", \"{question}\"),\n])\n\nchain = prompt | llm | StrOutputParser()\n\nresult = chain.invoke({\n    \"role\": \"Python teacher\",\n    \"language\": \"Hinglish\",\n    \"question\": \"Decorator kya hai?\",\n})\nprint(result)",
+     ""
+    ],
+    [
+     "p",
+     "इसमें `result` एक simple string होगी (AI का Hinglish जवाब)। `|` (pipe) का मतलब: **एक का output दूसरे का input**। पहले prompt भरा, फिर LLM को गया, फिर parser ने message object से सिर्फ़ text निकाला।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Chain = pipe",
+      "steps": [
+       "{variables}",
+       "Prompt",
+       "LLM",
+       "Parser",
+       "result"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "यह pipe अंदर से कैसे काम करता है? Pure Python में एक छोटा version बनाकर देखो (`__or__` magic method `|` को handle करता है, Stage 5 का OOP याद करो):"
+    ],
+    [
+     "code",
+     "python",
+     "class Step:\n    def __init__(self, fn):\n        self.fn = fn\n    def __or__(self, other):                 # a | b\n        return Step(lambda x: other.fn(self.fn(x)))\n    def invoke(self, x):\n        return self.fn(x)\n\nprompt = Step(lambda d: f\"Explain {d['topic']} in 1 line.\")\nfake_llm = Step(lambda p: {\"content\": \"Reply for: \" + p})\nparser = Step(lambda msg: msg[\"content\"].upper())\n\nchain = prompt | fake_llm | parser\nprint(chain.invoke({\"topic\": \"RAG\"}))",
+     "REPLY FOR: EXPLAIN RAG IN 1 LINE."
+    ],
+    [
+     "p",
+     "**Model switch — 1 line:**"
+    ],
+    [
+     "code",
+     "python",
+     "from langchain_anthropic import ChatAnthropic\n\nllm = ChatAnthropic(model=\"claude-sonnet-4-5\", temperature=0)\nchain = prompt | llm | StrOutputParser()     # baaki sab SAME",
+     ""
+    ],
+    [
+     "p",
+     "**JSON output parser** — जवाब सीधा Python dict/list बनकर आता है:"
+    ],
+    [
+     "code",
+     "python",
+     "from langchain_core.output_parsers import JsonOutputParser\n\nprompt = ChatPromptTemplate.from_template(\n    \"Top 3 {topic} batao. Sirf JSON: [{{\\\"name\\\": \\\"...\\\", \\\"reason\\\": \\\"...\\\"}}]\"\n)\nchain = prompt | llm | JsonOutputParser()\n\nitems = chain.invoke({\"topic\": \"Python libraries for AI\"})\nfor item in items:\n    print(item[\"name\"], \"-\", item[\"reason\"])",
+     ""
+    ],
+    [
+     "p",
+     "यहाँ `items` एक Python list होगी, जैसे `numpy - fast arrays`, `pandas - tables`, `scikit-learn - ML models`। ध्यान दो: template में JSON के `{ }` को `{{ }}` लिखते हैं, वरना LangChain उसे variable समझेगा।"
+    ],
+    [
+     "tip",
+     "फ़ायदा: जल्दी बनता है, provider बदलना आसान, RAG के loaders/splitters ready। नुकसान: एक extra layer, versions जल्दी बदलते हैं, debug थोड़ा मुश्किल। IQ line: \"Simple feature के लिए सीधा SDK, RAG pipeline के लिए LangChain।\""
+    ],
+    [
+     "warn",
+     "आम गलती: पुराने tutorials का `from langchain.llms import OpenAI` या `LLMChain` copy करना। नया style है `langchain_openai`, `langchain_core` और `|` pipe (LCEL)।"
+    ]
+   ]
+  },
+  {
+   "title": "Embeddings, cosine similarity और vector databases",
+   "blocks": [
+    [
+     "p",
+     "**Embedding** = text को numbers की list (**vector**) में बदलना, ऐसे कि **मतलब** numbers में आ जाए। मिलते-जुलते मतलब वाले texts के vectors पास-पास होते हैं, चाहे words अलग हों।"
+    ],
+    [
+     "analogy",
+     "शहर के मोहल्ले सोचो: \"cable price\", \"wire rate\", \"copper का भाव\" एक मोहल्ले में रहते हैं। \"cricket\", \"match\", \"score\" दूसरे मोहल्ले में। Search = \"मेरे सवाल के घर के सबसे पास कौन रहता है?\""
+    ],
+    [
+     "sketch",
+     {
+      "k": "chart",
+      "title": "Meaning space (2D)",
+      "type": "scatter",
+      "points": [
+       [
+        1,
+        8
+       ],
+       [
+        1.5,
+        7.5
+       ],
+       [
+        2,
+        8.5
+       ],
+       [
+        7,
+        2
+       ],
+       [
+        7.5,
+        2.8
+       ],
+       [
+        8,
+        1.5
+       ]
+      ],
+      "xl": "dimension 1",
+      "yl": "dimension 2"
+     }
+    ],
+    [
+     "p",
+     "असली embedding model (जैसे OpenAI `text-embedding-3-small`) हर text के लिए ~1536 numbers देता है। समझने के लिए हम 3 numbers वाले छोटे vectors लेते हैं।"
+    ],
+    [
+     "p",
+     "**Cosine similarity** = दो vectors के बीच का angle। Formula: `dot(a, b) / (|a| * |b|)`। **1 = same direction (same मतलब), 0 = कोई रिश्ता नहीं, -1 = उल्टा।**"
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\nprice   = np.array([0.9, 0.1, 0.2])\nrate    = np.array([0.8, 0.2, 0.1])\ncricket = np.array([0.1, 0.9, 0.3])\n\ndef cosine(a, b):\n    return float(np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)))\n\nprint(\"price vs rate   :\", round(cosine(price, rate), 3))\nprint(\"price vs cricket:\", round(cosine(price, cricket), 3))",
+     "price vs rate   : 0.987\nprice vs cricket: 0.271"
+    ],
+    [
+     "p",
+     "\"price\" और \"rate\" का score 0.987 (लगभग same मतलब), \"cricket\" का सिर्फ़ 0.271। Phone पर numpy नहीं है, तो यही pure Python में (practice में यही आएगा):"
+    ],
+    [
+     "code",
+     "python",
+     "import math\n\ndef cosine(a, b):\n    dot = sum(x * y for x, y in zip(a, b))\n    na = math.sqrt(sum(x * x for x in a))\n    nb = math.sqrt(sum(y * y for y in b))\n    return dot / (na * nb)\n\nprint(round(cosine([1, 0], [1, 0]), 2))\nprint(round(cosine([1, 0], [0, 1]), 2))\nprint(round(cosine([1, 0], [-1, 0]), 2))",
+     "1.0\n0.0\n-1.0"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Cosine score का मतलब",
+      "head": [
+       "Score",
+       "मतलब"
+      ],
+      "rows": [
+       [
+        "1",
+        "same direction"
+       ],
+       [
+        "0",
+        "कोई रिश्ता नहीं"
+       ],
+       [
+        "-1",
+        "बिल्कुल उल्टा"
+       ]
+      ]
+     }
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "Keyword vs Semantic search",
+      "left": {
+       "title": "Keyword",
+       "items": [
+        "words match",
+        "\"rate\" से \"price\" नहीं",
+        "\"IS 694\" exact अच्छा",
+        "SQL LIKE, BM25"
+       ]
+      },
+      "right": {
+       "title": "Semantic",
+       "items": [
+        "मतलब match",
+        "\"rate\" से \"price\" हाँ",
+        "exact code कमज़ोर",
+        "embeddings + cosine"
+       ]
+      }
+     }
+    ],
+    [
+     "tip",
+     "ध्यान से देखो: production में **hybrid search** best है = keyword + semantic दोनों। जैसे `final = 0.7 * vector_score + 0.3 * keyword_score`। Cable codes और IS numbers के लिए keyword ज़रूरी है।"
+    ],
+    [
+     "p",
+     "अब top-k search खुद करके देखो। हर document का vector एक matrix की row है; query से सबका cosine निकालो और सबसे बड़े score वाले चुनो:"
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\ndocs = [\"warranty policy\", \"payment terms\", \"copper price\", \"delivery time\"]\nvecs = np.array([[0.9, 0.1, 0.0], [0.1, 0.9, 0.1], [0.0, 0.3, 0.9], [0.3, 0.2, 0.2]])\nquery = np.array([0.8, 0.2, 0.1])           # \"guarantee kitne din?\"\n\nscores = vecs @ query / (np.linalg.norm(vecs, axis=1) * np.linalg.norm(query))\ntop = np.argsort(scores)[::-1][:2]\nprint([docs[i] for i in top])\nprint(np.round(scores[top], 2).tolist())",
+     "['warranty policy', 'delivery time']\n[0.98, 0.88]"
+    ],
+    [
+     "p",
+     "**Vector database** = embeddings store करने और लाखों में से सबसे पास वाले **तेज़ी से** ढूँढने के लिए बना database (अंदर ANN index जैसे HNSW, जो हर vector से compare नहीं करता)।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "कौन-सा vector DB",
+      "head": [
+       "DB",
+       "कब"
+      ],
+      "rows": [
+       [
+        "FAISS",
+        "local, prototype, fast"
+       ],
+       [
+        "Chroma",
+        "simple, Python, छोटा prod"
+       ],
+       [
+        "pgvector",
+        "Postgres पहले से है"
+       ],
+       [
+        "Pinecone/Qdrant",
+        "बड़ा scale, managed"
+       ]
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "import chromadb\n\nclient = chromadb.PersistentClient(path=\"./vectordb\")\ncol = client.get_or_create_collection(\"docs\")\n\ncol.add(\n    ids=[\"1\", \"2\"],\n    documents=[\"Warranty is 12 months from dispatch.\", \"Payment terms are 30 days.\"],\n    metadatas=[{\"source\": \"terms.pdf\", \"page\": 1}, {\"source\": \"terms.pdf\", \"page\": 2}],\n)\n\nres = col.query(query_texts=[\"how long is the guarantee?\"], n_results=1)\nprint(res[\"documents\"])",
+     ""
+    ],
+    [
+     "p",
+     "इसका output होगा `[['Warranty is 12 months from dispatch.']]`। \"guarantee\" लिखा था, \"Warranty\" मिला — मतलब से match हुआ। Chroma अपना default embedding model खुद चलाता है (पहली बार download करता है)।"
+    ],
+    [
+     "p",
+     "**pgvector** — Postgres में ही vector column (Stage 6 का SQL काम आएगा):"
+    ],
+    [
+     "code",
+     "sql",
+     "CREATE EXTENSION IF NOT EXISTS vector;\n\nCREATE TABLE chunks (\n    id SERIAL PRIMARY KEY,\n    content TEXT,\n    source TEXT,\n    embedding VECTOR(1536)\n);\n\n-- <=> = cosine distance (chhota = zyada similar)\nSELECT content, source\nFROM chunks\nORDER BY embedding <=> '[0.12, 0.05, ...]'\nLIMIT 3;",
+     ""
+    ],
+    [
+     "warn",
+     "आम गलती: documents को एक embedding model से store करना और query को दूसरे model से embed करना। **दोनों के लिए same embedding model** ज़रूरी है, वरना numbers का मतलब ही अलग होगा।"
+    ]
+   ]
+  },
+  {
+   "title": "RAG pipeline — chunking, retrieval और evaluation",
+   "blocks": [
+    [
+     "p",
+     "**Problem:** \"हमारी company की warranty policy क्या है?\" LLM को तुम्हारे documents नहीं पता, तो वह कुछ बना देगा (hallucination)। पूरे 500 documents prompt में डालो? Context window में नहीं आएँगे, और बहुत महँगा।"
+    ],
+    [
+     "p",
+     "**RAG = Retrieval Augmented Generation.** जवाब देने से पहले अपने documents से **relevant टुकड़े ढूँढो (Retrieval)**, उन्हें prompt में **जोड़ो (Augmented)**, फिर LLM से **जवाब बनवाओ (Generation)**।"
+    ],
+    [
+     "analogy",
+     "Open-book exam: student (LLM) को पूरी library याद नहीं। सवाल आया → सही किताब का सही page खोला (retrieve) → उस page से जवाब लिखा (generate)।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "RAG के 6 steps",
+      "steps": [
+       "Load",
+       "Split",
+       "Embed",
+       "Store",
+       "Retrieve",
+       "Generate"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "2 phases",
+      "left": {
+       "title": "Indexing (एक बार)",
+       "items": [
+        "Load: PDF/Excel से text",
+        "Split: chunks",
+        "Embed: vectors",
+        "Store: vector DB"
+       ]
+      },
+      "right": {
+       "title": "Query (हर सवाल)",
+       "items": [
+        "सवाल का embedding",
+        "Retrieve top-k",
+        "Prompt + context",
+        "जवाब Generate"
+       ]
+      }
+     }
+    ],
+    [
+     "p",
+     "**Chunking क्यों?** पूरा 50 page का document एक embedding में = warranty, payment, delivery सब घुल गया, search बेकार। छोटे chunks (~300-800 tokens) = सही paragraph मिलता है। **Overlap क्यों?** जो बात दो chunks की boundary पर कट गई, वह overlap से दोनों में पूरी रहती है।"
+    ],
+    [
+     "code",
+     "python",
+     "def chunk_text(text, size, overlap):\n    chunks = []\n    step = size - overlap\n    for start in range(0, len(text), step):\n        chunks.append(text[start:start + size])\n        if start + size >= len(text):\n            break\n    return chunks\n\ntext = \"ABCDEFGHIJKLMNOPQRST\"\nfor c in chunk_text(text, size=8, overlap=3):\n    print(c)",
+     "ABCDEFGH\nFGHIJKLM\nKLMNOPQR\nPQRST"
+    ],
+    [
+     "p",
+     "ध्यान से देखो: हर chunk के आखिरी 3 letters अगले chunk की शुरुआत में दोबारा आए (FGH, KLM, PQR)। यही overlap है।"
+    ],
+    [
+     "list",
+     [
+      "**Fixed size** — हर 500 characters/tokens पर काटो (simple, कभी-कभी sentence बीच में कट जाता है)",
+      "**Sentence / paragraph** — `.` या खाली line पर काटो (मतलब साफ़ रहता है)",
+      "**Recursive** — पहले paragraph, फिर line, फिर sentence पर तोड़ने की कोशिश (LangChain `RecursiveCharacterTextSplitter`, सबसे common)",
+      "**Heading / structure based** — PDF के headings, Excel की rows, code के functions पर",
+      "Rule of thumb: 300-800 tokens, 10-20% overlap, और हर chunk के साथ **metadata** (file, page)"
+     ]
+    ],
+    [
+     "p",
+     "अब एक **mini RAG retriever** बिना किसी library के — word overlap से score, top-k, और **score gate** (कमज़ोर match पर \"नहीं मिला\"):"
+    ],
+    [
+     "code",
+     "python",
+     "STOP = {\"what\", \"is\", \"the\", \"of\", \"for\", \"a\", \"on\", \"in\", \"how\"}\n\nchunks = [\n    \"Warranty for armoured cables is 12 months from dispatch.\",\n    \"Payment terms are 30 days from invoice.\",\n    \"Delivery within Delhi NCR takes 3 to 5 days.\",\n]\n\ndef words(text):\n    return {w.strip(\".,?\").lower() for w in text.split()} - STOP\n\ndef retrieve(question, k=1, min_score=0.2):\n    q = words(question)\n    scored = []\n    for c in chunks:\n        cw = words(c)\n        score = len(q & cw) / len(q | cw)          # Jaccard overlap\n        scored.append((round(score, 2), c))\n    scored.sort(reverse=True)\n    return [x for x in scored[:k] if x[0] >= min_score]\n\nprint(retrieve(\"What is the warranty for armoured cables?\"))\nprint(retrieve(\"What is the capital of France?\"))",
+     "[(0.43, 'Warranty for armoured cables is 12 months from dispatch.')]\n[]"
+    ],
+    [
+     "p",
+     "पहले सवाल पर warranty वाला chunk मिला। दूसरे पर खाली list `[]` — यही **score gate** है: कमज़ोर context पर LLM से पूछो ही मत, सीधे \"documents में नहीं मिला\" बोलो। असली RAG में word overlap की जगह embeddings का cosine होता है, idea same है।"
+    ],
+    [
+     "p",
+     "**Generate step** — retrieved chunks + सवाल को एक grounded prompt में डालो:"
+    ],
+    [
+     "code",
+     "python",
+     "def make_rag_prompt(question, hits):\n    context = \"\\n\".join(f\"- {c}\" for _, c in hits)\n    return (\n        \"Answer using ONLY the context. If not found, say 'Nahi mila'.\\n\"\n        f\"Context:\\n{context}\\n\"\n        f\"Question: {question}\"\n    )\n\nhits = [(0.5, \"Warranty for armoured cables is 12 months from dispatch.\")]\nprint(make_rag_prompt(\"Warranty kitni hai?\", hits))",
+     "Answer using ONLY the context. If not found, say 'Nahi mila'.\nContext:\n- Warranty for armoured cables is 12 months from dispatch.\nQuestion: Warranty kitni hai?"
+    ],
+    [
+     "p",
+     "**LangChain में पूरा RAG** (book का code, याद करने लायक):"
+    ],
+    [
+     "code",
+     "python",
+     "from langchain_openai import ChatOpenAI, OpenAIEmbeddings\nfrom langchain_community.document_loaders import PyPDFLoader\nfrom langchain_text_splitters import RecursiveCharacterTextSplitter\nfrom langchain_community.vectorstores import FAISS\nfrom langchain_core.prompts import ChatPromptTemplate\nfrom langchain_core.output_parsers import StrOutputParser\nfrom langchain_core.runnables import RunnablePassthrough\n\ndocs = PyPDFLoader(\"company_manual.pdf\").load()                       # 1 LOAD\nsplitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)\nchunks = splitter.split_documents(docs)                              # 2 SPLIT\nvectorstore = FAISS.from_documents(chunks, OpenAIEmbeddings())       # 3 EMBED + 4 STORE\nretriever = vectorstore.as_retriever(search_kwargs={\"k\": 3})         # 5 RETRIEVE\n\nprompt = ChatPromptTemplate.from_template(\n    \"Context:\\n{context}\\n\\nQuestion: {question}\\n\"\n    \"Sirf context se jawab do. Nahi mila to bolo 'Nahi mila'.\"\n)\n\ndef format_docs(docs):\n    return \"\\n\\n\".join(d.page_content for d in docs)\n\nrag_chain = (\n    {\"context\": retriever | format_docs, \"question\": RunnablePassthrough()}\n    | prompt | ChatOpenAI(model=\"gpt-4o-mini\", temperature=0) | StrOutputParser()\n)\nprint(rag_chain.invoke(\"Company ki leave policy kya hai?\"))          # 6 GENERATE",
+     ""
+    ],
+    [
+     "p",
+     "यह PDF से leave policy वाला जवाब देगा, सिर्फ़ manual के content से। Manual में न हो तो \"Nahi mila\"।"
+    ],
+    [
+     "p",
+     "**RAG का evaluation** — \"मुझे अच्छा लगा\" काफ़ी नहीं। 30-50 असली सवाल + सही जवाब का **test set** बनाओ (बाहर के सवाल भी, जिनका जवाब \"NOT_FOUND\" होना चाहिए)। हर change (chunk size, model, prompt) के बाद पूरा set चलाओ। **Retrieval और answer अलग-अलग check करो:**"
+    ],
+    [
+     "code",
+     "python",
+     "tests = [\n    {\"q\": \"warranty?\", \"expected_chunk\": 0, \"retrieved\": [0, 2]},\n    {\"q\": \"payment terms?\", \"expected_chunk\": 1, \"retrieved\": [1, 0]},\n    {\"q\": \"delivery time?\", \"expected_chunk\": 2, \"retrieved\": [0, 1]},\n    {\"q\": \"GST number?\", \"expected_chunk\": 1, \"retrieved\": [1, 2]},\n]\n\nhits = sum(1 for t in tests if t[\"expected_chunk\"] in t[\"retrieved\"])\nprint(f\"Hit rate @2: {hits}/{len(tests)} = {hits / len(tests):.0%}\")\nfails = [t[\"q\"] for t in tests if t[\"expected_chunk\"] not in t[\"retrieved\"]]\nprint(\"Fix these:\", fails)",
+     "Hit rate @2: 3/4 = 75%\nFix these: ['delivery time?']"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "RAG metrics",
+      "head": [
+       "Metric",
+       "सवाल"
+      ],
+      "rows": [
+       [
+        "Hit rate / Recall@k",
+        "सही chunk आया?"
+       ],
+       [
+        "Context precision",
+        "कचरा कितना आया?"
+       ],
+       [
+        "Faithfulness",
+        "जवाब context से?"
+       ],
+       [
+        "Answer relevance",
+        "सवाल का जवाब?"
+       ]
+      ]
+     }
+    ],
+    [
+     "tip",
+     "ध्यान से देखो: RAGAS जैसी libraries ये metrics LLM-as-judge से निकालती हैं। Production में user का 👍/👎, \"नहीं मिला\" कितनी बार आया, और गलत जवाब log करके test set में जोड़ना — यही असली improvement loop है।"
+    ],
+    [
+     "list",
+     [
+      "Better RAG के senior points: अच्छी chunking (headings पर)",
+      "Metadata + sources दिखाओ (file, page)",
+      "Hybrid search (keyword + semantic दोनों)",
+      "Re-ranking: पहले 20 लाओ, cross-encoder से best 4 चुनो",
+      "Score gate, scanned PDF के लिए OCR, document बदले तो re-index"
+     ]
+    ],
+    [
+     "warn",
+     "आम गलती: retrieval test किए बिना सिर्फ़ prompt बदलते रहना। 80% RAG problems **retrieval** में होती हैं (गलत chunk आया), LLM में नहीं।"
+    ]
+   ]
+  }
+ ],
+ "teach": [
+  {
+   "say": "LLM का एक ही काम है: अगला token guess करना। बहुत बड़ा autocomplete। इसलिए कभी-कभी confidently गलत भी बोलता है।",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "भारत की राजधानी",
+     "New",
+     "Delhi"
+    ],
+    "dir": "h"
+   },
+   "code": null
+  },
+  {
+   "say": "Token मतलब text का टुकड़ा। पैसा और limit दोनों tokens में। Context window मतलब desk का size — कितना एक साथ पढ़ सकता है।",
+   "sketch": {
+    "k": "array",
+    "items": [
+     "Cable",
+     " cost",
+     "ing"
+    ],
+    "index": true
+   },
+   "code": null
+  },
+  {
+   "say": "Temperature randomness का knob है। Zero पर हर बार same जवाब, ज़्यादा पर creative। Data निकालना हो तो zero।",
+   "sketch": {
+    "k": "table",
+    "head": [
+     "Temp",
+     "कब"
+    ],
+    "rows": [
+     [
+      "0",
+      "extraction"
+     ],
+     [
+      "0.7",
+      "chat"
+     ],
+     [
+      "1+",
+      "कविता"
+     ]
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "तीन roles याद करो: system rules देता है, user सवाल पूछता है, assistant पिछला जवाब है। Model को memory नहीं, history हर बार भेजो।",
+   "sketch": {
+    "k": "stack",
+    "items": [
+     "system: rules",
+     "user: सवाल",
+     "assistant: जवाब",
+     "user: नया सवाल"
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "API call का pattern हर company में same है: key environment से लो, model और messages भेजो, जवाब निकालो।",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Client + key",
+     "model + messages",
+     "response"
+    ],
+    "dir": "h"
+   },
+   "code": "client = anthropic.Anthropic()\nr = client.messages.create(model=MODEL, max_tokens=300,\n    messages=[{\"role\": \"user\", \"content\": \"Hi\"}])\nprint(r.content[0].text)"
+  },
+  {
+   "say": "अच्छा prompt एक building जैसा है: role, task, rules, format, examples, और data delimiters में बंद। Few-shot मतलब पहले examples दिखाओ।",
+   "sketch": {
+    "k": "stack",
+    "items": [
+     "Role",
+     "Task",
+     "Rules",
+     "Format",
+     "Examples",
+     "<<< Data >>>"
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "LangChain में pipe लगाते हैं: prompt, फिर LLM, फिर parser। एक का output दूसरे का input। Model बदलो, बाकी same।",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Prompt",
+     "LLM",
+     "Parser"
+    ],
+    "dir": "h"
+   },
+   "code": "chain = prompt | llm | StrOutputParser()\nchain.invoke({\"topic\": \"RAG\"})"
+  },
+  {
+   "say": "Embedding text को numbers बनाता है। Same मतलब वाले पास-पास। कितने पास हैं, यह cosine similarity बताता है: 1 same, 0 कोई रिश्ता नहीं।",
+   "sketch": {
+    "k": "chart",
+    "type": "scatter",
+    "points": [
+     [
+      1,
+      8
+     ],
+     [
+      1.5,
+      7.5
+     ],
+     [
+      7,
+      2
+     ],
+     [
+      7.5,
+      2.5
+     ]
+    ],
+    "xl": "dim 1",
+    "yl": "dim 2"
+   },
+   "code": "dot / (norm(a) * norm(b))"
+  },
+  {
+   "say": "RAG के 6 steps मुँह-ज़ुबानी: Load, Split, Embed, Store — ये एक बार। Retrieve, Generate — हर सवाल पर।",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Load",
+     "Split",
+     "Embed",
+     "Store",
+     "Retrieve",
+     "Generate"
+    ],
+    "dir": "h"
+   },
+   "code": null
+  },
+  {
+   "say": "आखिरी बात: chunks में overlap रखो, कमज़ोर match पर score gate लगाओ, और test set से retrieval और answer अलग-अलग check करो। अब practice!",
+   "sketch": {
+    "k": "compare",
+    "left": {
+     "title": "Retrieval check",
+     "items": [
+      "सही chunk आया?",
+      "hit rate @k"
+     ]
+    },
+    "right": {
+     "title": "Answer check",
+     "items": [
+      "context से है?",
+      "सही जवाब?"
+     ]
+    }
+   },
+   "code": null
+  }
+ ],
+ "practice": [
+  {
+   "q": "एक simple **tokenizer** बनाओ: text को lowercase करो, `.,?!` हटाओ, words में तोड़ो। फिर words count और approx tokens (words / 0.75, round) print करो, और cost निकालो अगर 1 token = Rs 0.002 हो (approx tokens से, 3 decimal)। Expected:\n['xlpe', 'cable', 'ka', 'rate', 'kya', 'hai', 'aaj']\nWords: 7\nTokens: 9\nCost: Rs 0.018",
+   "starter": "text = \"XLPE cable ka rate kya hai, aaj?\"\n\ndef tokenize(t):\n    # TODO: lowercase, .,?! hatao, split\n    pass\n\nwords = tokenize(text)\nprint(words)\n# TODO: Words, Tokens, Cost print karo\n",
+   "hint": "for ch in \".,?!\": t = t.replace(ch, \"\")  फिर t.lower().split()। Cost = tokens * 0.002, f\"{cost:.3f}\"।",
+   "solution": "text = \"XLPE cable ka rate kya hai, aaj?\"\n\ndef tokenize(t):\n    for ch in \".,?!\":\n        t = t.replace(ch, \"\")\n    return t.lower().split()\n\nwords = tokenize(text)\nprint(words)\ntokens = round(len(words) / 0.75)\nprint(\"Words:\", len(words))\nprint(\"Tokens:\", tokens)\nprint(f\"Cost: Rs {tokens * 0.002:.3f}\")",
+   "expect": "['xlpe', 'cable', 'ka', 'rate', 'kya', 'hai', 'aaj']\nWords: 7\nTokens: 9\nCost: Rs 0.018"
+  },
+  {
+   "q": "`cosine(a, b)` function बनाओ (सिर्फ़ `math`, numpy नहीं) और query vector से तीनों documents का score (2 decimal) print करो, फिर सबसे मिलता-जुलता document। Expected:\nwarranty 0.98\npayment 0.38\ndelivery 0.67\nBest: warranty",
+   "starter": "import math\n\ndocs = {\n    \"warranty\": [0.9, 0.1, 0.1],\n    \"payment\": [0.1, 0.9, 0.2],\n    \"delivery\": [0.4, 0.3, 0.8],\n}\nquery = [0.8, 0.2, 0.2]\n\ndef cosine(a, b):\n    # TODO: dot / (norm a * norm b)\n    pass\n\n# TODO: har doc ka score print karo, phir Best\n",
+   "hint": "dot = sum(x*y for x, y in zip(a, b)); norm = math.sqrt(sum(x*x for x in a))। Best के लिए max(docs, key=...)।",
+   "solution": "import math\n\ndocs = {\n    \"warranty\": [0.9, 0.1, 0.1],\n    \"payment\": [0.1, 0.9, 0.2],\n    \"delivery\": [0.4, 0.3, 0.8],\n}\nquery = [0.8, 0.2, 0.2]\n\ndef cosine(a, b):\n    dot = sum(x * y for x, y in zip(a, b))\n    na = math.sqrt(sum(x * x for x in a))\n    nb = math.sqrt(sum(y * y for y in b))\n    return dot / (na * nb)\n\nscores = {name: cosine(vec, query) for name, vec in docs.items()}\nfor name, s in scores.items():\n    print(name, round(s, 2))\nprint(\"Best:\", max(scores, key=scores.get))",
+   "expect": "warranty 0.98\npayment 0.38\ndelivery 0.67\nBest: warranty"
+  },
+  {
+   "q": "**Mini RAG retriever** बनाओ। हर chunk का score = सवाल के कितने words (stop words हटाकर) chunk में हैं। सबसे ज़्यादा score वाला chunk लो; अगर score 0 हो तो `Nahi mila` (score gate)। तीनों सवालों का जवाब print करो। Expected:\nwarranty kitni hai? -> Warranty is 12 months from dispatch.\npayment kab tak? -> Payment within 30 days of invoice.\ncricket score? -> Nahi mila",
+   "starter": "STOP = {\"kitni\", \"hai\", \"kab\", \"tak\", \"is\", \"of\", \"from\"}\nchunks = [\n    \"Warranty is 12 months from dispatch.\",\n    \"Payment within 30 days of invoice.\",\n    \"Delivery in 5 days.\",\n]\n\ndef words(t):\n    # TODO: lowercase, '.' aur '?' hatao, split, set banao, STOP hatao\n    pass\n\ndef answer(q):\n    # TODO: best chunk dhoondo, score 0 -> \"Nahi mila\"\n    pass\n\nfor q in [\"warranty kitni hai?\", \"payment kab tak?\", \"cricket score?\"]:\n    print(q, \"->\", answer(q))\n",
+   "hint": "score = len(words(q) & words(c))। best = max(chunks, key=...)। पहले check करो कि best का score > 0 है।",
+   "solution": "STOP = {\"kitni\", \"hai\", \"kab\", \"tak\", \"is\", \"of\", \"from\"}\nchunks = [\n    \"Warranty is 12 months from dispatch.\",\n    \"Payment within 30 days of invoice.\",\n    \"Delivery in 5 days.\",\n]\n\ndef words(t):\n    t = t.lower().replace(\".\", \"\").replace(\"?\", \"\")\n    return set(t.split()) - STOP\n\ndef answer(q):\n    qw = words(q)\n    best = max(chunks, key=lambda c: len(qw & words(c)))\n    if len(qw & words(best)) == 0:\n        return \"Nahi mila\"\n    return best\n\nfor q in [\"warranty kitni hai?\", \"payment kab tak?\", \"cricket score?\"]:\n    print(q, \"->\", answer(q))",
+   "expect": "warranty kitni hai? -> Warranty is 12 months from dispatch.\npayment kab tak? -> Payment within 30 days of invoice.\ncricket score? -> Nahi mila"
+  }
+ ],
+ "quiz": [
+  {
+   "q": "LLM असल में क्या करता है?",
+   "o": [
+    "Internet पर live search",
+    "अगला token predict करता है",
+    "Database query चलाता है",
+    "सच check करके जवाब देता है"
+   ],
+   "a": 1,
+   "why": "LLM training के patterns से सबसे likely अगला token चुनता है; इसलिए hallucination हो सकता है।"
+  },
+  {
+   "q": "Tender PDF से cable size JSON में निकालना है। Temperature कितना रखोगे?",
+   "o": [
+    "0",
+    "0.9",
+    "1.5",
+    "2"
+   ],
+   "a": 0,
+   "why": "Extraction में हर बार same, consistent जवाब चाहिए, इसलिए temperature 0।"
+  },
+  {
+   "q": "Claude को दूसरी API call में पिछली बात कैसे याद रहेगी?",
+   "o": [
+    "Model खुद याद रखता है",
+    "temperature बढ़ाओ",
+    "पूरी history messages list में दोबारा भेजो",
+    "max_tokens बढ़ाओ"
+   ],
+   "a": 2,
+   "why": "Model stateless है; हर call में पुराने user/assistant messages भेजने पड़ते हैं।"
+  },
+  {
+   "q": "Anthropic Claude API में system prompt कहाँ जाता है?",
+   "o": [
+    "अलग `system=` parameter में",
+    "messages list के अंदर role system",
+    "Headers में",
+    "max_tokens में"
+   ],
+   "a": 0,
+   "why": "Claude में system एक अलग parameter है; OpenAI में वह messages के अंदर जाता है।"
+  },
+  {
+   "q": "API key रखने का सही तरीका?",
+   "o": [
+    "Code में string",
+    "GitHub README में",
+    "Frontend JavaScript में",
+    "Environment variable / .env (gitignore में)"
+   ],
+   "a": 3,
+   "why": "Key code या repo में हो तो leak हो जाती है; env variable से पढ़ो।"
+  },
+  {
+   "q": "Prompt में पहले 2-3 input→output examples देना क्या कहलाता है?",
+   "o": [
+    "Zero-shot",
+    "Fine-tuning",
+    "Few-shot",
+    "Streaming"
+   ],
+   "a": 2,
+   "why": "Few-shot prompting examples से model को format/pattern दिखाता है।"
+  },
+  {
+   "q": "LangChain में `prompt | llm | StrOutputParser()` का `|` क्या करता है?",
+   "o": [
+    "एक का output अगले का input बनाता है",
+    "OR condition",
+    "Parallel run",
+    "Error handle करता है"
+   ],
+   "a": 0,
+   "why": "LCEL pipe steps को जोड़ता है: prompt भरा, LLM को गया, parser ने text निकाला।"
+  },
+  {
+   "q": "Cosine similarity 1 का मतलब?",
+   "o": [
+    "बिल्कुल उल्टा मतलब",
+    "कोई रिश्ता नहीं",
+    "Vector खाली है",
+    "Same direction, लगभग same मतलब"
+   ],
+   "a": 3,
+   "why": "1 = same direction, 0 = कोई रिश्ता नहीं, -1 = उल्टा।"
+  },
+  {
+   "q": "RAG के steps का सही order?",
+   "o": [
+    "Embed → Load → Store → Split → Generate → Retrieve",
+    "Load → Split → Embed → Store → Retrieve → Generate",
+    "Retrieve → Load → Embed → Generate",
+    "Split → Generate → Load → Store"
+   ],
+   "a": 1,
+   "why": "Indexing: Load, Split, Embed, Store। Query: Retrieve, Generate।"
+  },
+  {
+   "q": "Chunks में overlap क्यों रखते हैं?",
+   "o": [
+    "Tokens बचाने के लिए",
+    "Embedding fast करने के लिए",
+    "Boundary पर कटी बात दोनों chunks में पूरी रहे",
+    "Vector DB की requirement है"
+   ],
+   "a": 2,
+   "why": "जो sentence दो chunks के बीच कट जाता, overlap से वह कम से कम एक chunk में पूरा रहता है।"
+  }
+ ],
+ "iq": [
+  {
+   "q": "LLM क्या है? आसान शब्दों में समझाओ।",
+   "a": "LLM एक बड़ा transformer model है जो huge text पर train हुआ है और अगला token predict करता है। इसी से वह लिखना, summarize, code और सवाल-जवाब कर लेता है। क्योंकि वह probability से likely word चुनता है, सच check नहीं करता, इसलिए कभी-कभी confidently गलत भी बोलता है (hallucination)।"
+  },
+  {
+   "q": "Token और context window क्या हैं, और क्यों matter करते हैं?",
+   "a": "Token text का छोटा टुकड़ा है (English में ~¾ word)। Context window वह max tokens है जो model एक call में पढ़ सकता है — prompt, history, documents और जवाब सब मिलाकर। Cost और limit दोनों tokens में होते हैं, इसलिए history trim, छोटे prompts और RAG use करते हैं।"
+  },
+  {
+   "q": "Temperature क्या है? कब 0 और कब ज़्यादा?",
+   "a": "Temperature output की randomness control करता है। 0 पर model हमेशा top token चुनता है, जवाब consistent — extraction, classification, JSON के लिए। 0.7-1 पर creative writing या brainstorming। Production data tasks में मैं 0 रखता हूँ।"
+  },
+  {
+   "q": "System, user और assistant messages में फ़र्क? Model को memory है क्या?",
+   "a": "System = role और rules, user = इंसान का input, assistant = model के पिछले जवाब। Model stateless है, इसलिए multi-turn chat के लिए पूरी history हर call में भेजते हैं। History लंबी हो तो पुराने messages trim या summarize करते हैं ताकि cost और context limit control में रहे।"
+  },
+  {
+   "q": "Production में LLM API call को reliable कैसे बनाओगे?",
+   "a": "API key env variable में, हर call पर timeout, 429/5xx पर exponential backoff के साथ retry, और एक provider fail हो तो fallback model। max_tokens से cost limit, token usage और latency log करता हूँ, और लंबे जवाब के लिए streaming ताकि user को तुरंत कुछ दिखे।"
+  },
+  {
+   "q": "Prompt engineering की main techniques बताओ।",
+   "a": "Clear role, specific task, rules (\"सिर्फ़ दिए गए text से, नहीं मिला तो बोलो\"), fixed output format जैसे JSON, data के चारों ओर delimiters, few-shot examples, और complex reasoning के लिए step-by-step (chain-of-thought)। Prompts को भी code की तरह test set पर test करता हूँ।"
+  },
+  {
+   "q": "Hallucination क्या है और कैसे कम करोगे?",
+   "a": "Model का confidently गलत या बनाया हुआ जवाब। कम करने के लिए: RAG से grounding, \"नहीं पता तो बोलो\" rule, temperature 0, score gate, structured output + validation, choices को fixed list तक limit, sources दिखाना, और important decisions पर human review। पैसे का हिसाब हमेशा code से, LLM से नहीं।"
+  },
+  {
+   "q": "LLM से reliable JSON कैसे लोगे?",
+   "a": "Prompt में exact keys और \"missing हो तो null\" लिखो, API का JSON mode / structured output use करो, temperature 0 रखो। फिर `json.loads` और Pydantic से validate करो; fail हो तो retry या human review, सीधे database में कभी नहीं।\n`data = Model.model_validate_json(reply)`"
+  },
+  {
+   "q": "Embedding और cosine similarity क्या है?",
+   "a": "Embedding text का dense vector है जिसमें मतलब encode होता है, इसलिए मिलते-जुलते मतलब वाले texts पास होते हैं चाहे words अलग हों। Cosine similarity दो vectors के angle का cosine है: dot(a,b)/(|a||b|), 1 = same direction, 0 = unrelated। Semantic search इसी से होता है।"
+  },
+  {
+   "q": "Vector database क्या है? FAISS, Chroma, pgvector में कब क्या?",
+   "a": "Vector DB embeddings store करके nearest neighbours ANN index (जैसे HNSW) से तेज़ी से ढूँढता है, metadata filter के साथ। FAISS = local library, prototype और speed। Chroma = simple Python DB, छोटे production apps। pgvector = अगर Postgres पहले से है तो अलग DB नहीं चाहिए। बड़े managed scale के लिए Pinecone/Qdrant।"
+  },
+  {
+   "q": "RAG pipeline end-to-end समझाओ। Chunking और overlap क्यों?",
+   "a": "Indexing: Load (PDF/Excel से text), Split (chunks), Embed, Store (vector DB + metadata)। Query: सवाल embed करके top-k chunks Retrieve, फिर \"सिर्फ़ इस context से जवाब दो\" prompt के साथ Generate। Chunking से search precise होती है और context window में fit होता है; overlap से boundary पर कटी बात पूरी रहती है। Typical 300-800 tokens, 10-20% overlap।"
+  },
+  {
+   "q": "RAG system को evaluate कैसे करोगे?",
+   "a": "असली सवाल और expected answers का fixed test set, out-of-scope सवाल भी। Retrieval अलग check (hit rate / recall@k, context precision) और answer अलग (faithfulness, correctness, relevance) — RAGAS या LLM-as-judge से। हर change के बाद set दोबारा चलाता हूँ, और production में user feedback और \"not found\" rate monitor करके fails को test set में जोड़ता हूँ।"
+  }
+ ]
+}

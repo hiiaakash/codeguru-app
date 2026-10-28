@@ -1,0 +1,1010 @@
+{
+ "n": 3,
+ "id": "aiml-03",
+ "title": "Functions & Modules",
+ "goal": "Apne functions banana, parameters, default/keyword args, *args/**kwargs, return, scope, lambda, map/filter aur recursion samajhna, aur modules import karke code ko saaf files mein baantna seekhoge.",
+ "lessons": [
+  {
+   "title": "Function kya hai — def aur parameters",
+   "blocks": [
+    [
+     "p",
+     "**Function** = code ka ek **reusable block**. Ek baar likho, naam do, aur jab chahiye naam se bula lo. Code repeat nahi karna padta."
+    ],
+    [
+     "analogy",
+     "Chai ki machine: button dabao (function call), andar ka process (body) chalta hai, aur chai bahar aati hai (result). Har baar machine dobara banani nahi padti."
+    ],
+    [
+     "p",
+     "Real use: ERP mein \"calculate tax\" ek baar banao, phir 100 jagah call karo. Galti mile to sirf ek jagah theek karo."
+    ],
+    [
+     "code",
+     "python",
+     "def greet(name):\n    print(f\"Hello {name}! Welcome to GEEP\")\n\ngreet(\"Anna\")\ngreet(\"Rohan\")\ngreet(\"Deepak\")",
+     "Hello Anna! Welcome to GEEP\nHello Rohan! Welcome to GEEP\nHello Deepak! Welcome to GEEP"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Function ke hisse",
+      "head": [
+       "Hissa",
+       "Matlab"
+      ],
+      "rows": [
+       [
+        "def",
+        "function define karo"
+       ],
+       [
+        "greet",
+        "function ka naam"
+       ],
+       [
+        "(name)",
+        "parameter (input)"
+       ],
+       [
+        ":",
+        "body shuru"
+       ],
+       [
+        "greet(\"Anna\")",
+        "call, Anna pass kiya"
+       ]
+      ]
+     }
+    ],
+    [
+     "p",
+     "**Define** karna aur **call** karna do alag cheezein hain. `def` sirf recipe likhta hai; jab tak call nahi karoge, kuch nahi chalega."
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Call ka safar",
+      "steps": [
+       "greet(\"Anna\")",
+       "name = \"Anna\"",
+       "Body chali",
+       "Wapas aage"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "**Parameter** vs **argument**: function banate waqt bracket mein jo naam likhte ho (`name`) woh parameter hai. Call karte waqt jo asli value bhejte ho (`\"Anna\"`) woh argument hai."
+    ],
+    [
+     "code",
+     "python",
+     "def cable_cost(meters, rate):\n    print(f\"{meters} m x Rs {rate} = Rs {meters * rate}\")\n\ncable_cost(100, 45)\ncable_cost(250, 38)",
+     "100 m x Rs 45 = Rs 4500\n250 m x Rs 38 = Rs 9500"
+    ],
+    [
+     "tip",
+     "Dhyan se dekh: arguments **order** se jaate hain. Pehla argument pehle parameter mein, doosra doosre mein."
+    ],
+    [
+     "warn",
+     "Common galti: function ko call karne se pehle define nahi kiya, to `NameError`. Python upar se neeche padhta hai, isliye `def` upar hona chahiye."
+    ],
+    [
+     "warn",
+     "Common galti: arguments kam ya zyada bhejna. `cable_cost(100)` likhoge to `TypeError: missing 1 required positional argument: 'rate'`."
+    ],
+    [
+     "p",
+     "**Docstring** = function ke shuru mein triple quotes mein likha chhota sa note: function kya karta hai. Professional code mein har function ka docstring hota hai."
+    ],
+    [
+     "code",
+     "python",
+     "def area(length, width):\n    \"\"\"Rectangle ka area return karta hai.\"\"\"\n    return length * width\n\nprint(area.__doc__)",
+     "Rectangle ka area return karta hai."
+    ],
+    [
+     "tip",
+     "Function ka naam **verb** jaisa rakho jo kaam bataye: `calculate_tax`, `clean_text`, `load_data`. Aur ek function = ek kaam."
+    ]
+   ]
+  },
+  {
+   "title": "return vs print — value wapas lena",
+   "blocks": [
+    [
+     "p",
+     "`print` = screen pe **dikha diya**, baat khatam. `return` = value **wapas haath mein di**, ab aage use kar sakte ho."
+    ],
+    [
+     "code",
+     "python",
+     "def add_print(a, b):\n    print(a + b)\n\ndef add_return(a, b):\n    return a + b\n\nx = add_print(2, 3)\nprint(\"x =\", x)\ny = add_return(2, 3)\nprint(\"y =\", y)\nprint(\"y * 10 =\", y * 10)",
+     "5\nx = None\ny = 5\ny * 10 = 50"
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "print vs return",
+      "left": {
+       "title": "print",
+       "items": [
+        "Screen pe dikhata",
+        "Value wapas nahi",
+        "Result: None",
+        "Aage use nahi"
+       ]
+      },
+      "right": {
+       "title": "return",
+       "items": [
+        "Value wapas deta",
+        "Variable mein rakho",
+        "Aage hisaab karo",
+        "Real code mein yahi"
+       ]
+      }
+     }
+    ],
+    [
+     "tip",
+     "Dhyan se dekh: `add_print` ne 5 dikhaya, lekin `x` mein **None** aaya. Jis function mein `return` nahi hota, woh chupke se `None` return karta hai."
+    ],
+    [
+     "analogy",
+     "Dukaan wala tumhe bill **dikha** de (print) vs bill tumhare **haath mein de** de (return). Haath mein ho to hi aage office mein jama kar sakte ho."
+    ],
+    [
+     "p",
+     "Real projects mein 99% functions `return` karte hain. `predictions = model.predict(data)` — `predict` return karta hai, print nahi, taaki result aage use ho."
+    ],
+    [
+     "code",
+     "python",
+     "def calculate_tax(salary, tax_percent=10):\n    tax = salary * tax_percent / 100\n    net = salary - tax\n    return net\n\ns1 = calculate_tax(50000)\ns2 = calculate_tax(80000, 20)\nprint(f\"50K salary, 10% tax: {s1}\")\nprint(f\"80K salary, 20% tax: {s2}\")",
+     "50K salary, 10% tax: 45000.0\n80K salary, 20% tax: 64000.0"
+    ],
+    [
+     "warn",
+     "Common galti: `return net` likha lekin `net` naam ka variable banaya hi nahi (`salary = salary - tax` likh diya). Result: `NameError`. Jo variable banaya hai wahi return karo."
+    ],
+    [
+     "p",
+     "`return` ke baad function **turant ruk jaata** hai. Neeche ki lines nahi chalti. Isko **early return** kehte hain."
+    ],
+    [
+     "code",
+     "python",
+     "def check(n):\n    if n > 0:\n        return \"Positive\"\n    if n < 0:\n        return \"Negative\"\n    return \"Zero\"\n\nprint(check(7), check(-2), check(0))",
+     "Positive Negative Zero"
+    ],
+    [
+     "p",
+     "**Multiple values return:** comma lagao. Python unhe ek **tuple** mein pack karta hai, aur tum unhe alag dibbon mein khol sakte ho (**unpacking**)."
+    ],
+    [
+     "code",
+     "python",
+     "def cable_report(length, defects):\n    quality = \"PASS\" if defects == 0 else \"FAIL\"\n    cost = length * 50\n    return quality, cost\n\nq, c = cable_report(100, 0)\nprint(f\"Quality: {q}, Cost: {c}\")\nprint(cable_report(200, 3))",
+     "Quality: PASS, Cost: 5000\n('FAIL', 10000)"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Multiple return",
+      "steps": [
+       "return q, c",
+       "(\"PASS\", 5000)",
+       "q, c = ..."
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "code",
+     "python",
+     "def stats(nums):\n    return min(nums), max(nums), sum(nums) / len(nums)\n\nlow, high, avg = stats([4, 9, 2, 5])\nprint(low, high, avg)",
+     "2 9 5.0"
+    ],
+    [
+     "tip",
+     "ML mein yeh har jagah dikhega: `X_train, X_test, y_train, y_test = train_test_split(...)` — ek function, chaar values wapas."
+    ]
+   ]
+  },
+  {
+   "title": "Default, keyword, *args aur **kwargs",
+   "blocks": [
+    [
+     "p",
+     "**Default parameter:** agar value na di jaaye to pehle se rakhi value use ho. Jaise GST zyaadatar 18% hai, to default 18 rakh do."
+    ],
+    [
+     "code",
+     "python",
+     "def total(rate, meters, gst=18):\n    amount = rate * meters\n    return amount + amount * gst / 100\n\nprint(total(100, 10))\nprint(total(100, 10, 5))",
+     "1180.0\n1050.0"
+    ],
+    [
+     "warn",
+     "Default wale parameters hamesha **end mein**. `def f(gst=18, rate):` likhoge to SyntaxError."
+    ],
+    [
+     "p",
+     "**Keyword arguments:** call karte waqt naam se value do. Tab order matter nahi karta, aur code padhne mein saaf ho jaata hai."
+    ],
+    [
+     "code",
+     "python",
+     "def total(rate, meters, gst=18):\n    amount = rate * meters\n    return amount + amount * gst / 100\n\nprint(total(meters=10, rate=100))\nprint(total(100, 10, gst=12))",
+     "1180.0\n1120.0"
+    ],
+    [
+     "tip",
+     "ML libraries mein keyword arguments har jagah hain: `RandomForestClassifier(n_estimators=100, max_depth=5, random_state=42)`. Naam se pata chal jaata hai kaunsi value kis cheez ki hai."
+    ],
+    [
+     "p",
+     "`*args` = jitne marzi positional values bhejo, sab ek **tuple** mein aa jaati hain."
+    ],
+    [
+     "code",
+     "python",
+     "def add_all(*args):\n    print(args)\n    return sum(args)\n\nprint(add_all(1, 2, 3))\nprint(add_all(5, 10))",
+     "(1, 2, 3)\n6\n(5, 10)\n15"
+    ],
+    [
+     "p",
+     "`**kwargs` = jitne marzi **naam wale** values bhejo, sab ek **dictionary** mein aa jaati hain (dict Stage 4 mein detail se)."
+    ],
+    [
+     "code",
+     "python",
+     "def info(**kwargs):\n    for key, value in kwargs.items():\n        print(f\"{key} = {value}\")\n\ninfo(name=\"Akash\", city=\"Bhiwadi\", role=\"developer\")",
+     "name = Akash\ncity = Bhiwadi\nrole = developer"
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "Ek star vs do star",
+      "left": {
+       "title": "*args",
+       "items": [
+        "Bina naam ki values",
+        "Tuple banta hai",
+        "add_all(1, 2, 3)"
+       ]
+      },
+      "right": {
+       "title": "**kwargs",
+       "items": [
+        "Naam wali values",
+        "Dict banta hai",
+        "info(name=\"A\")"
+       ]
+      }
+     }
+    ],
+    [
+     "tip",
+     "Yaad rakh: **ek star = tuple, do star = dict.** Naam `args`/`kwargs` sirf convention hai; asli kaam `*` aur `**` ka hai."
+    ],
+    [
+     "p",
+     "Sab ek saath ho to order fix hai: normal → `*args` → default/keyword-only → `**kwargs`."
+    ],
+    [
+     "code",
+     "python",
+     "def train(model, *layers, epochs=10, **opts):\n    print(model, layers, epochs, opts)\n\ntrain(\"net\", 64, 32, epochs=5, lr=0.01)",
+     "net (64, 32) 5 {'lr': 0.01}"
+    ],
+    [
+     "warn",
+     "Common galti (IQ favourite): **mutable default**. `def add_item(item, lst=[]):` — yeh list sirf **ek baar** banti hai aur har call mein wahi purani list use hoti hai."
+    ],
+    [
+     "code",
+     "python",
+     "def add_item(item, lst=[]):\n    lst.append(item)\n    return lst\n\nprint(add_item(\"a\"))\nprint(add_item(\"b\"))\n\ndef add_item_safe(item, lst=None):\n    if lst is None:\n        lst = []\n    lst.append(item)\n    return lst\n\nprint(add_item_safe(\"a\"))\nprint(add_item_safe(\"b\"))",
+     "['a']\n['a', 'b']\n['a']\n['b']"
+    ],
+    [
+     "tip",
+     "Fix: default `None` rakho aur andar nayi list banao. Default mein kabhi `[]` ya `{}` mat rakho."
+    ]
+   ]
+  },
+  {
+   "title": "Scope — variable kahan tak dikhta hai",
+   "blocks": [
+    [
+     "p",
+     "**Scope** = woh area jahan variable dikhta hai aur use ho sakta hai. Function ke andar bana variable **local** hai: sirf andar zinda, function khatam to woh bhi khatam."
+    ],
+    [
+     "analogy",
+     "Ghar ka kamra: kamre ke andar rakhi cheez (local) sirf kamre mein milegi. Aangan mein rakhi cheez (global) har kamre se dikh jaati hai."
+    ],
+    [
+     "code",
+     "python",
+     "def f():\n    x = 10\n    print(\"andar:\", x)\n\nf()\ntry:\n    print(x)\nexcept NameError as e:\n    print(\"bahar: NameError ->\", e)",
+     "andar: 10\nbahar: NameError -> name 'x' is not defined"
+    ],
+    [
+     "p",
+     "(`try/except` error pakadne ka tareeka hai, Stage 5 mein detail se. Yahan bas error dikhane ke liye.)"
+    ],
+    [
+     "sketch",
+     {
+      "k": "boxes",
+      "title": "Global vs local",
+      "items": [
+       {
+        "label": "global: rate",
+        "value": "45"
+       },
+       {
+        "label": "f() local: x",
+        "value": "10"
+       }
+      ]
+     }
+    ],
+    [
+     "p",
+     "**Global** variable (file ke top level pe bana) function ke andar **padha** ja sakta hai:"
+    ],
+    [
+     "code",
+     "python",
+     "rate = 45\n\ndef cost(meters):\n    return meters * rate\n\nprint(cost(10))",
+     "450"
+    ],
+    [
+     "p",
+     "Lekin agar function ke andar usi naam ko **value assign** karo, to Python ek **naya local** variable bana deta hai. Bahar wala nahi badalta."
+    ],
+    [
+     "code",
+     "python",
+     "count = 0\n\ndef bump():\n    count = 99\n    print(\"andar:\", count)\n\nbump()\nprint(\"bahar:\", count)",
+     "andar: 99\nbahar: 0"
+    ],
+    [
+     "p",
+     "Bahar wala sach mein badalna hai to `global` keyword lagao:"
+    ],
+    [
+     "code",
+     "python",
+     "count = 0\n\ndef bump():\n    global count\n    count += 1\n\nbump()\nbump()\nprint(count)",
+     "2"
+    ],
+    [
+     "warn",
+     "`global` kam se kam use karo. Jab har function chupke se global badalta hai to bug dhoondhna mushkil ho jaata hai. Achha tareeka: value **parameter se do, return se lo**: `count = bump(count)`."
+    ],
+    [
+     "p",
+     "Python naam dhoondhne ka order: **LEGB** — Local, Enclosing (bahar wala function), Global, Built-in (jaise `print`, `len`)."
+    ],
+    [
+     "sketch",
+     {
+      "k": "stack",
+      "title": "LEGB: naam kahan dhoondhe",
+      "items": [
+       "Local",
+       "Enclosing",
+       "Global",
+       "Built-in"
+      ]
+     }
+    ],
+    [
+     "warn",
+     "Common galti: built-in ka naam variable mein use karna, jaise `sum = 10` ya `list = [1, 2]`. Phir `sum([1, 2])` error dega, kyunki global `sum` ne built-in ko dhak diya."
+    ]
+   ]
+  },
+  {
+   "title": "lambda, map, filter aur recursion",
+   "blocks": [
+    [
+     "p",
+     "**lambda** = ek line ka chhota, bina naam ka function. Format: `lambda inputs: expression`. `return` likhna nahi padta, expression ki value apne aap wapas aati hai."
+    ],
+    [
+     "code",
+     "python",
+     "square = lambda x: x * x\nprint(square(4))\n\ndef square2(x):\n    return x * x\nprint(square2(4))",
+     "16\n16"
+    ],
+    [
+     "p",
+     "lambda ka asli use: kisi doosre function ko chhota sa kaam dena, jaise **sorting** ka key."
+    ],
+    [
+     "code",
+     "python",
+     "leads = [(\"Rahul\", 500), (\"Neha\", 900), (\"Amit\", 300)]\nprint(sorted(leads, key=lambda l: l[1]))\nprint(max(leads, key=lambda l: l[1]))",
+     "[('Amit', 300), ('Rahul', 500), ('Neha', 900)]\n('Neha', 900)"
+    ],
+    [
+     "tip",
+     "`key=lambda l: l[1]` matlab \"har item ka index 1 (amount) dekh ke sort karo\"."
+    ],
+    [
+     "p",
+     "**map** = har item pe ek function lagao. **filter** = sirf woh items rakho jinke liye function True de. Dono ko `list()` mein lapetna padta hai result dekhne ke liye."
+    ],
+    [
+     "code",
+     "python",
+     "prices = [100, 250, 80, 400]\nwith_gst = list(map(lambda p: round(p * 1.18, 2), prices))\nprint(with_gst)\ncostly = list(filter(lambda p: p > 150, prices))\nprint(costly)",
+     "[118.0, 295.0, 94.4, 472.0]\n[250, 400]"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "map aur filter",
+      "steps": [
+       "[100, 250, 80]",
+       "map: x 1.18",
+       "filter: > 150",
+       "Result"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "tip",
+     "Bahut log map/filter ki jagah **list comprehension** pasand karte hain: `[p * 1.18 for p in prices]`. Yeh Stage 4 mein. IQ mein dono aane chahiye."
+    ],
+    [
+     "p",
+     "**Recursion** = function jo **khud ko call** karta hai. Har recursion mein do cheez zaroori: **base case** (kab rukna hai) aur **chhota sawaal** (har call problem ko chhota kare)."
+    ],
+    [
+     "analogy",
+     "Seedhi utarna: \"ek seedhi utro, phir baaki seedhiyan utro\". Zameen aa gayi (base case) to ruk jao."
+    ],
+    [
+     "code",
+     "python",
+     "def factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n - 1)\n\nprint(factorial(5))",
+     "120"
+    ],
+    [
+     "sketch",
+     {
+      "k": "stack",
+      "title": "Call stack: factorial(4)",
+      "items": [
+       "factorial(1) = 1",
+       "factorial(2) = 2 x 1",
+       "factorial(3) = 3 x 2",
+       "factorial(4) = 4 x 6"
+      ]
+     }
+    ],
+    [
+     "p",
+     "Har call ek **stack** (thali ka dher) mein upar rakhi jaati hai. Base case aate hi answers neeche ki taraf wapas lautte hain: 1, 2, 6, 24."
+    ],
+    [
+     "warn",
+     "Common galti: base case bhool gaye to function khud ko bulata hi rahega aur `RecursionError: maximum recursion depth exceeded` aayega (default limit lagbhag 1000)."
+    ],
+    [
+     "code",
+     "python",
+     "def countdown(n):\n    if n == 0:\n        print(\"GO!\")\n        return\n    print(n, end=\" \")\n    countdown(n - 1)\n\ncountdown(3)",
+     "3 2 1 GO!"
+    ],
+    [
+     "tip",
+     "Recursion trees, folders aur nested data ke liye natural hai. Lekin simple counting ke liye loop zyada tez aur safe hai."
+    ]
+   ]
+  },
+  {
+   "title": "Modules, import aur __name__ == \"__main__\"",
+   "blocks": [
+    [
+     "p",
+     "**Module** = ek `.py` file jisme functions aur variables hain. **import** se doosri file ka code apni file mein use karte ho. Python ke saath bahut saare modules free aate hain (**standard library**)."
+    ],
+    [
+     "analogy",
+     "Toolbox: har kaam ka auzaar khud banane ki zaroorat nahi. `import math` = maths wala dibba khol liya."
+    ],
+    [
+     "code",
+     "python",
+     "import math\nprint(math.sqrt(16))\nprint(math.pi)\nprint(math.ceil(4.2), math.floor(4.8))",
+     "4.0\n3.141592653589793\n5 4"
+    ],
+    [
+     "p",
+     "Import karne ke tareeke:"
+    ],
+    [
+     "code",
+     "python",
+     "from math import sqrt, pi\nprint(sqrt(25))\n\nimport statistics as st\nprint(st.mean([2, 4, 6]))",
+     "5.0\n4"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Import ke tareeke",
+      "head": [
+       "Likho",
+       "Use karo"
+      ],
+      "rows": [
+       [
+        "import math",
+        "math.sqrt(4)"
+       ],
+       [
+        "from math import sqrt",
+        "sqrt(4)"
+       ],
+       [
+        "import numpy as np",
+        "np.array(...)"
+       ]
+      ]
+     }
+    ],
+    [
+     "tip",
+     "`import numpy as np`, `import pandas as pd` — yeh **alias** (chhota naam) poori ML duniya ka standard hai. Stage 8 mein roz likhoge."
+    ],
+    [
+     "warn",
+     "Common galti: `from module import *` — saare naam ek saath aa jaate hain aur tumhare variables se takra sakte hain. Isse bacho."
+    ],
+    [
+     "p",
+     "`random` module ke saath **seed** lagao to har baar same \"random\" numbers aate hain. ML mein results repeat karne ke liye (`random_state=42`) yahi idea hai."
+    ],
+    [
+     "code",
+     "python",
+     "import random\nrandom.seed(42)\nprint(random.randint(1, 100), random.randint(1, 100))\nrandom.seed(42)\nprint(random.randint(1, 100), random.randint(1, 100))",
+     "82 15\n82 15"
+    ],
+    [
+     "p",
+     "**Apna module** banana: ek file `cable_utils.py` banao aur usme functions likho. Phir doosri file mein import karo."
+    ],
+    [
+     "code",
+     "python",
+     "# cable_utils.py\ndef cost(meters, rate=45):\n    return meters * rate\n\nif __name__ == \"__main__\":\n    print(\"Test:\", cost(10))",
+     ""
+    ],
+    [
+     "code",
+     "python",
+     "# main.py (same folder mein)\nimport cable_utils\nprint(cable_utils.cost(100))",
+     ""
+    ],
+    [
+     "p",
+     "`python cable_utils.py` chalane pe `Test: 450` print hoga. Lekin `python main.py` chalane pe sirf `4500` aayega — test wali line **nahi** chalegi."
+    ],
+    [
+     "p",
+     "Kyun? Har file ke paas ek special variable `__name__` hota hai. File **seedha chalao** to `__name__` = `\"__main__\"`. File **import** ho to `__name__` = file ka naam (`\"cable_utils\"`)."
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "__name__ ki value",
+      "left": {
+       "title": "Seedha run",
+       "items": [
+        "python cable_utils.py",
+        "__name__ = \"__main__\"",
+        "Test chalega"
+       ]
+      },
+      "right": {
+       "title": "Import hua",
+       "items": [
+        "import cable_utils",
+        "__name__ = \"cable_utils\"",
+        "Test nahi chalega"
+       ]
+      }
+     }
+    ],
+    [
+     "code",
+     "python",
+     "print(__name__)",
+     "__main__"
+    ],
+    [
+     "tip",
+     "Rule: har script ka \"chalane wala\" code `if __name__ == \"__main__\":` ke andar rakho. Isse file **module** bhi ban sakti hai aur **script** bhi. FastAPI, training scripts sab mein yahi pattern hai."
+    ],
+    [
+     "p",
+     "**pip** se baahar ke packages install hote hain: `pip install numpy`. Phir `import numpy` kaam karega. Standard library ko install nahi karna padta."
+    ]
+   ]
+  }
+ ],
+ "teach": [
+  {
+   "say": "Function matlab code ka reusable dibba. Ek baar def se banao, phir naam se jitni baar chaho bulao.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Input",
+     "Function body",
+     "Output"
+    ],
+    "dir": "h"
+   },
+   "code": "def greet(name):\n    print(f\"Hello {name}\")\n\ngreet(\"Akash\")"
+  },
+  {
+   "say": "Bracket mein jo naam likha woh parameter. Call karte waqt jo value bheji woh argument.",
+   "sketch": {
+    "k": "boxes",
+    "items": [
+     {
+      "label": "parameter",
+      "value": "name"
+     },
+     {
+      "label": "argument",
+      "value": "\"Akash\""
+     }
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "print sirf dikhata hai, return value wapas deta hai. return nahi hai to function None deta hai.",
+   "sketch": {
+    "k": "compare",
+    "left": {
+     "title": "print",
+     "items": [
+      "Dikha diya",
+      "x = None"
+     ]
+    },
+    "right": {
+     "title": "return",
+     "items": [
+      "Haath mein diya",
+      "y = 5"
+     ]
+    }
+   },
+   "code": "def add(a, b):\n    return a + b\n\ny = add(2, 3)"
+  },
+  {
+   "say": "Comma laga ke kai values return kar sakte ho. Woh tuple mein aati hain, aur hum unhe alag dibbon mein khol lete hain.",
+   "sketch": {
+    "k": "boxes",
+    "items": [
+     {
+      "label": "q",
+      "value": "\"PASS\""
+     },
+     {
+      "label": "c",
+      "value": "5000"
+     }
+    ]
+   },
+   "code": "q, c = cable_report(100, 0)"
+  },
+  {
+   "say": "Default value se parameter optional ban jaata hai, aur keyword argument se naam ke saath value bhejte hain, order ki tension khatam.",
+   "sketch": {
+    "k": "table",
+    "head": [
+     "Call",
+     "gst"
+    ],
+    "rows": [
+     [
+      "total(100, 10)",
+      "18 (default)"
+     ],
+     [
+      "total(100, 10, gst=5)",
+      "5"
+     ]
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "Ek star args sab extra values ko tuple mein le leta hai, do star kwargs naam wali values ko dict mein.",
+   "sketch": {
+    "k": "compare",
+    "left": {
+     "title": "*args",
+     "items": [
+      "(1, 2, 3)"
+     ]
+    },
+    "right": {
+     "title": "**kwargs",
+     "items": [
+      "{'name': 'A'}"
+     ]
+    }
+   },
+   "code": null
+  },
+  {
+   "say": "Function ke andar bana variable local hai, bahar nahi dikhta. Naam dhoondhne ka order LEGB: Local, Enclosing, Global, Built-in.",
+   "sketch": {
+    "k": "stack",
+    "items": [
+     "Local",
+     "Enclosing",
+     "Global",
+     "Built-in"
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "lambda ek line ka bina naam ka function hai. Sorting ke key mein, map aur filter mein sabse zyada kaam aata hai.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "x",
+     "lambda x: x * x",
+     "x squared"
+    ],
+    "dir": "h"
+   },
+   "code": "sorted(leads, key=lambda l: l[1])"
+  },
+  {
+   "say": "Recursion mein function khud ko bulata hai. Base case zaroori, warna RecursionError. Har call stack pe chadhti hai aur answer neeche lautta hai.",
+   "sketch": {
+    "k": "stack",
+    "items": [
+     "fact(1) = 1",
+     "fact(2) = 2",
+     "fact(3) = 6"
+    ]
+   },
+   "code": "def fact(n):\n    if n <= 1:\n        return 1\n    return n * fact(n - 1)"
+  },
+  {
+   "say": "Module matlab ek py file. import se use karo. Aur if name equals main ke andar ka code sirf tab chalta hai jab file seedha run ho, import pe nahi. Ab practice karo!",
+   "sketch": {
+    "k": "tree",
+    "root": {
+     "label": "cable_utils.py",
+     "children": [
+      {
+       "label": "Seedha run: test chale",
+       "children": []
+      },
+      {
+       "label": "Import: test nahi",
+       "children": []
+      }
+     ]
+    }
+   },
+   "code": "if __name__ == \"__main__\":\n    main()"
+  }
+ ],
+ "practice": [
+  {
+   "q": "Function `mean_std(nums)` likho jo numbers ka **mean** aur **standard deviation** (population) dono return kare. Library mat use karo, khud loop se nikalo. Output:\nMean: 5.0\nStd: 2.0",
+   "starter": "def mean_std(nums):\n    # TODO: mean = total / count\n    # TODO: har number ka (x - mean) ** 2 jodo, count se divide, phir ** 0.5\n    pass\n\nm, s = mean_std([2, 4, 4, 4, 5, 5, 7, 9])\nprint(f\"Mean: {m}\")\nprint(f\"Std: {s}\")\n",
+   "expect": "Mean: 5.0\nStd: 2.0",
+   "hint": "Do loop: pehle total se mean, phir squared differences ka total. `return mean, std` se dono wapas.",
+   "solution": "def mean_std(nums):\n    total = 0\n    for x in nums:\n        total += x\n    mean = total / len(nums)\n    sq = 0\n    for x in nums:\n        sq += (x - mean) ** 2\n    std = (sq / len(nums)) ** 0.5\n    return mean, std\n\nm, s = mean_std([2, 4, 4, 4, 5, 5, 7, 9])\nprint(f\"Mean: {m}\")\nprint(f\"Std: {s}\")"
+  },
+  {
+   "q": "**Min-max scaling** (ML ka common preprocessing): function `scale(x, lo, hi)` likho jo `(x - lo) / (hi - lo)` return kare. Phir `map` + `lambda` se saare values scale karo, aur `filter` se gino kitne 0.5 ya zyada hain. Output:\n[0.0, 0.25, 0.5, 0.75, 1.0]\nHigh values: 3",
+   "starter": "def scale(x, lo, hi):\n    # TODO: formula return karo\n    pass\n\nvalues = [10, 20, 30, 40, 50]\nlo, hi = min(values), max(values)\n# TODO: scaled = list(map(lambda ..., values))\n# TODO: high = list(filter(lambda ..., scaled))\n# TODO: dono print karo\n",
+   "expect": "[0.0, 0.25, 0.5, 0.75, 1.0]\nHigh values: 3",
+   "hint": "`map(lambda v: scale(v, lo, hi), values)`. filter ke lambda mein condition `v >= 0.5`.",
+   "solution": "def scale(x, lo, hi):\n    return (x - lo) / (hi - lo)\n\nvalues = [10, 20, 30, 40, 50]\nlo, hi = min(values), max(values)\nscaled = list(map(lambda v: scale(v, lo, hi), values))\nprint(scaled)\nhigh = list(filter(lambda v: v >= 0.5, scaled))\nprint(f\"High values: {len(high)}\")"
+  },
+  {
+   "q": "Recursive `factorial(n)` banao, aur uski madad se `ncr(n, r)` = n! / (r! x (n-r)!) likho (combinations, probability mein bahut aata hai). Integer division `//` use karo. Output:\n5! = 120\n5C2 = 10\n10C3 = 120",
+   "starter": "def factorial(n):\n    # TODO: base case: n <= 1 ho to 1\n    # TODO: warna n * factorial(n - 1)\n    pass\n\ndef ncr(n, r):\n    # TODO: formula, // se divide\n    pass\n\nprint(f\"5! = {factorial(5)}\")\nprint(f\"5C2 = {ncr(5, 2)}\")\nprint(f\"10C3 = {ncr(10, 3)}\")\n",
+   "expect": "5! = 120\n5C2 = 10\n10C3 = 120",
+   "hint": "Base case pehle likho. ncr mein teen factorial calls: `factorial(n) // (factorial(r) * factorial(n - r))`.",
+   "solution": "def factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n - 1)\n\ndef ncr(n, r):\n    return factorial(n) // (factorial(r) * factorial(n - r))\n\nprint(f\"5! = {factorial(5)}\")\nprint(f\"5C2 = {ncr(5, 2)}\")\nprint(f\"10C3 = {ncr(10, 3)}\")"
+  }
+ ],
+ "quiz": [
+  {
+   "q": "Jis function mein `return` nahi hai, woh kya return karta hai?",
+   "o": [
+    "0",
+    "None",
+    "Error",
+    "Khaali string"
+   ],
+   "a": 1,
+   "why": "Bina return wala function apne aap `None` return karta hai."
+  },
+  {
+   "q": "`def total(rate, meters, gst=18)` ho to `total(100, 10)` mein gst kya hoga?",
+   "o": [
+    "0",
+    "10",
+    "18",
+    "Error"
+   ],
+   "a": 2,
+   "why": "gst nahi diya, isliye default value 18 use hui."
+  },
+  {
+   "q": "`def f(*args): return args` ho to `f(1, 2, 3)` kya dega?",
+   "o": [
+    "(1, 2, 3)",
+    "[1, 2, 3]",
+    "6",
+    "{1, 2, 3}"
+   ],
+   "a": 0,
+   "why": "*args saari extra positional values ko ek tuple mein pack karta hai."
+  },
+  {
+   "q": "`**kwargs` ke andar values kis type mein aati hain?",
+   "o": [
+    "list",
+    "tuple",
+    "set",
+    "dict"
+   ],
+   "a": 3,
+   "why": "Naam wali values key-value pairs hain, isliye dict banta hai."
+  },
+  {
+   "q": "`(lambda x: x * 2)(5)` ka result?",
+   "o": [
+    "5",
+    "25",
+    "10",
+    "Error"
+   ],
+   "a": 2,
+   "why": "lambda ko 5 diya, expression 5 * 2 = 10 wapas aaya."
+  },
+  {
+   "q": "Function ke andar `x = 10` banaya. Bahar `print(x)` (bahar koi x nahi) karne pe?",
+   "o": [
+    "NameError",
+    "10",
+    "None",
+    "0"
+   ],
+   "a": 0,
+   "why": "x local hai, sirf function ke andar exist karta hai."
+  },
+  {
+   "q": "Recursive function mein base case na ho to kya hoga?",
+   "o": [
+    "Function 0 return karega",
+    "Ek baar chal ke rukega",
+    "SyntaxError",
+    "RecursionError"
+   ],
+   "a": 3,
+   "why": "Function khud ko bulata hi rahega jab tak recursion limit (~1000) na cross ho, phir RecursionError."
+  },
+  {
+   "q": "`if __name__ == \"__main__\":` ke andar ka code kab chalta hai?",
+   "o": [
+    "Jab file import ho",
+    "Jab file seedha run ho",
+    "Kabhi nahi",
+    "Hamesha"
+   ],
+   "a": 1,
+   "why": "Seedha run karne pe `__name__` \"__main__\" hota hai; import pe file ka naam hota hai."
+  },
+  {
+   "q": "`list(filter(lambda n: n % 2 == 0, [1, 2, 3, 4]))` ka output?",
+   "o": [
+    "[1, 3]",
+    "[True, False]",
+    "[2, 4]",
+    "[1, 2, 3, 4]"
+   ],
+   "a": 2,
+   "why": "filter sirf woh items rakhta hai jinke liye lambda True de: even numbers 2 aur 4."
+  },
+  {
+   "q": "`def add_item(item, lst=[])` ko do baar call kiya: `add_item(\"a\")`, phir `add_item(\"b\")`. Doosri call kya return karegi?",
+   "o": [
+    "['b']",
+    "['a', 'b']",
+    "['a']",
+    "Error"
+   ],
+   "a": 1,
+   "why": "Mutable default list sirf ek baar banti hai aur calls ke beech share hoti hai, isliye 'a' bacha raha. Fix: `lst=None`."
+  }
+ ],
+ "iq": [
+  {
+   "q": "Function kya hai aur kyun use karte hain?",
+   "a": "Function code ka naam wala reusable block hai jo input (parameters) leta hai aur output return karta hai. Fayde: code repeat nahi hota (DRY), testing aasaan, ek jagah fix karo sab jagah theek, aur bada program chhote samajhne laayak tukdon mein bant jaata hai."
+  },
+  {
+   "q": "print aur return mein farak?",
+   "a": "print sirf console pe dikhata hai aur function ka result None hi rehta hai. return value caller ko wapas deta hai jise variable mein rakh ke aage use kar sakte ho, aur return pe function wahin ruk jaata hai. Production code mein functions return karte hain; print sirf debugging ya CLI output ke liye."
+  },
+  {
+   "q": "*args aur **kwargs kya hain? Kab use karte ho?",
+   "a": "*args variable number ke positional arguments ko tuple mein leta hai, **kwargs keyword arguments ko dict mein. Use: jab inputs ki ginti fix na ho, ya wrapper/decorator banana ho jo arguments aage pass kare: `def wrapper(*args, **kwargs): return func(*args, **kwargs)`."
+  },
+  {
+   "q": "Mutable default argument ki problem samjhao.",
+   "a": "Default values function define hote waqt sirf ek baar banti hain. `def f(x, lst=[])` mein wahi list har call mein share hoti hai, isliye pichhli calls ka data reh jaata hai. Fix: `lst=None` rakho aur andar `if lst is None: lst = []`."
+  },
+  {
+   "q": "lambda kya hai? Iski limitation?",
+   "a": "lambda ek anonymous one-line function hai: `lambda x: x * 2`. Mostly sort key, map, filter mein short logic ke liye. Limitation: sirf ek expression, koi statement (loop, assignment) nahi, aur naam na hone se debugging thodi mushkil. Complex logic ke liye `def` use karo."
+  },
+  {
+   "q": "map, filter aur reduce mein farak?",
+   "a": "map har item pe function lagata hai (same length output). filter sirf woh items rakhta hai jahan function True de. reduce (functools se) saare items ko ek value mein combine karta hai, jaise total: `reduce(lambda a, b: a + b, nums)`. Python 3 mein map/filter lazy iterator dete hain, isliye `list()` lagate hain."
+  },
+  {
+   "q": "Local aur global scope kya hai? LEGB rule?",
+   "a": "Function ke andar assign hua variable local hota hai, sirf andar dikhta hai. File level pe bana global hota hai. Python naam is order mein dhoondhta hai: Local, Enclosing, Global, Built-in. Global ko andar se badalna ho to `global` keyword, nested function ke bahar wale variable ke liye `nonlocal`."
+  },
+  {
+   "q": "Recursion kya hai? Iteration se kab behtar?",
+   "a": "Function ka khud ko chhote input ke saath call karna, base case pe rukna. Tree traversal, nested folders, divide-and-conquer (merge sort) mein natural lagta hai. Nuksaan: har call stack memory leti hai aur Python ki limit ~1000 hai, isliye simple counting ke liye loop better."
+  },
+  {
+   "q": "`if __name__ == \"__main__\"` kya karta hai?",
+   "a": "Har module ka `__name__` hota hai; file seedha run ho to \"__main__\", import ho to module ka naam. Is check ke andar ka code sirf direct run pe chalta hai. Isse ek file reusable module bhi ban sakti hai aur standalone script bhi, aur import karte waqt test/training code apne aap nahi chalta."
+  },
+  {
+   "q": "Module aur package mein farak?",
+   "a": "Module ek single .py file hai. Package modules ka folder hai (traditionally `__init__.py` ke saath), jaise `sklearn` package ke andar `sklearn.linear_model` module. Library = packages ka collection jo pip se install hota hai."
+  },
+  {
+   "q": "Python mein arguments pass-by-value hain ya pass-by-reference?",
+   "a": "Na pura ek, na pura doosra: \"pass by object reference\". Function ko object ka reference milta hai. Mutable object (list, dict) ko andar modify karo to bahar bhi badlega; immutable (int, str) ko reassign karo to sirf local naam badlega, bahar wala same rehta hai."
+  },
+  {
+   "q": "Positional, keyword aur default arguments ka order kya hona chahiye?",
+   "a": "Definition mein: normal positional → *args → keyword-only/default → **kwargs, jaise `def f(a, b, *args, option=True, **kwargs)`. Call karte waqt positional arguments keyword arguments se pehle aate hain; `f(a=1, 2)` SyntaxError hai."
+  }
+ ]
+}

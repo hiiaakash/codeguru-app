@@ -1,0 +1,1061 @@
+{
+ "n": 4,
+ "id": "aiml-04",
+ "title": "Lists, Tuples, Sets, Dicts",
+ "goal": "You will learn to store, change, search and count data in a list, tuple, set and dict; filter/group a list of dicts like a mini dataset, write comprehensions, and understand which box is fast, when and why.",
+ "lessons": [
+  {
+   "title": "List — one box, many things",
+   "blocks": [
+    [
+     "p",
+     "Until now, one variable held **one value**. But if you need to store the names of GEEP's 50 cable products, will you make 50 variables? No. That is what a **list** is for."
+    ],
+    [
+     "p",
+     "**List** = an **ordered collection** of items. Ordered means items stay in the same order you put them in. Square brackets `[ ]`, with commas between items."
+    ],
+    [
+     "analogy",
+     "A list is like a train: every coach (item) has a number, and the coaches are joined in a line. You can add a new coach at the back, and you can also take one out from the middle."
+    ],
+    [
+     "code",
+     "python",
+     "cables = [\"5 Core\", \"3 Core\", \"Fiber\", \"XLPE\"]\nprint(cables[0])\nprint(cables[-1])\nprint(len(cables))",
+     "5 Core\nXLPE\n4"
+    ],
+    [
+     "sketch",
+     {
+      "k": "array",
+      "title": "Indexing of cables",
+      "items": [
+       "5 Core",
+       "3 Core",
+       "Fiber",
+       "XLPE"
+      ],
+      "index": true
+     }
+    ],
+    [
+     "p",
+     "Indexing starts **from 0**. A negative index counts from the back: `-1` = last, `-2` = second last. Why from 0? Because an index means \"how far from the start\"; the first item is 0 away."
+    ],
+    [
+     "p",
+     "**Slicing** = a piece of a list. `list[start:stop]` — start is included, stop is **not included**."
+    ],
+    [
+     "code",
+     "python",
+     "nums = [10, 20, 30, 40, 50]\nprint(nums[1:3])\nprint(nums[:2])\nprint(nums[2:])\nprint(nums[::-1])",
+     "[20, 30]\n[10, 20]\n[30, 40, 50]\n[50, 40, 30, 20, 10]"
+    ],
+    [
+     "tip",
+     "Look carefully: `nums[1:3]` gave index 1 and 2, not 3. `[::-1]` = the whole list reversed. This trick is asked a lot in IQs."
+    ],
+    [
+     "p",
+     "**Mutable** = it can change. In a string, `s[0] = \"x\"` gave an error; in a list it works."
+    ],
+    [
+     "code",
+     "python",
+     "cables = [\"5 Core\", \"3 Core\", \"Fiber\"]\ncables[1] = \"4 Core\"\ncables.append(\"PVC\")\ncables.insert(0, \"2 Core\")\nprint(cables)\ncables.remove(\"Fiber\")\nlast = cables.pop()\nprint(last)\nprint(cables)",
+     "['2 Core', '5 Core', '4 Core', 'Fiber', 'PVC']\nPVC\n['2 Core', '5 Core', '4 Core']"
+    ],
+    [
+     "list",
+     [
+      "`append(x)` = one item at the end",
+      "`insert(i, x)` = item at index i",
+      "`extend([..])` = many items at the end, one by one",
+      "`remove(x)` = remove the first match by value",
+      "`pop()` / `pop(i)` = remove by index and give the item back"
+     ]
+    ],
+    [
+     "code",
+     "python",
+     "a = [1, 2]\na.append([3, 4])\nprint(a)\nb = [1, 2]\nb.extend([3, 4])\nprint(b)",
+     "[1, 2, [3, 4]]\n[1, 2, 3, 4]"
+    ],
+    [
+     "warn",
+     "Common mistake (IQ trap): `append([3, 4])` turns the whole list into **one item**. To add them separately, use `extend`."
+    ],
+    [
+     "code",
+     "python",
+     "nums = [5, 1, 4, 1]\nprint(nums.count(1), nums.index(4), 4 in nums)\nnew = sorted(nums)\nprint(new, nums)\nx = nums.sort()\nprint(x, nums)",
+     "2 2 True\n[1, 1, 4, 5] [5, 1, 4, 1]\nNone [1, 1, 4, 5]"
+    ],
+    [
+     "warn",
+     "Common mistake: if you write `x = nums.sort()`, `x` will be **None**. `.sort()` changes the original list itself and returns nothing. If you want a new list, use `sorted(nums)`."
+    ],
+    [
+     "code",
+     "python",
+     "prices = [100, 250, 400]\nfor i, p in enumerate(prices):\n    print(i, p)\nprint(\"Total:\", sum(prices))",
+     "0 100\n1 250\n2 400\nTotal: 750"
+    ],
+    [
+     "code",
+     "python",
+     "a = [1, 2, 3]\nb = a\nb.append(4)\nprint(a)\nc = a.copy()\nc.append(99)\nprint(a, c)",
+     "[1, 2, 3, 4]\n[1, 2, 3, 4] [1, 2, 3, 4, 99]"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "b = a is not a copy",
+      "steps": [
+       "a",
+       "same list [1,2,3]",
+       "b"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "tip",
+     "`b = a` does not make a new box; it only gives **the same list a second name** (like two addresses for one house). A real copy: `a.copy()`, `a[:]` or `list(a)`."
+    ]
+   ]
+  },
+  {
+   "title": "Tuple and Set — fixed data and unique data",
+   "blocks": [
+    [
+     "p",
+     "**Tuple** = an ordered collection like a list, but **immutable** — once made, it cannot change. Round brackets `( )`."
+    ],
+    [
+     "analogy",
+     "Tuple = a final printed marksheet. You can read it, but you cannot change the marks. List = a rough page written in pencil."
+    ],
+    [
+     "code",
+     "python",
+     "point = (10, 20)\nprint(point[0])\ntry:\n    point[0] = 50\nexcept TypeError as e:\n    print(\"Error:\", e)",
+     "10\nError: 'tuple' object does not support item assignment"
+    ],
+    [
+     "p",
+     "**Why do we need it?** Data that should never change (GPS coordinates, an RGB color, one row of a database, config) goes in a tuple. Then it can't change by mistake. A tuple is also a bit **faster** and uses less memory, and it can be a **dict key** (a list cannot)."
+    ],
+    [
+     "code",
+     "python",
+     "x = (5)\ny = (5,)\nprint(type(x), type(y))",
+     "<class 'int'> <class 'tuple'>"
+    ],
+    [
+     "warn",
+     "Common mistake: to make a tuple with one item, the **comma is required**: `(5,)`. Just `(5)` is simply the number 5."
+    ],
+    [
+     "p",
+     "**Unpacking** = putting a tuple's values straight into separate variables. You will see this everywhere in Python, in ML code too (`X_train, X_test = ...`)."
+    ],
+    [
+     "code",
+     "python",
+     "point = (10, 20)\nx, y = point\nprint(x, y)\na, b = 1, 2\na, b = b, a\nprint(a, b)\n\ndef min_max(nums):\n    return min(nums), max(nums)\n\nlow, high = min_max([4, 9, 2])\nprint(low, high)",
+     "10 20\n2 1\n2 9"
+    ],
+    [
+     "tip",
+     "When a function does `return a, b`, it actually returns a **tuple**, and we unpack it. The swap `a, b = b, a` is also just tuple unpacking."
+    ],
+    [
+     "p",
+     "**Set** = a collection of **unique** items only, with **no order**. Curly brackets `{ }`. Duplicates are removed automatically."
+    ],
+    [
+     "code",
+     "python",
+     "codes = [101, 102, 101, 103, 102]\nunique = set(codes)\nprint(unique)\nprint(len(unique))\nunique.add(104)\nunique.discard(101)\nprint(sorted(unique))",
+     "{101, 102, 103}\n3\n[102, 103, 104]"
+    ],
+    [
+     "p",
+     "Set maths — questions like \"which customers ordered in both months?\" in one line:"
+    ],
+    [
+     "code",
+     "python",
+     "jan = {\"Rahul\", \"Neha\", \"Amit\"}\nfeb = {\"Neha\", \"Amit\", \"Priya\"}\nprint(sorted(jan & feb))\nprint(sorted(jan | feb))\nprint(sorted(feb - jan))\nprint(sorted(jan ^ feb))",
+     "['Amit', 'Neha']\n['Amit', 'Neha', 'Priya', 'Rahul']\n['Priya']\n['Priya', 'Rahul']"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Set operations",
+      "head": [
+       "Op",
+       "Meaning",
+       "Result"
+      ],
+      "rows": [
+       [
+        "a & b",
+        "common to both",
+        "Neha, Amit"
+       ],
+       [
+        "a | b",
+        "everything in both",
+        "4 names"
+       ],
+       [
+        "b - a",
+        "in b, not in a",
+        "Priya"
+       ],
+       [
+        "a ^ b",
+        "in only one",
+        "Rahul, Priya"
+       ]
+      ]
+     }
+    ],
+    [
+     "tip",
+     "Look carefully: I printed the set after `sorted()`. A set's order is not fixed, so a set of text can print in a different order each time."
+    ],
+    [
+     "warn",
+     "Common mistake: `x = {}` is **not an empty set**, it is an empty **dict**. Empty set: `set()`. And a set has no index: `s[0]` will give an error."
+    ],
+    [
+     "p",
+     "**Where (in ML):** getting the unique categories of a column (`set(cities)`), removing duplicate rows, finding common IDs in two datasets, building a vocabulary (unique words)."
+    ]
+   ]
+  },
+  {
+   "title": "Dictionary — find a value by name",
+   "blocks": [
+    [
+     "p",
+     "In a list you search by index: `cables[47]`. But how will you remember what is at 47? In a **dictionary** you search by **name (key)**."
+    ],
+    [
+     "analogy",
+     "A phone's contact list: search \"Anna\" and you get the number. You don't need to remember that Anna is contact number 47. Or GEEP's item code: say the code and you get the full cable details."
+    ],
+    [
+     "p",
+     "**Dictionary (dict)** = a collection of `key: value` pairs. Keys are **unique**. From Python 3.7+, a dict remembers insertion order."
+    ],
+    [
+     "code",
+     "python",
+     "cable = {\n    \"name\": \"5 Core Cable\",\n    \"size\": \"16 sqmm\",\n    \"price\": 4500,\n    \"in_stock\": True\n}\nprint(cable[\"name\"])\nprint(cable[\"price\"])\nprint(len(cable))",
+     "5 Core Cable\n4500\n4"
+    ],
+    [
+     "sketch",
+     {
+      "k": "boxes",
+      "title": "dict = key → value",
+      "items": [
+       {
+        "label": "name",
+        "value": "\"5 Core Cable\""
+       },
+       {
+        "label": "size",
+        "value": "\"16 sqmm\""
+       },
+       {
+        "label": "price",
+        "value": "4500"
+       },
+       {
+        "label": "in_stock",
+        "value": "True"
+       }
+      ]
+     }
+    ],
+    [
+     "p",
+     "**CRUD** = Create, Read, Update, Delete. In a dict, each of the four is one line:"
+    ],
+    [
+     "code",
+     "python",
+     "user = {\"name\": \"Akash\", \"age\": 25, \"city\": \"Bhiwadi\"}\nuser[\"email\"] = \"a@x.com\"   # new key = add\nuser[\"age\"] = 26            # existing key = update\ndel user[\"city\"]            # delete\nremoved = user.pop(\"email\")\nprint(user)\nprint(removed)",
+     "{'name': 'Akash', 'age': 26}\na@x.com"
+    ],
+    [
+     "p",
+     "If you ask for a key that doesn't exist using `[ ]`, you get a **KeyError** and the program crashes. The safe way is `.get()`:"
+    ],
+    [
+     "code",
+     "python",
+     "user = {\"name\": \"Akash\"}\nprint(user.get(\"phone\"))\nprint(user.get(\"phone\", \"N/A\"))\nprint(\"name\" in user, \"phone\" in user)",
+     "None\nN/A\nTrue False"
+    ],
+    [
+     "tip",
+     "In real code, where a key may or may not be there (like JSON from an API), use `.get(key, default)`. `in` checks only **keys**, not values."
+    ],
+    [
+     "code",
+     "python",
+     "cable = {\"name\": \"5 Core\", \"price\": 4500, \"stock\": 12}\nfor key in cable:\n    print(key)\nfor key, value in cable.items():\n    print(f\"{key}: {value}\")\nprint(list(cable.values()))",
+     "name\nprice\nstock\nname: 5 Core\nprice: 4500\nstock: 12\n['5 Core', 4500, 12]"
+    ],
+    [
+     "p",
+     "`.keys()` = only keys, `.values()` = only values, `.items()` = both, as (key, value) tuples."
+    ],
+    [
+     "p",
+     "**The most famous IQ question: counting.** \"How many times did each word appear?\" — this is the first step in NLP and ML (word frequency)."
+    ],
+    [
+     "code",
+     "python",
+     "text = \"cable pass cable fail cable pass\"\ncount = {}\nfor word in text.split():\n    count[word] = count.get(word, 0) + 1\nprint(count)",
+     "{'cable': 3, 'pass': 2, 'fail': 1}"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "count.get(word, 0) + 1",
+      "head": [
+       "word",
+       "before",
+       "after"
+      ],
+      "rows": [
+       [
+        "cable",
+        "0",
+        "1"
+       ],
+       [
+        "pass",
+        "0",
+        "1"
+       ],
+       [
+        "cable",
+        "1",
+        "2"
+       ],
+       [
+        "fail",
+        "0",
+        "1"
+       ],
+       [
+        "cable",
+        "2",
+        "3"
+       ],
+       [
+        "pass",
+        "1",
+        "2"
+       ]
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "from collections import Counter\nc = Counter(\"cable pass cable fail cable pass\".split())\nprint(c.most_common(2))",
+     "[('cable', 3), ('pass', 2)]"
+    ],
+    [
+     "warn",
+     "Common mistake: a dict key **cannot be mutable**. `{[1, 2]: \"x\"}` gives a TypeError (unhashable type: list). Use str, int or tuple for keys."
+    ],
+    [
+     "code",
+     "python",
+     "try:\n    d = {[1, 2]: \"x\"}\nexcept TypeError as e:\n    print(type(e).__name__)\nd = {(28.2, 76.8): \"Bhiwadi\"}\nprint(d[(28.2, 76.8)])",
+     "TypeError\nBhiwadi"
+    ]
+   ]
+  },
+  {
+   "title": "Nested data and comprehensions — a mini dataset",
+   "blocks": [
+    [
+     "p",
+     "Real-world data (API, database, CSV) often comes as a **list of dicts**. Each dict = one **row**, each key = one **column**. This is a mini dataset — later, a Pandas DataFrame is thought of the same way."
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "List of dicts = table",
+      "head": [
+       "name",
+       "city",
+       "amount"
+      ],
+      "rows": [
+       [
+        "Rahul",
+        "Delhi",
+        "50000"
+       ],
+       [
+        "Neha",
+        "Jaipur",
+        "20000"
+       ],
+       [
+        "Amit",
+        "Delhi",
+        "35000"
+       ]
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "leads = [\n    {\"name\": \"Rahul\", \"city\": \"Delhi\", \"amount\": 50000},\n    {\"name\": \"Neha\", \"city\": \"Jaipur\", \"amount\": 20000},\n    {\"name\": \"Amit\", \"city\": \"Delhi\", \"amount\": 35000},\n]\nprint(leads[0][\"name\"])\nprint(len(leads))\nfor lead in leads:\n    if lead[\"city\"] == \"Delhi\":\n        print(lead[\"name\"], lead[\"amount\"])",
+     "Rahul\n3\nRahul 50000\nAmit 35000"
+    ],
+    [
+     "tip",
+     "Look carefully: `leads[0]` = the first row (a dict), then `[\"name\"]` = that row's column. Read from the outside in."
+    ],
+    [
+     "p",
+     "**Group by** — the total amount for each city. Pandas' `groupby` does the same thing inside:"
+    ],
+    [
+     "code",
+     "python",
+     "leads = [\n    {\"name\": \"Rahul\", \"city\": \"Delhi\", \"amount\": 50000},\n    {\"name\": \"Neha\", \"city\": \"Jaipur\", \"amount\": 20000},\n    {\"name\": \"Amit\", \"city\": \"Delhi\", \"amount\": 35000},\n]\ntotal_by_city = {}\nfor lead in leads:\n    city = lead[\"city\"]\n    total_by_city[city] = total_by_city.get(city, 0) + lead[\"amount\"]\nprint(total_by_city)\nbiggest = max(leads, key=lambda l: l[\"amount\"])\nprint(biggest[\"name\"])\nby_amount = sorted(leads, key=lambda l: l[\"amount\"], reverse=True)\nprint([l[\"name\"] for l in by_amount])",
+     "{'Delhi': 85000, 'Jaipur': 20000}\nRahul\n['Rahul', 'Amit', 'Neha']"
+    ],
+    [
+     "p",
+     "`key=lambda l: l[\"amount\"]` means: \"compare each row by its amount\". `lambda` is a small function without a name (remember Stage 3)."
+    ],
+    [
+     "p",
+     "**List comprehension** = writing a loop + append in one line. Read it like this: \"**do this**, **for each x** in the list, **if** the condition is true\"."
+    ],
+    [
+     "code",
+     "python",
+     "squares = []\nfor x in range(5):\n    squares.append(x * x)\nprint(squares)\n\nsquares = [x * x for x in range(5)]\nprint(squares)\nevens = [x for x in range(10) if x % 2 == 0]\nprint(evens)\nlabels = [\"PASS\" if v >= 500 else \"FAIL\" for v in [520, 480, 610]]\nprint(labels)",
+     "[0, 1, 4, 9, 16]\n[0, 1, 4, 9, 16]\n[0, 2, 4, 6, 8]\n['PASS', 'FAIL', 'PASS']"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "How to read a comprehension",
+      "steps": [
+       "x * x (do this)",
+       "for x in nums",
+       "if x > 0 (filter)"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "There are also **dict comprehensions** and **set comprehensions**:"
+    ],
+    [
+     "code",
+     "python",
+     "names = [\"Rahul\", \"Neha\", \"Amit\"]\nlengths = {n: len(n) for n in names}\nprint(lengths)\nprices = {\"5 Core\": 4500, \"3 Core\": 3000}\nwith_gst = {k: round(v * 1.18) for k, v in prices.items()}\nprint(with_gst)\ncities = {l for l in [\"Delhi\", \"Jaipur\", \"Delhi\"]}\nprint(len(cities))",
+     "{'Rahul': 5, 'Neha': 4, 'Amit': 4}\n{'5 Core': 5310, '3 Core': 3540}\n2"
+    ],
+    [
+     "p",
+     "**Connection to ML:** a model needs numbers. Pulling one column out of a list of dicts, or building a list of features — it is all done with comprehensions:"
+    ],
+    [
+     "code",
+     "python",
+     "rows = [\n    {\"size\": 16, \"cores\": 5, \"price\": 4500},\n    {\"size\": 10, \"cores\": 3, \"price\": 2600},\n]\nX = [[r[\"size\"], r[\"cores\"]] for r in rows]\ny = [r[\"price\"] for r in rows]\nprint(X)\nprint(y)",
+     "[[16, 5], [10, 3]]\n[4500, 2600]"
+    ],
+    [
+     "warn",
+     "Common mistake: don't write very long comprehensions with three `for`s. If it gets hard to read, a normal `for` loop is better. We write code for humans too."
+    ]
+   ]
+  },
+  {
+   "title": "Choose the right box + understanding Big-O",
+   "blocks": [
+    [
+     "p",
+     "The difference between all four boxes in one table (from the book):"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "List vs Tuple vs Set vs Dict",
+      "head": [
+       "",
+       "Order",
+       "Duplicate",
+       "Change"
+      ],
+      "rows": [
+       [
+        "List [ ]",
+        "Yes",
+        "Yes",
+        "Yes"
+       ],
+       [
+        "Tuple ( )",
+        "Yes",
+        "Yes",
+        "No"
+       ],
+       [
+        "Set { }",
+        "No",
+        "No",
+        "Yes"
+       ],
+       [
+        "Dict {k:v}",
+        "Yes",
+        "Not keys",
+        "Yes"
+       ]
+      ]
+     }
+    ],
+    [
+     "list",
+     [
+      "You need a line of items, order matters → **List**",
+      "You need to search by name/ID → **Dict**",
+      "You need to remove duplicates, or a fast 'is it there or not' check → **Set**",
+      "The data must stay fixed, or you need a dict key → **Tuple**"
+     ]
+    ],
+    [
+     "p",
+     "Now a deeper point that is asked in IQs: **why is searching a list slow, and why is a set/dict fast?**"
+    ],
+    [
+     "analogy",
+     "List = a shop without a register. \"Do you have 5 Core cable?\" — the shopkeeper checks every shelf one by one. With 10 lakh items, that's 10 lakh shelves. Set/Dict = a shop with a register: look up the code, get the shelf number directly, answer in one second."
+    ],
+    [
+     "p",
+     "**Big-O** tells you how much the work grows as the data grows. In a list, `x in list` = **O(n)** (n items means up to n checks). In a set/dict, `x in set` = **O(1)** on average (constant), because they use **hashing**: the key is turned into a number (hash) that points straight to its place."
+    ],
+    [
+     "sketch",
+     {
+      "k": "chart",
+      "title": "Lookup work vs data size",
+      "type": "line",
+      "points": [
+       [
+        1,
+        1
+       ],
+       [
+        2,
+        2
+       ],
+       [
+        3,
+        3
+       ],
+       [
+        4,
+        4
+       ],
+       [
+        5,
+        5
+       ]
+      ],
+      "line": [
+       [
+        0,
+        1
+       ],
+       [
+        5,
+        1
+       ]
+      ],
+      "xl": "items (n)",
+      "yl": "steps"
+     }
+    ],
+    [
+     "p",
+     "In the chart above, the points = list (a straight line going up, O(n)); the flat line = set/dict (O(1))."
+    ],
+    [
+     "code",
+     "python",
+     "print(hash(\"5 Core\") == hash(\"5 Core\"))\nprint(hash(42))",
+     "True\n42"
+    ],
+    [
+     "p",
+     "The same value always has the same hash, so a set/dict goes straight to that place. That is why a **key must be immutable** — if it changes, the hash changes and the dict can no longer find it."
+    ],
+    [
+     "code",
+     "python",
+     "import time\nbig_list = list(range(1_000_000))\nbig_set = set(big_list)\nt = time.perf_counter(); _ = 999_999 in big_list; t_list = time.perf_counter() - t\nt = time.perf_counter(); _ = 999_999 in big_set; t_set = time.perf_counter() - t\nprint(f\"list: {t_list:.6f}s, set: {t_set:.6f}s\")",
+     ""
+    ],
+    [
+     "p",
+     "Run this and the list time will be **thousands of times more** than the set time (the exact number is different on every machine, so the output is not written here)."
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Common Big-O",
+      "head": [
+       "Task",
+       "List",
+       "Set/Dict"
+      ],
+      "rows": [
+       [
+        "x in ...",
+        "O(n)",
+        "O(1)"
+       ],
+       [
+        "get by index/key",
+        "O(1)",
+        "O(1)"
+       ],
+       [
+        "add at end",
+        "O(1)",
+        "O(1)"
+       ],
+       [
+        "insert at start",
+        "O(n)",
+        "-"
+       ]
+      ]
+     }
+    ],
+    [
+     "tip",
+     "Real tip: if you keep writing `if x in badi_list` inside a loop, first make `badi_set = set(badi_list)`. The code becomes fast right away. Mentioning this optimization in an IQ really impresses."
+    ],
+    [
+     "code",
+     "python",
+     "blocked = [\"u7\", \"u9\", \"u3\"]\nusers = [\"u1\", \"u3\", \"u5\", \"u9\"]\nblocked_set = set(blocked)\nallowed = [u for u in users if u not in blocked_set]\nprint(allowed)",
+     "['u1', 'u5']"
+    ],
+    [
+     "warn",
+     "Common mistake: assuming a set has an order. If you need order, keep a list or use `sorted(set)`. And `list(set(nums))` will remove duplicates, but the order may get mixed up; to keep the order, use `list(dict.fromkeys(nums))`."
+    ],
+    [
+     "code",
+     "python",
+     "nums = [3, 1, 3, 2, 1]\nprint(list(dict.fromkeys(nums)))",
+     "[3, 1, 2]"
+    ]
+   ]
+  }
+ ],
+ "teach": [
+  {
+   "say": "Imagine you need to store 50 cable names. 50 variables? No. Make one list — a train where every coach is one item.",
+   "sketch": {
+    "k": "array",
+    "items": [
+     "5 Core",
+     "3 Core",
+     "Fiber",
+     "XLPE"
+    ],
+    "index": true
+   },
+   "code": "cables = [\"5 Core\", \"3 Core\", \"Fiber\", \"XLPE\"]"
+  },
+  {
+   "say": "Index starts at zero. Minus one means the last one. And in slicing, the stop index is not included.",
+   "sketch": {
+    "k": "array",
+    "items": [
+     "10",
+     "20",
+     "30",
+     "40",
+     "50"
+    ],
+    "index": true
+   },
+   "code": "nums[1:3]  # [20, 30]\nnums[-1]   # 50"
+  },
+  {
+   "say": "A list can change: append adds at the end, pop takes from the end. But careful: b = a is not a copy, it is a second name for the same list.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "a",
+     "[1, 2, 3]",
+     "b"
+    ],
+    "dir": "h"
+   },
+   "code": "b = a        # same list\nc = a.copy() # real copy"
+  },
+  {
+   "say": "A tuple is like a list but written in ink — you can't change it. It's for fixed data, and very useful in unpacking.",
+   "sketch": {
+    "k": "compare",
+    "left": {
+     "title": "List",
+     "items": [
+      "[ ]",
+      "can change",
+      "not a dict key"
+     ]
+    },
+    "right": {
+     "title": "Tuple",
+     "items": [
+      "( )",
+      "can't change",
+      "can be a dict key"
+     ]
+    }
+   },
+   "code": "x, y = (10, 20)\na, b = b, a"
+  },
+  {
+   "say": "A set keeps only unique things. Duplicates vanish on their own. And to get what's common, use the and sign.",
+   "sketch": {
+    "k": "table",
+    "head": [
+     "Op",
+     "Meaning"
+    ],
+    "rows": [
+     [
+      "a & b",
+      "common"
+     ],
+     [
+      "a | b",
+      "all"
+     ],
+     [
+      "a - b",
+      "only in a"
+     ]
+    ]
+   },
+   "code": "set([1, 1, 2])  # {1, 2}\njan & feb"
+  },
+  {
+   "say": "A dictionary has no index; we search by name. Say the key, get the value. Just like a phone contact.",
+   "sketch": {
+    "k": "boxes",
+    "items": [
+     {
+      "label": "name",
+      "value": "\"Akash\""
+     },
+     {
+      "label": "age",
+      "value": "25"
+     },
+     {
+      "label": "city",
+      "value": "\"Bhiwadi\""
+     }
+    ]
+   },
+   "code": "user[\"name\"]\nuser.get(\"phone\", \"N/A\")"
+  },
+  {
+   "say": "Remember the counting pattern: give the count so far, zero if it's not there, then plus one. It definitely comes up in IQs.",
+   "sketch": {
+    "k": "cycle",
+    "steps": [
+     "take word",
+     "get(word, 0)",
+     "store +1"
+    ]
+   },
+   "code": "count[w] = count.get(w, 0) + 1"
+  },
+  {
+   "say": "Real data is a list of dicts: each dict is a row, each key is a column. This is your first mini dataset.",
+   "sketch": {
+    "k": "table",
+    "head": [
+     "name",
+     "city",
+     "amount"
+    ],
+    "rows": [
+     [
+      "Rahul",
+      "Delhi",
+      "50000"
+     ],
+     [
+      "Neha",
+      "Jaipur",
+      "20000"
+     ]
+    ]
+   },
+   "code": "for row in leads:\n    print(row[\"name\"])"
+  },
+  {
+   "say": "A comprehension means loop and append in one line: do this, for each x, if the condition is true.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "x * x",
+     "for x in nums",
+     "if x > 0"
+    ],
+    "dir": "h"
+   },
+   "code": "[x * x for x in nums if x > 0]"
+  },
+  {
+   "say": "Last point: searching a list is checking shelf by shelf, O(n). A set and a dict are like a register, straight to the spot, O(1). If you search a big list again and again, make a set.",
+   "sketch": {
+    "k": "compare",
+    "left": {
+     "title": "List lookup",
+     "items": [
+      "O(n)",
+      "one-by-one check",
+      "slow on big data"
+     ]
+    },
+    "right": {
+     "title": "Set/Dict lookup",
+     "items": [
+      "O(1) average",
+      "hashing",
+      "very fast"
+     ]
+    }
+   },
+   "code": null
+  }
+ ],
+ "practice": [
+  {
+   "q": "Word frequency counter (the first step of NLP). Count in a dict how many times each word appears in the given `text`. Then print the top 3 most frequent words in `word: count` format (higher count first; if counts are equal, alphabetical order).",
+   "starter": "text = \"the cable is good the cable is cheap the price is good\"\ncount = {}\n# TODO: split into words and count each with count.get(word, 0) + 1\n\n# TODO: sort items by (-count, word) and print the top 3\n",
+   "hint": "sorted(count.items(), key=lambda kv: (-kv[1], kv[0]))[:3]",
+   "solution": "text = \"the cable is good the cable is cheap the price is good\"\ncount = {}\nfor word in text.split():\n    count[word] = count.get(word, 0) + 1\ntop = sorted(count.items(), key=lambda kv: (-kv[1], kv[0]))[:3]\nfor word, c in top:\n    print(f\"{word}: {c}\")",
+   "expect": "is: 3\nthe: 3\ncable: 2"
+  },
+  {
+   "q": "Mini dataset: `employees` is a list of dicts. Find the **average salary** of each city (group by) and print `city: avg` in alphabetical order of city (round avg to an int). On the last line, print the name of the person with the highest salary.",
+   "starter": "employees = [\n    {\"name\": \"Rahul\", \"city\": \"Delhi\", \"salary\": 40000},\n    {\"name\": \"Neha\", \"city\": \"Jaipur\", \"salary\": 35000},\n    {\"name\": \"Amit\", \"city\": \"Delhi\", \"salary\": 52000},\n    {\"name\": \"Priya\", \"city\": \"Bhiwadi\", \"salary\": 30000},\n    {\"name\": \"Karan\", \"city\": \"Jaipur\", \"salary\": 41000},\n]\ntotals = {}\ncounts = {}\n# TODO: for each employee, increase the city's total and count\n\n# TODO: loop over sorted(totals) and print the average\n\n# TODO: find the top earner with max(..., key=lambda e: e[\"salary\"])\n",
+   "hint": "totals[c] = totals.get(c, 0) + e[\"salary\"]; counts[c] = counts.get(c, 0) + 1; avg = round(totals[c] / counts[c])",
+   "solution": "employees = [\n    {\"name\": \"Rahul\", \"city\": \"Delhi\", \"salary\": 40000},\n    {\"name\": \"Neha\", \"city\": \"Jaipur\", \"salary\": 35000},\n    {\"name\": \"Amit\", \"city\": \"Delhi\", \"salary\": 52000},\n    {\"name\": \"Priya\", \"city\": \"Bhiwadi\", \"salary\": 30000},\n    {\"name\": \"Karan\", \"city\": \"Jaipur\", \"salary\": 41000},\n]\ntotals = {}\ncounts = {}\nfor e in employees:\n    c = e[\"city\"]\n    totals[c] = totals.get(c, 0) + e[\"salary\"]\n    counts[c] = counts.get(c, 0) + 1\nfor c in sorted(totals):\n    print(f\"{c}: {round(totals[c] / counts[c])}\")\ntop = max(employees, key=lambda e: e[\"salary\"])\nprint(\"Top:\", top[\"name\"])",
+   "expect": "Bhiwadi: 30000\nDelhi: 46000\nJaipur: 38000\nTop: Amit"
+  },
+  {
+   "q": "Customer analysis with sets. `jan` and `feb` hold the customer IDs of orders (with duplicates). Print (each line as a sorted list):\n1. Count of unique customers in Jan\n2. Customers in both months\n3. New customers in Feb (who were not in Jan)\n4. Those who were in Jan but did not come in Feb (churn)",
+   "starter": "jan = [\"c1\", \"c2\", \"c3\", \"c2\", \"c4\", \"c1\"]\nfeb = [\"c2\", \"c4\", \"c5\", \"c6\", \"c5\"]\n# TODO: turn both into sets\n\n# TODO: print 4 lines using len, &, and -\n",
+   "hint": "a = set(jan); b = set(feb); print(sorted(a & b))",
+   "solution": "jan = [\"c1\", \"c2\", \"c3\", \"c2\", \"c4\", \"c1\"]\nfeb = [\"c2\", \"c4\", \"c5\", \"c6\", \"c5\"]\na = set(jan)\nb = set(feb)\nprint(len(a))\nprint(sorted(a & b))\nprint(sorted(b - a))\nprint(sorted(a - b))",
+   "expect": "4\n['c2', 'c4']\n['c5', 'c6']\n['c1', 'c3']"
+  }
+ ],
+ "quiz": [
+  {
+   "q": "If `nums = [10, 20, 30, 40]`, what does `nums[1:3]` give?",
+   "o": [
+    "[10, 20, 30]",
+    "[20, 30]",
+    "[20, 30, 40]",
+    "[10, 20]"
+   ],
+   "a": 1,
+   "why": "Start index 1 is included, stop index 3 is not: index 1 and 2 = [20, 30]."
+  },
+  {
+   "q": "What is the output of `a = [1, 2]; b = a; b.append(3); print(a)`?",
+   "o": [
+    "[1, 2]",
+    "[3]",
+    "Error",
+    "[1, 2, 3]"
+   ],
+   "a": 3,
+   "why": "`b = a` does not make a copy; both point to the same list, so a changed too."
+  },
+  {
+   "q": "After `x = nums.sort()`, what will `x` hold?",
+   "o": [
+    "None",
+    "Sorted list",
+    "Original list",
+    "Error"
+   ],
+   "a": 0,
+   "why": "`.sort()` changes the list in place and returns None. For a new list, use `sorted()`."
+  },
+  {
+   "q": "How do you make a tuple with one item?",
+   "o": [
+    "(5)",
+    "[5]",
+    "(5,)",
+    "{5}"
+   ],
+   "a": 2,
+   "why": "The comma makes the tuple; `(5)` is just the number 5."
+  },
+  {
+   "q": "What does `{}` create?",
+   "o": [
+    "Empty set",
+    "Empty dict",
+    "Empty tuple",
+    "Error"
+   ],
+   "a": 1,
+   "why": "Empty curly brackets = dict. For an empty set, use `set()`."
+  },
+  {
+   "q": "What is the result of `{1, 2, 3} & {2, 3, 4}`?",
+   "o": [
+    "{1, 2, 3, 4}",
+    "{1, 4}",
+    "{1}",
+    "{2, 3}"
+   ],
+   "a": 3,
+   "why": "`&` is intersection: the items common to both."
+  },
+  {
+   "q": "How do you safely read a key that may be missing from a dict?",
+   "o": [
+    "d.get(\"k\", 0)",
+    "d[\"k\"]",
+    "d.find(\"k\")",
+    "d.key(\"k\")"
+   ],
+   "a": 0,
+   "why": "If the key is missing, `.get()` gives None or the given default instead of an error."
+  },
+  {
+   "q": "Which of these **cannot** be a dict key?",
+   "o": [
+    "\"name\"",
+    "42",
+    "[1, 2]",
+    "(1, 2)"
+   ],
+   "a": 2,
+   "why": "A list is mutable, so it is unhashable; a dict key must be immutable (hashable)."
+  },
+  {
+   "q": "What is the result of `[x * 2 for x in range(4) if x % 2 == 1]`?",
+   "o": [
+    "[0, 2, 4, 6]",
+    "[2, 6]",
+    "[1, 3]",
+    "[0, 4]"
+   ],
+   "a": 1,
+   "why": "Odd x = 1 and 3; doubled gives [2, 6]."
+  },
+  {
+   "q": "You need to check again and again whether an ID is among 10 lakh IDs. What is fastest?",
+   "o": [
+    "List",
+    "Tuple",
+    "Set",
+    "String"
+   ],
+   "a": 2,
+   "why": "A set uses hashing: a membership check is O(1) on average, O(n) in a list."
+  }
+ ],
+ "iq": [
+  {
+   "q": "What is the difference between a list and a tuple? When would you use which?",
+   "a": "A list is mutable (you can change it), a tuple is immutable. A tuple is a bit faster and uses less memory, and because it is hashable it can be a dict key or a set item. Changing data goes in a list (a list of products), fixed data goes in a tuple (coordinates, a DB row, multiple return values from a function)."
+  },
+  {
+   "q": "What is the lookup time complexity of a Python list, set and dict, and why?",
+   "a": "`x in list` is O(n) because each item is checked one by one. A set and a dict are built on a hash table, so `x in set` and `d[key]` are O(1) on average: the key's hash points straight to its place. The worst case (many collisions) can be O(n), but in practice it is rare."
+  },
+  {
+   "q": "What is the difference between append and extend?",
+   "a": "`append(x)` adds x at the end as a single item, even if x is a list: `[1,2].append([3,4])` → `[1, 2, [3, 4]]`. `extend(iterable)` adds each item separately → `[1, 2, 3, 4]`."
+  },
+  {
+   "q": "Difference between sort() and sorted()?",
+   "a": "`list.sort()` sorts the original list in place and returns None; it works only on lists. `sorted(iterable)` returns a new sorted list, the original stays the same, and it works on any iterable (tuple, set, dict keys). Both take `key=` and `reverse=`."
+  },
+  {
+   "q": "What are shallow copy and deep copy?",
+   "a": "`b = a` is not a copy at all, it is a new name for the same object. `a.copy()` or `a[:]` is a shallow copy: the outer list is new, but the nested lists inside are the same objects. `copy.deepcopy(a)` makes everything new, all the way inside. For nested data (a list of lists/dicts) you need deepcopy so the original doesn't change."
+  },
+  {
+   "q": "Why can't a dict key be mutable?",
+   "a": "A dict computes the key's hash to decide where the value goes. If the key changes, the hash changes and the dict can't find it. So a key must be hashable (immutable): str, int, float, tuple (if everything inside is immutable too). Using a list or dict as a key gives `TypeError: unhashable type`."
+  },
+  {
+   "q": "How do you remove duplicates from a list while keeping the order?",
+   "a": "If order doesn't matter: `list(set(nums))`. To keep the order: `list(dict.fromkeys(nums))`, because a dict remembers insertion order and its keys are unique. Or by running a loop with a `seen` set."
+  },
+  {
+   "q": "How do you find the frequency of each character/word in a string?",
+   "a": "With a dict: `for w in words: count[w] = count.get(w, 0) + 1`. Or `collections.Counter(words)`, which also gives `most_common(n)`. This is the base for building bag-of-words and a vocabulary in NLP."
+  },
+  {
+   "q": "What is a list comprehension, and when should you not use it?",
+   "a": "Building a new list in one line with a loop + an optional filter: `[x*x for x in nums if x > 0]`. It is shorter and a bit faster than a normal loop + append. But when the logic is complex, there are more than 2 nested loops, or there are side effects (print, file write), a normal loop is more readable."
+  },
+  {
+   "q": "What is the difference between a generator expression and a list comprehension?",
+   "a": "`[x*x for x in nums]` builds the whole list in memory right away. `(x*x for x in nums)` is a generator that makes one value at a time when asked, so it saves memory on big data. Writing `sum(x*x for x in nums)` is common. A generator can be iterated only once."
+  },
+  {
+   "q": "In ML, how do you turn raw data from a list of dicts into features (X) and labels (y)?",
+   "a": "Each row is a dict, so with comprehensions: `X = [[r[\"size\"], r[\"cores\"]] for r in rows]` and `y = [r[\"price\"] for r in rows]`. X becomes a 2D list (rows x features) that later goes into a NumPy array or a Pandas DataFrame. For missing values, use a default like `r.get(\"size\", 0)`."
+  }
+ ]
+}

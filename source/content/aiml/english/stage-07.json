@@ -1,0 +1,1074 @@
+{
+ "n": 7,
+ "id": "aiml-07",
+ "title": "APIs, HTTP & FastAPI",
+ "goal": "You will understand client-server, HTTP methods, status codes, headers and JSON; call APIs with requests (with API key, timeout and error handling); learn REST design; and build your own API with FastAPI to serve an ML model behind an endpoint.",
+ "lessons": [
+  {
+   "title": "APIs and client-server: two programs talking",
+   "blocks": [
+    [
+     "p",
+     "**API** (Application Programming Interface) = a way for two programs to talk to each other. One program tells another \"give me this\" or \"do this\", and gets an answer back."
+    ],
+    [
+     "analogy",
+     "In a restaurant you don't walk into the kitchen. You give your order to the **waiter**, and he brings the food from the kitchen. You = **client**, kitchen = **server**, waiter + menu = **API**. The menu tells you what you can ask for, and how."
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Client-server",
+      "steps": [
+       "Client (app)",
+       "Request",
+       "Server",
+       "Response"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "The Zomato app talks to the restaurant = API. A weather app fetches weather data = API. Your Python code sends a prompt to Claude/OpenAI = API. And when you build your own ML model, a mobile app or website will use it only through **your API**."
+    ],
+    [
+     "p",
+     "**HTTP** = the **rules** (protocol) for how a client and a server talk on the internet. Every exchange has two parts: a **request** (the client sends it) and a **response** (the server sends it back)."
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "Request vs Response",
+      "left": {
+       "title": "Request",
+       "items": [
+        "Method (GET/POST)",
+        "URL",
+        "Headers",
+        "Body (optional)"
+       ]
+      },
+      "right": {
+       "title": "Response",
+       "items": [
+        "Status code (200)",
+        "Headers",
+        "Body (JSON)"
+       ]
+      }
+     }
+    ],
+    [
+     "p",
+     "A **URL** has parts too. Python's `urllib.parse` (stdlib) breaks a URL apart and shows them:"
+    ],
+    [
+     "code",
+     "python",
+     "from urllib.parse import urlparse, parse_qs\n\nurl = \"https://api.geep.in:8000/v1/products?category=cable&limit=5\"\np = urlparse(url)\nprint(p.scheme)\nprint(p.netloc)\nprint(p.path)\nprint(parse_qs(p.query))",
+     "https\napi.geep.in:8000\n/v1/products\n{'category': ['cable'], 'limit': ['5']}"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Parts of a URL",
+      "head": [
+       "Part",
+       "Example"
+      ],
+      "rows": [
+       [
+        "scheme",
+        "https"
+       ],
+       [
+        "host:port",
+        "api.geep.in:8000"
+       ],
+       [
+        "path",
+        "/v1/products"
+       ],
+       [
+        "query",
+        "category=cable&limit=5"
+       ]
+      ]
+     }
+    ],
+    [
+     "p",
+     "The **path** says *which thing* (the resource). The **query** (after `?`, separated by `&`) says *how* (filter, page, limit)."
+    ],
+    [
+     "p",
+     "**HTTP methods** = the type of action:"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "HTTP methods",
+      "head": [
+       "Method",
+       "Action",
+       "Idempotent?"
+      ],
+      "rows": [
+       [
+        "GET",
+        "get data",
+        "Yes"
+       ],
+       [
+        "POST",
+        "create new",
+        "No"
+       ],
+       [
+        "PUT",
+        "replace fully",
+        "Yes"
+       ],
+       [
+        "PATCH",
+        "change some fields",
+        "No*"
+       ],
+       [
+        "DELETE",
+        "remove",
+        "Yes"
+       ]
+      ]
+     }
+    ],
+    [
+     "tip",
+     "Look carefully: **Idempotent** = send the same request 10 times and the result stays the same. GET 10 times = same data. POST 10 times = 10 new records! That's why we are careful when retrying a POST request like a payment."
+    ],
+    [
+     "warn",
+     "Common mistake: using GET to change data (like `GET /delete?id=5`). GET is only for reading; a browser or cache can resend a GET at any time."
+    ]
+   ]
+  },
+  {
+   "title": "Status codes, headers and JSON",
+   "blocks": [
+    [
+     "p",
+     "Every response comes with a **status code**: a 3-digit number that tells what happened. The first digit tells the family."
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Status code families",
+      "head": [
+       "Range",
+       "Meaning"
+      ],
+      "rows": [
+       [
+        "2xx",
+        "Success"
+       ],
+       [
+        "3xx",
+        "Redirect"
+       ],
+       [
+        "4xx",
+        "Client's mistake"
+       ],
+       [
+        "5xx",
+        "Server's mistake"
+       ]
+      ]
+     }
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Memorise these",
+      "head": [
+       "Code",
+       "Name",
+       "When"
+      ],
+      "rows": [
+       [
+        "200",
+        "OK",
+        "all good"
+       ],
+       [
+        "201",
+        "Created",
+        "made by POST"
+       ],
+       [
+        "400/422",
+        "Bad/Invalid",
+        "bad data"
+       ],
+       [
+        "401 / 403",
+        "Unauth/Forbidden",
+        "login/permission"
+       ],
+       [
+        "404",
+        "Not Found",
+        "thing not found"
+       ],
+       [
+        "500",
+        "Server Error",
+        "bug in server"
+       ]
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "from http import HTTPStatus\n\nfor code in (200, 201, 401, 403, 404, 500):\n    print(code, HTTPStatus(code).phrase)",
+     "200 OK\n201 Created\n401 Unauthorized\n403 Forbidden\n404 Not Found\n500 Internal Server Error"
+    ],
+    [
+     "tip",
+     "IQ trap: **401 vs 403**. 401 = you didn't prove who you are (no token or wrong token). 403 = your identity is fine, but you don't have permission for this action. No gate pass = 401; you have a gate pass but can't go to the admin floor = 403."
+    ],
+    [
+     "p",
+     "**Headers** = extra info sent with a request/response, like the address written on an envelope. The data is inside the body; the header has info about it."
+    ],
+    [
+     "sketch",
+     {
+      "k": "boxes",
+      "title": "Common headers",
+      "items": [
+       {
+        "label": "Content-Type",
+        "value": "application/json"
+       },
+       {
+        "label": "Authorization",
+        "value": "Bearer sk-..."
+       },
+       {
+        "label": "Accept",
+        "value": "application/json"
+       }
+      ]
+     }
+    ],
+    [
+     "p",
+     "**JSON** (JavaScript Object Notation) = the common language of APIs. It looks just like a Python dict/list, but it is **text**. Python's `json` module (stdlib) converts both ways:"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "json module",
+      "steps": [
+       "Python dict",
+       "json.dumps()",
+       "JSON text",
+       "json.loads()",
+       "Python dict"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "code",
+     "python",
+     "import json\n\nprofile = {\"name\": \"Akash\", \"age\": 25, \"ml\": True, \"skills\": [\"Python\", \"SQL\"], \"manager\": None}\ntext = json.dumps(profile)\nprint(text)\nprint(type(text))\nback = json.loads(text)\nprint(back[\"skills\"][1], type(back))",
+     "{\"name\": \"Akash\", \"age\": 25, \"ml\": true, \"skills\": [\"Python\", \"SQL\"], \"manager\": null}\n<class 'str'>\nSQL <class 'dict'>"
+    ],
+    [
+     "tip",
+     "Look carefully: in JSON `True` → `true`, `None` → `null`, and always **double quotes**. A tuple becomes a list in JSON."
+    ],
+    [
+     "p",
+     "Real API responses are mostly **nested** (a list inside a dict, a dict inside a list). Below we parse the response of an ML prediction API:"
+    ],
+    [
+     "code",
+     "python",
+     "import json\n\nraw = '''{\"model\": \"churn-v2\", \"status\": \"ok\",\n \"predictions\": [\n   {\"customer\": \"Sharma\", \"label\": \"stay\", \"score\": 0.91},\n   {\"customer\": \"Gupta\", \"label\": \"leave\", \"score\": 0.77},\n   {\"customer\": \"Verma\", \"label\": \"leave\", \"score\": 0.64}\n ]}'''\ndata = json.loads(raw)\nprint(data[\"model\"], len(data[\"predictions\"]))\nleaving = [p[\"customer\"] for p in data[\"predictions\"] if p[\"label\"] == \"leave\"]\nprint(leaving)\nprint(round(max(p[\"score\"] for p in data[\"predictions\"]), 2))",
+     "churn-v2 3\n['Gupta', 'Verma']\n0.91"
+    ],
+    [
+     "p",
+     "If the key is missing, `data[\"x\"]` gives a KeyError. Don't trust API data; use `.get()` with a default. And bad JSON raises `json.JSONDecodeError`:"
+    ],
+    [
+     "code",
+     "python",
+     "import json\n\nresp = json.loads('{\"name\": \"Akash\"}')\nprint(resp.get(\"city\", \"N/A\"))\ntry:\n    json.loads(\"{name: Akash}\")\nexcept json.JSONDecodeError as e:\n    print(\"Bad JSON:\", e.msg)",
+     "N/A\nBad JSON: Expecting property name enclosed in double quotes"
+    ],
+    [
+     "warn",
+     "Common mistake: treating a JSON string as a dict and writing `text[\"name\"]`. Do `json.loads()` first. And in `json.dumps` pass `ensure_ascii=False` for Hindi text, otherwise it shows up like `\\u0905`."
+    ]
+   ]
+  },
+  {
+   "title": "requests library: API calls, API keys, timeouts, error handling",
+   "blocks": [
+    [
+     "p",
+     "The most popular Python library for calling APIs is `requests` (`pip install requests`). It needs the internet, so the output of these examples is not given here; what you get is written below."
+    ],
+    [
+     "code",
+     "python",
+     "import requests\n\nresponse = requests.get(\"https://api.github.com/users/octocat\", timeout=10)\nprint(response.status_code)          # 200\ndata = response.json()               # JSON text -> Python dict\nprint(data[\"name\"], data[\"public_repos\"])",
+     ""
+    ],
+    [
+     "p",
+     "When you run it you get `200`, octocat's name and the repos count. `requests.get()` = a GET request; `response.json()` = turns the body into a dict (inside it's just `json.loads`)."
+    ],
+    [
+     "p",
+     "Don't glue **query params** together yourself; pass `params=`. For **POST** send data with `json=`; requests builds the JSON and sets the `Content-Type` header for you."
+    ],
+    [
+     "code",
+     "python",
+     "import requests\n\nr = requests.get(\"https://jsonplaceholder.typicode.com/posts\",\n                 params={\"userId\": 1}, timeout=10)\nprint(r.url)        # ...posts?userId=1\n\nnew_post = {\"title\": \"GEEP\", \"body\": \"Hello\", \"userId\": 1}\nr = requests.post(\"https://jsonplaceholder.typicode.com/posts\", json=new_post, timeout=10)\nprint(r.status_code)   # 201 Created",
+     ""
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Journey of a request",
+      "steps": [
+       "requests.get()",
+       "Server",
+       "status + JSON",
+       ".json() dict"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "**API key** = the ID card for an API. Paid APIs (OpenAI, Claude, weather) return `401` without a key. The key goes in a **header**, and it is never written in the code; it comes from an environment variable (`.env` file)."
+    ],
+    [
+     "code",
+     "python",
+     "import os\nimport requests\n\napi_key = os.getenv(\"API_KEY\")          # from .env / environment\nheaders = {\"Authorization\": f\"Bearer {api_key}\",\n           \"Content-Type\": \"application/json\"}\nr = requests.get(\"https://api.example.com/data\", headers=headers, timeout=30)",
+     ""
+    ],
+    [
+     "warn",
+     "Security rule: if you write `api_key = \"sk-abc123\"` in code and push it to GitHub, anyone can use it and you will get the bill. Put `.env` in `.gitignore`."
+    ],
+    [
+     "p",
+     "**Timeout** = don't wait longer than this many seconds. Without a timeout, if the server gets stuck, your program will hang forever."
+    ],
+    [
+     "analogy",
+     "You put your card in the ATM and the internet goes down. The ATM doesn't crash; it shows \"Please try again\". That is **error handling**: when a problem comes, don't crash, handle it."
+    ],
+    [
+     "code",
+     "python",
+     "import requests\n\ndef safe_get(url):\n    try:\n        r = requests.get(url, timeout=30)\n        r.raise_for_status()          # HTTPError on 4xx/5xx\n        return r.json()\n    except requests.exceptions.Timeout:\n        print(\"Server slow hai - timeout\")\n    except requests.exceptions.ConnectionError:\n        print(\"Internet / server band\")\n    except requests.exceptions.HTTPError as e:\n        print(\"HTTP error:\", e.response.status_code)\n    return None",
+     ""
+    ],
+    [
+     "p",
+     "Servers sometimes fail for a short time (503, 429 rate limit). Then we **retry with backoff**: try again, waiting a bit longer each time. Below, understand the logic with a fake server, no internet needed:"
+    ],
+    [
+     "code",
+     "python",
+     "replies = iter([503, 503, 200])        # fake server: fails 2 times, then OK\n\ndef call_api():\n    return next(replies)\n\ndef with_retry(max_tries=4):\n    wait = 1\n    for attempt in range(1, max_tries + 1):\n        status = call_api()\n        print(f\"try {attempt}: {status}\")\n        if status < 500:\n            return status\n        print(f\"  {wait}s ruk ke retry\")\n        wait *= 2                      # 1, 2, 4 ... (exponential backoff)\n    return None\n\nprint(\"final:\", with_retry())",
+     "try 1: 503\n  1s ruk ke retry\ntry 2: 503\n  2s ruk ke retry\ntry 3: 200\nfinal: 200"
+    ],
+    [
+     "tip",
+     "Retry only on 5xx, 429 and timeouts. Retrying on 400/401/404 is useless; the request itself is wrong. In real code you put `time.sleep(wait)` here."
+    ],
+    [
+     "warn",
+     "Common mistake: a bare `requests.get(url)` with no `timeout` and no try/except. This gets rejected in code review."
+    ]
+   ]
+  },
+  {
+   "title": "REST API design: what a good API looks like",
+   "blocks": [
+    [
+     "p",
+     "**REST** = a style of API design. The idea is simple: everything is a **resource** (product, order, user) with its own URL, and the HTTP method says the action. **Noun** in the URL, **verb** in the method."
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "REST: products resource",
+      "head": [
+       "Method",
+       "URL",
+       "Action",
+       "Status"
+      ],
+      "rows": [
+       [
+        "GET",
+        "/products",
+        "list",
+        "200"
+       ],
+       [
+        "GET",
+        "/products/7",
+        "one product",
+        "200/404"
+       ],
+       [
+        "POST",
+        "/products",
+        "create new",
+        "201"
+       ],
+       [
+        "PUT/PATCH",
+        "/products/7",
+        "update",
+        "200"
+       ],
+       [
+        "DELETE",
+        "/products/7",
+        "remove",
+        "204"
+       ]
+      ]
+     }
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "URL design",
+      "left": {
+       "title": "Wrong",
+       "items": [
+        "/getProducts",
+        "/createProduct",
+        "/deleteProduct?id=7",
+        "/product_list_all"
+       ]
+      },
+      "right": {
+       "title": "Right",
+       "items": [
+        "GET /products",
+        "POST /products",
+        "DELETE /products/7",
+        "GET /products?page=2"
+       ]
+      }
+     }
+    ],
+    [
+     "list",
+     [
+      "Resource names are **plural nouns**: `/products`, `/orders`.",
+      "Nesting for relations: `/customers/3/orders` (orders of customer 3).",
+      "Filter, sort and page go in the **query**: `/products?category=cable&sort=rate&page=2&limit=20`.",
+      "Version in the URL: `/v1/predict`, so a new version doesn't break old clients.",
+      "Return the right status code, not just 200. The error body is JSON too: `{\"detail\": \"Product not found\"}`."
+     ]
+    ],
+    [
+     "p",
+     "**Stateless**: every request is complete on its own (the token goes in the header every time too). The server doesn't remember the previous request. That's why you can run 10 servers instead of one and share the load."
+    ],
+    [
+     "analogy",
+     "A railway enquiry counter: you have to give your PNR every time; the clerk doesn't remember you came before. Because of this, any free counter can do your work."
+    ],
+    [
+     "p",
+     "Let's build a small in-memory REST-like router, so the method + path → status logic sticks in your head (this is just Python, not a server):"
+    ],
+    [
+     "code",
+     "python",
+     "products = {1: {\"name\": \"Copper Wire\", \"rate\": 850}}\n\ndef handle(method, path, body=None):\n    parts = path.strip(\"/\").split(\"/\")\n    if parts[0] != \"products\":\n        return 404, {\"detail\": \"Not found\"}\n    if method == \"GET\" and len(parts) == 1:\n        return 200, list(products.values())\n    if method == \"POST\" and len(parts) == 1:\n        if not body or \"name\" not in body:\n            return 422, {\"detail\": \"name required\"}\n        new_id = max(products) + 1\n        products[new_id] = body\n        return 201, {\"id\": new_id}\n    pid = int(parts[1])\n    if pid not in products:\n        return 404, {\"detail\": \"Product not found\"}\n    if method == \"GET\":\n        return 200, products[pid]\n    if method == \"DELETE\":\n        del products[pid]\n        return 204, None\n    return 405, {\"detail\": \"Method not allowed\"}\n\nprint(handle(\"POST\", \"/products\", {\"name\": \"PVC Cable\", \"rate\": 420}))\nprint(handle(\"POST\", \"/products\", {\"rate\": 10}))\nprint(handle(\"GET\", \"/products/2\"))\nprint(handle(\"DELETE\", \"/products/2\"))\nprint(handle(\"GET\", \"/products/2\"))",
+     "(201, {'id': 2})\n(422, {'detail': 'name required'})\n(200, {'name': 'PVC Cable', 'rate': 420})\n(204, None)\n(404, {'detail': 'Product not found'})"
+    ],
+    [
+     "tip",
+     "FastAPI does all of this (splitting the path, turning the id into an int, validation, status codes) for you automatically. We'll see it in the next lesson."
+    ],
+    [
+     "warn",
+     "Common mistake: sending 200 on every response and writing `{\"error\": true}` in the body. Clients (and monitoring tools) look at the status code; on an error, send 4xx/5xx."
+    ]
+   ]
+  },
+  {
+   "title": "FastAPI basics: building your own API",
+   "blocks": [
+    [
+     "p",
+     "**FastAPI** = a modern framework for building API servers in Python. You built a model, but how will a mobile app or website use it? Through an API. FastAPI is the industry standard for AI/ML APIs today."
+    ],
+    [
+     "analogy",
+     "The AI model = the chef in the kitchen. FastAPI = the restaurant counter, where the order comes in, gets checked, and the food goes out. Uvicorn = the restaurant building the counter runs in."
+    ],
+    [
+     "list",
+     [
+      "**Fast**: built on Starlette + async.",
+      "**Automatic validation**: Pydantic rejects bad data automatically (422).",
+      "**Automatic docs**: Swagger UI at `/docs` automatically; you can test without writing anything."
+     ]
+    ],
+    [
+     "code",
+     "bash",
+     "pip install fastapi uvicorn\nuvicorn main:app --reload        # main = file, app = FastAPI object",
+     ""
+    ],
+    [
+     "code",
+     "python",
+     "# main.py\nfrom fastapi import FastAPI\n\napp = FastAPI(title=\"GEEP AI Service\")\n\n@app.get(\"/health\")\ndef health():\n    return {\"status\": \"running\"}       # the dict becomes JSON automatically",
+     ""
+    ],
+    [
+     "p",
+     "Run the server and open `http://localhost:8000/health` in the browser to see `{\"status\":\"running\"}`, and `http://localhost:8000/docs` for full interactive documentation."
+    ],
+    [
+     "p",
+     "**Path parameter** = part of the URL (in `{}`). **Query parameter** = the other function arguments, after `?` in the URL. Give a type hint (`int`, `bool`) and FastAPI converts and checks it by itself."
+    ],
+    [
+     "code",
+     "python",
+     "@app.get(\"/products/{product_id}\")\ndef get_product(product_id: int):\n    return {\"id\": product_id}\n# /products/5    -> {\"id\": 5}\n# /products/abc  -> 422 error, automatically\n\n@app.get(\"/products\")\ndef list_products(category: str | None = None, skip: int = 0, limit: int = 10):\n    return {\"category\": category, \"skip\": skip, \"limit\": limit}\n# /products?category=cable&limit=5",
+     ""
+    ],
+    [
+     "tip",
+     "Rule: if the argument's name is inside the path's `{}`, it's a path parameter; otherwise it's a query parameter. With a default value it's optional; without one it's required."
+    ],
+    [
+     "p",
+     "**Pydantic model** = the exact structure of the request body. If bad data comes in (wrong type, missing field, out of range), FastAPI returns `422` before your function even runs."
+    ],
+    [
+     "code",
+     "python",
+     "from fastapi import FastAPI, HTTPException\nfrom pydantic import BaseModel, Field\n\napp = FastAPI()\n\nclass ProductIn(BaseModel):\n    name: str = Field(..., min_length=2)\n    rate: float = Field(..., gt=0)\n    stock: int = 0\n\nclass ProductOut(BaseModel):\n    id: int\n    name: str\n\nDB = {}\n\n@app.post(\"/products\", response_model=ProductOut, status_code=201)\ndef create_product(p: ProductIn):\n    new_id = len(DB) + 1\n    DB[new_id] = p\n    return {\"id\": new_id, \"name\": p.name}\n\n@app.get(\"/products/{pid}\", response_model=ProductOut)\ndef read_product(pid: int):\n    if pid not in DB:\n        raise HTTPException(status_code=404, detail=\"Product not found\")\n    return {\"id\": pid, \"name\": DB[pid].name}",
+     ""
+    ],
+    [
+     "p",
+     "If you send `{\"name\": \"PVC\", \"rate\": -5}` you get 422 (`rate` must be greater than 0). `response_model` also filters the output, so an internal field like a password doesn't leak out by mistake."
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Journey of a request",
+      "steps": [
+       "Uvicorn",
+       "Routing",
+       "Pydantic check",
+       "Your function",
+       "response_model",
+       "JSON"
+      ],
+      "dir": "v"
+     }
+    ],
+    [
+     "p",
+     "**async**: when a function is **waiting** for something (database, another API, an LLM call), `async def` + `await` lets the server handle other requests in the meantime."
+    ],
+    [
+     "code",
+     "python",
+     "import httpx\n\n@app.get(\"/weather/{city}\")\nasync def weather(city: str):\n    async with httpx.AsyncClient(timeout=10) as client:\n        r = await client.get(f\"https://api.example.com/weather/{city}\")\n    return r.json()",
+     ""
+    ],
+    [
+     "warn",
+     "Common mistake: running something blocking (like `requests.get`, `time.sleep`, or a heavy model calculation) inside `async def`. It stops the whole event loop. For blocking work write a normal `def`; FastAPI runs it in a threadpool."
+    ]
+   ]
+  },
+  {
+   "title": "Serving an ML model behind an API",
+   "blocks": [
+    [
+     "p",
+     "The real job: the model is trained, now how does the world use it? **Load the model once, build a `/predict` endpoint, validate the input with Pydantic, return the prediction as JSON.**"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Model serving",
+      "steps": [
+       "Client JSON",
+       "/predict",
+       "Pydantic check",
+       "model.predict",
+       "JSON result"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "code",
+     "python",
+     "# serve.py\nimport joblib\nfrom fastapi import FastAPI\nfrom pydantic import BaseModel, Field\n\napp = FastAPI(title=\"Churn Model API\", version=\"1.0\")\nmodel = joblib.load(\"churn_model.joblib\")   # load ONCE at startup\n\nclass Customer(BaseModel):\n    orders_last_90d: int = Field(..., ge=0)\n    avg_amount: float = Field(..., ge=0)\n    days_since_last_order: int = Field(..., ge=0)\n\nclass Prediction(BaseModel):\n    will_leave: bool\n    probability: float\n    model_version: str\n\n@app.post(\"/v1/predict\", response_model=Prediction)\ndef predict(c: Customer):\n    X = [[c.orders_last_90d, c.avg_amount, c.days_since_last_order]]\n    prob = float(model.predict_proba(X)[0][1])\n    return Prediction(will_leave=prob >= 0.5, probability=round(prob, 3),\n                      model_version=\"1.0\")",
+     ""
+    ],
+    [
+     "p",
+     "Send the request `{\"orders_last_90d\": 1, \"avg_amount\": 4000, \"days_since_last_order\": 75}` and the answer will look something like `{\"will_leave\": true, \"probability\": 0.81, \"model_version\": \"1.0\"}` (the number depends on the model)."
+    ],
+    [
+     "tip",
+     "Look carefully: **don't load the model on every request**. Loading takes seconds; load it once in a global variable or at startup (`lifespan`). `predict` is a normal `def` because model calculation is CPU work, not waiting."
+    ],
+    [
+     "list",
+     [
+      "Input validation (Pydantic) = bad data never reaches the model.",
+      "Keep a `/health` endpoint, so the load balancer can check that the server is alive.",
+      "Version in the URL and the response (`/v1`, `model_version`), so when a new model comes you know which one gave what.",
+      "Log every prediction (input, output, time); it is useful later for model monitoring.",
+      "A batch endpoint (list of inputs) gives many predictions in one call: faster and cheaper."
+     ]
+    ],
+    [
+     "p",
+     "How the client side makes the call (with requests):"
+    ],
+    [
+     "code",
+     "python",
+     "import requests\n\npayload = {\"orders_last_90d\": 1, \"avg_amount\": 4000, \"days_since_last_order\": 75}\nr = requests.post(\"http://localhost:8000/v1/predict\", json=payload, timeout=10)\nprint(r.status_code, r.json())",
+     ""
+    ],
+    [
+     "p",
+     "You can write tests even without a server using FastAPI's `TestClient`. It runs in pytest:"
+    ],
+    [
+     "code",
+     "python",
+     "from fastapi.testclient import TestClient\nfrom serve import app\n\nclient = TestClient(app)\n\ndef test_predict_ok():\n    r = client.post(\"/v1/predict\", json={\"orders_last_90d\": 3, \"avg_amount\": 900, \"days_since_last_order\": 4})\n    assert r.status_code == 200\n    assert 0 <= r.json()[\"probability\"] <= 1\n\ndef test_predict_bad_input():\n    r = client.post(\"/v1/predict\", json={\"orders_last_90d\": -1})\n    assert r.status_code == 422",
+     ""
+    ],
+    [
+     "sketch",
+     {
+      "k": "stack",
+      "title": "Production stack",
+      "items": [
+       "Client (app/web)",
+       "Nginx",
+       "Gunicorn + Uvicorn workers",
+       "FastAPI app",
+       "Model + Database"
+      ]
+     }
+    ],
+    [
+     "p",
+     "In production: a Docker image, Uvicorn workers inside Gunicorn, with Nginx in front. We'll do this in detail in stage 14. For now just remember: **model + FastAPI + Pydantic + /docs = an ML microservice.**"
+    ],
+    [
+     "warn",
+     "Common mistake: the feature order or preprocessing differs between training and serving (you scaled in training but forgot in serving). Save the preprocessing together with the model in one pipeline (`Pipeline` in stage 10)."
+    ]
+   ]
+  }
+ ],
+ "teach": [
+  {
+   "say": "An API means two programs talking. Your app sends a request, and the server sends back a response. Like a waiter takes your order and brings the food.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Client",
+     "Request",
+     "Server",
+     "Response"
+    ],
+    "dir": "h"
+   },
+   "code": null
+  },
+  {
+   "say": "In a request, the method says what the action is. GET to get, POST to create, PUT/PATCH to change, DELETE to remove.",
+   "sketch": {
+    "k": "table",
+    "head": [
+     "Method",
+     "Action"
+    ],
+    "rows": [
+     [
+      "GET",
+      "get"
+     ],
+     [
+      "POST",
+      "create"
+     ],
+     [
+      "PUT/PATCH",
+      "change"
+     ],
+     [
+      "DELETE",
+      "remove"
+     ]
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "A status code comes with the response. Starts with 2 means success, starts with 4 means the client's mistake, starts with 5 means the server's mistake.",
+   "sketch": {
+    "k": "boxes",
+    "items": [
+     {
+      "label": "200",
+      "value": "OK"
+     },
+     {
+      "label": "201",
+      "value": "Created"
+     },
+     {
+      "label": "404",
+      "value": "Not Found"
+     },
+     {
+      "label": "500",
+      "value": "Server Error"
+     }
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "Data travels as JSON. In Python, json.loads turns text into a dict, and json.dumps turns a dict into text.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "JSON text",
+     "json.loads",
+     "dict",
+     "json.dumps",
+     "JSON text"
+    ],
+    "dir": "h"
+   },
+   "code": "data = json.loads('{\"name\": \"Akash\"}')\nprint(data[\"name\"])"
+  },
+  {
+   "say": "Make calls with requests, but always with a timeout, and with the API key in a header, taken from the environment.",
+   "sketch": {
+    "k": "boxes",
+    "items": [
+     {
+      "label": "timeout",
+      "value": "30"
+     },
+     {
+      "label": "Authorization",
+      "value": "Bearer KEY"
+     }
+    ]
+   },
+   "code": "r = requests.get(url, headers=headers, timeout=30)\nr.raise_for_status()"
+  },
+  {
+   "say": "The network can fail at any time. Use try except, and on 5xx wait a little and retry.",
+   "sketch": {
+    "k": "cycle",
+    "steps": [
+     "Call",
+     "5xx?",
+     "Wait (1,2,4s)",
+     "Retry"
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "In REST the URL is a noun and the method is a verb. GET on slash products gives the list, POST creates a new one.",
+   "sketch": {
+    "k": "compare",
+    "left": {
+     "title": "Wrong",
+     "items": [
+      "/getProducts",
+      "/deleteProduct?id=7"
+     ]
+    },
+    "right": {
+     "title": "Right",
+     "items": [
+      "GET /products",
+      "DELETE /products/7"
+     ]
+    }
+   },
+   "code": null
+  },
+  {
+   "say": "In FastAPI a decorator creates an endpoint. Give type hints, and FastAPI does the validation and docs by itself.",
+   "sketch": null,
+   "code": "@app.get(\"/products/{pid}\")\ndef read(pid: int, limit: int = 10):\n    return {\"pid\": pid}"
+  },
+  {
+   "say": "The Pydantic model is the door for input. If bad data comes, you get 422 and your function never runs.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "JSON body",
+     "Pydantic",
+     "Valid: function",
+     "Invalid: 422"
+    ],
+    "dir": "h"
+   },
+   "code": "class Customer(BaseModel):\n    avg_amount: float = Field(..., ge=0)"
+  },
+  {
+   "say": "Finally the ML model: load it once, build a slash predict endpoint, and return the prediction as JSON. That's it, now the world can use your model.",
+   "sketch": {
+    "k": "stack",
+    "items": [
+     "Client",
+     "FastAPI /v1/predict",
+     "Pydantic",
+     "model.predict",
+     "JSON"
+    ]
+   },
+   "code": null
+  }
+ ],
+ "practice": [
+  {
+   "q": "You are given an API's JSON response string. Parse it with the `json` module and print: the user's name, how many repos there are, and the total stars of all repos:\nAkash\n3\n42",
+   "starter": "import json\n\nraw = '{\"user\": {\"name\": \"Akash\"}, \"repos\": [{\"name\": \"costing\", \"stars\": 25}, {\"name\": \"gds\", \"stars\": 12}, {\"name\": \"tutor\", \"stars\": 5}]}'\n# TODO: make a dict with json.loads\n# TODO: print data[\"user\"][\"name\"]\n# TODO: print the number of repos\n# TODO: print the total stars\n",
+   "expect": "Akash\n3\n42",
+   "hint": "data = json.loads(raw); sum(r[\"stars\"] for r in data[\"repos\"])",
+   "solution": "import json\n\nraw = '{\"user\": {\"name\": \"Akash\"}, \"repos\": [{\"name\": \"costing\", \"stars\": 25}, {\"name\": \"gds\", \"stars\": 12}, {\"name\": \"tutor\", \"stars\": 5}]}'\ndata = json.loads(raw)\nprint(data[\"user\"][\"name\"])\nprint(len(data[\"repos\"]))\nprint(sum(r[\"stars\"] for r in data[\"repos\"]))"
+  },
+  {
+   "q": "Write a function `status_message(code)` that tells the family of a status code: 2xx → \"Success\", 4xx → \"Client error\", 5xx → \"Server error\", anything else → \"Other\". Then for each code in the list `[200, 201, 404, 422, 503, 302]` print `code: message`:\n200: Success\n201: Success\n404: Client error\n422: Client error\n503: Server error\n302: Other",
+   "starter": "def status_message(code):\n    # TODO: 200-299 Success, 400-499 Client error, 500-599 Server error, else Other\n    pass\n\nfor c in [200, 201, 404, 422, 503, 302]:\n    print(f\"{c}: {status_message(c)}\")\n",
+   "expect": "200: Success\n201: Success\n404: Client error\n422: Client error\n503: Server error\n302: Other",
+   "hint": "code // 100 gives the first digit: 2, 4 or 5.",
+   "solution": "def status_message(code):\n    family = code // 100\n    if family == 2:\n        return \"Success\"\n    if family == 4:\n        return \"Client error\"\n    if family == 5:\n        return \"Server error\"\n    return \"Other\"\n\nfor c in [200, 201, 404, 422, 503, 302]:\n    print(f\"{c}: {status_message(c)}\")"
+  },
+  {
+   "q": "Build a mini \"predict API\" handler (not a server, just a function). `predict(body_json)` takes a JSON string with `orders` and `days`. Validation: both keys must be present and be ints of 0 or more, otherwise `(422, {\"detail\": \"invalid input\"})`. Rule-based model: `score = days * 2 - orders * 10`; if score > 50 the label is \"leave\", otherwise \"stay\". On success return `(200, {\"label\": ..., \"score\": ...})`. Print each result with `json.dumps` along with the status:\n200 {\"label\": \"leave\", \"score\": 130}\n200 {\"label\": \"stay\", \"score\": -20}\n422 {\"detail\": \"invalid input\"}\n422 {\"detail\": \"invalid input\"}",
+   "starter": "import json\n\ndef predict(body_json):\n    data = json.loads(body_json)\n    # TODO: check that \"orders\" and \"days\" both exist, are ints, and are >= 0\n    #       if wrong, return 422, {\"detail\": \"invalid input\"}\n    # TODO: score = days * 2 - orders * 10\n    # TODO: label = \"leave\" if score > 50, else \"stay\"\n    # TODO: return 200, {\"label\": label, \"score\": score}\n    pass\n\nrequests_in = [\n    '{\"orders\": 1, \"days\": 70}',\n    '{\"orders\": 4, \"days\": 10}',\n    '{\"orders\": -2, \"days\": 10}',\n    '{\"days\": 10}',\n]\nfor body in requests_in:\n    status, resp = predict(body)\n    print(status, json.dumps(resp))\n",
+   "expect": "200 {\"label\": \"leave\", \"score\": 130}\n200 {\"label\": \"stay\", \"score\": -20}\n422 {\"detail\": \"invalid input\"}\n422 {\"detail\": \"invalid input\"}",
+   "hint": "For each key: `k in data and isinstance(data[k], int) and data[k] >= 0`. Use `all(...)` to check both in one line.",
+   "solution": "import json\n\ndef predict(body_json):\n    data = json.loads(body_json)\n    ok = all(k in data and isinstance(data[k], int) and data[k] >= 0 for k in (\"orders\", \"days\"))\n    if not ok:\n        return 422, {\"detail\": \"invalid input\"}\n    score = data[\"days\"] * 2 - data[\"orders\"] * 10\n    label = \"leave\" if score > 50 else \"stay\"\n    return 200, {\"label\": label, \"score\": score}\n\nrequests_in = [\n    '{\"orders\": 1, \"days\": 70}',\n    '{\"orders\": 4, \"days\": 10}',\n    '{\"orders\": -2, \"days\": 10}',\n    '{\"days\": 10}',\n]\nfor body in requests_in:\n    status, resp = predict(body)\n    print(status, json.dumps(resp))"
+  }
+ ],
+ "quiz": [
+  {
+   "q": "In client-server, what does the \"server\" do?",
+   "o": [
+    "Sends requests",
+    "Takes a request and returns a response",
+    "Only stores data, never answers",
+    "Runs the browser"
+   ],
+   "a": 1,
+   "why": "The client sends a request; the server processes it and returns a response (status + data)."
+  },
+  {
+   "q": "Which HTTP method creates a new record?",
+   "o": [
+    "GET",
+    "DELETE",
+    "POST",
+    "HEAD"
+   ],
+   "a": 2,
+   "why": "POST creates a new resource; on success you usually get 201 Created."
+  },
+  {
+   "q": "The token is valid but the user has no permission for the admin page. Status code?",
+   "o": [
+    "403",
+    "401",
+    "404",
+    "500"
+   ],
+   "a": 0,
+   "why": "401 = identity not proven; 403 = identity known but no permission."
+  },
+  {
+   "q": "What does `json.loads('{\"ok\": true}')` return?",
+   "o": [
+    "String '{\"ok\": true}'",
+    "Error, because true is lowercase",
+    "List [True]",
+    "Dict {'ok': True}"
+   ],
+   "a": 3,
+   "why": "loads turns JSON text into a Python object, and JSON's true becomes Python's True."
+  },
+  {
+   "q": "The right way to keep an API key?",
+   "o": [
+    "A variable in the code",
+    "Environment variable / .env, send it in a header",
+    "Always in the URL",
+    "In the GitHub README"
+   ],
+   "a": 1,
+   "why": "A key written in code gets leaked; read it from the environment and send it in the Authorization header."
+  },
+  {
+   "q": "Why should you pass `timeout` to `requests.get(url)`?",
+   "o": [
+    "The request becomes faster",
+    "You get status code 200",
+    "So the program doesn't hang forever if the server is stuck",
+    "So JSON gets parsed automatically"
+   ],
+   "a": 2,
+   "why": "Without a timeout, a slow or stuck server can block your program forever."
+  },
+  {
+   "q": "The right REST-style URL to delete product 7?",
+   "o": [
+    "GET /deleteProduct?id=7",
+    "POST /products/delete/7",
+    "DELETE /product_delete",
+    "DELETE /products/7"
+   ],
+   "a": 3,
+   "why": "The URL names the resource (noun); the method (DELETE) names the action."
+  },
+  {
+   "q": "In FastAPI, `def get(pid: int)` with route `/items/{pid}`. What happens on `/items/abc`?",
+   "o": [
+    "422 validation error automatically",
+    "pid = 'abc' will work",
+    "500 server crash",
+    "Always 404"
+   ],
+   "a": 0,
+   "why": "The type hint is int and 'abc' can't be converted, so FastAPI returns 422 without running the function."
+  },
+  {
+   "q": "The main job of a Pydantic model in FastAPI?",
+   "o": [
+    "Creating a database",
+    "Structure and validation of request/response data",
+    "Running the server",
+    "Making an HTML page"
+   ],
+   "a": 1,
+   "why": "BaseModel defines fields, types and limits; bad input gets 422."
+  },
+  {
+   "q": "When should you load the model while serving an ML model?",
+   "o": [
+    "On every request",
+    "Every 10 requests",
+    "Once at app start",
+    "On the client's computer"
+   ],
+   "a": 2,
+   "why": "Loading is expensive; load once and reuse it on every request."
+  }
+ ],
+ "iq": [
+  {
+   "q": "What is an API? Give a real example.",
+   "a": "An API is a contract for how two programs talk: which URL, which method, what input, what output. For example, my Python code POSTs a prompt to the Claude/OpenAI API and gets the answer as JSON, or a mobile app gets a prediction from my FastAPI `/predict` endpoint."
+  },
+  {
+   "q": "Difference between GET and POST? What does idempotent mean?",
+   "a": "GET is for reading data; the data is in the URL/query, it can be cached, and it is idempotent. POST is for creating a new resource; the data is in the body, and it is not idempotent (send it 10 times, get 10 records). Idempotent = no matter how many times you send the same request, the server state changes only as much as it would once. PUT and DELETE are idempotent too."
+  },
+  {
+   "q": "Difference between PUT and PATCH?",
+   "a": "PUT replaces the whole resource with new data (you must send all fields). PATCH updates only the fields you send, like changing just `rate`."
+  },
+  {
+   "q": "Name the common status codes, and 401 vs 403?",
+   "a": "200 OK, 201 Created, 204 No Content, 400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 409 Conflict, 422 validation failed, 429 rate limit, 500 server error, 503 unavailable. 401 = authentication failed (no token or wrong token); 403 = authenticated but no permission."
+  },
+  {
+   "q": "What is a REST API? Principles of good REST design?",
+   "a": "REST is an architecture style where everything is a resource with a URL, and HTTP methods act on it. Principles: plural noun URLs (`/products/7`), correct methods and status codes, stateless requests, JSON responses, filtering/pagination in query params, and versioning (`/v1`)."
+  },
+  {
+   "q": "How would you make an external API call production-ready?",
+   "a": "A timeout on every call, try/except (Timeout, ConnectionError, HTTPError), `raise_for_status()`, limited retries with exponential backoff on 5xx/429, the API key from the environment, and logging. Read the response with `.get()` so missing keys don't cause a crash."
+  },
+  {
+   "q": "Why FastAPI? How is it different from Flask/Django?",
+   "a": "FastAPI is an API-first framework: automatic validation from type hints (Pydantic), automatic Swagger docs at `/docs`, and native async support (ASGI). Flask is minimal; you have to add everything yourself. Django is full-stack with a built-in ORM and admin, for big web apps. For ML model serving, FastAPI is the most common."
+  },
+  {
+   "q": "Difference between a path parameter and a query parameter?",
+   "a": "A path parameter is part of the URL and identifies the resource: `/products/{id}`. A query parameter comes after `?` and is for filtering/sorting/pagination: `/products?category=cable&limit=10`. In FastAPI, an argument inside the path's `{}` is a path param; the rest are query params."
+  },
+  {
+   "q": "What does Pydantic do, and why do you use response_model?",
+   "a": "Pydantic validates and converts request data according to types and rules (`Field(gt=0)`, `min_length`); on bad data FastAPI returns 422. `response_model` fixes the output structure, shows it in the docs, and filters out extra fields (like a password hash) so they don't leak."
+  },
+  {
+   "q": "When would you use async def, and when not?",
+   "a": "When the endpoint waits on I/O (database, another API, an LLM call) and the library has an async version (httpx, asyncpg), use `async def` + `await`. For CPU-heavy work (model inference, image processing) or a blocking library, use a normal `def`, because a blocking call inside async stops the whole event loop; FastAPI runs `def` in a threadpool."
+  },
+  {
+   "q": "How would you deploy a trained ML model as an API?",
+   "a": "Save the model with joblib/pickle (or ONNX), load it once at startup in the FastAPI app, define the input schema with Pydantic, build a `/v1/predict` POST endpoint that returns the prediction and model version as JSON, and keep a `/health` endpoint. Then tests with TestClient, a Docker image, deploy behind Uvicorn/Gunicorn workers and Nginx, and monitoring by logging predictions."
+  },
+  {
+   "q": "What is CORS?",
+   "a": "A browser security rule: JavaScript from one origin (domain+port) can send a request to another origin only if the server allows it. For example, with a React frontend on port 5173 and FastAPI on 8000, the backend must list the allowed origins with `CORSMiddleware`. It applies only in the browser, not to Python requests."
+  }
+ ]
+}

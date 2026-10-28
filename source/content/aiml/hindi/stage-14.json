@@ -1,0 +1,1329 @@
+{
+ "n": 14,
+ "id": "aiml-14",
+ "title": "Deploy, DSA, Portfolio और IQ की तैयारी",
+ "goal": "Git/GitHub, Docker और Streamlit से अपना AI app दुनिया तक पहुँचाओगे, IQ के DSA patterns (hashing, two pointers, stack, binary search, recursion) solve करोगे, और portfolio + STAR + resume के साथ job के लिए तैयार हो जाओगे।",
+ "lessons": [
+  {
+   "title": "Git और GitHub — code की time machine",
+   "blocks": [
+    [
+     "p",
+     "**Git** = एक tool जो तुम्हारे code का **हर बदला हुआ version** याद रखता है। **GitHub** = website जहाँ यह Git वाला code online रखा जाता है, team के साथ share होता है, और recruiter तुम्हारा काम देखता है।"
+    ],
+    [
+     "analogy",
+     "Git एक **diary** है, factory के register जैसी: हर दिन क्या बदला, किसने बदला, क्यों बदला — सब लिखा है। गलती हुई तो पुराने page पर वापस जा सकते हो। GitHub = वह diary जो office की अलमारी (cloud) में रखी है, सब पढ़ सकते हैं।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Git के 4 घर",
+      "steps": [
+       "Working dir",
+       "Staging (add)",
+       "Local repo (commit)",
+       "GitHub (push)"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "ध्यान से देखो: file पहले **working directory** में बदलती है। `git add` से वह **staging** (तैयारी वाला डिब्बा) में जाती है। `git commit` से **photo** खिंच जाती है (local history)। `git push` से वह photo **GitHub** पर चली जाती है।"
+    ],
+    [
+     "code",
+     "bash",
+     "# Pehli baar setup (sirf ek baar)\ngit config --global user.name \"Akash Kumar\"\ngit config --global user.email \"akash@example.com\"\n\n# Naya project shuru\ngit init                      # folder ko git repo banao\ngit status                    # kya badla? (sabse zyada use hone wala command)\ngit add app.py                # ek file staging mein\ngit add .                     # saari files staging mein\ngit commit -m \"Add FastAPI predict endpoint\"\ngit log --oneline             # history dekho",
+     ""
+    ],
+    [
+     "p",
+     "अब GitHub से जोड़ना। GitHub पर नया repo बनाओ, फिर:"
+    ],
+    [
+     "code",
+     "bash",
+     "git remote add origin https://github.com/akash/cable-ml-api.git\ngit branch -M main\ngit push -u origin main       # pehli baar -u, baad mein sirf git push\n\n# Kisi aur ka repo laana\ngit clone https://github.com/akash/cable-ml-api.git\ngit pull                      # GitHub se latest changes laao",
+     ""
+    ],
+    [
+     "tip",
+     "अच्छा commit message = **क्या किया**, छोटे present-tense में: `Add login API`, `Fix null check in predict`। बुरा: `changes`, `final`, `final2`। IQ में GitHub देखते हैं, messages भी पढ़ते हैं।"
+    ],
+    [
+     "p",
+     "**Branch** = code की एक अलग line जहाँ तुम main code तोड़े बिना नया feature बना सकते हो। `main` branch हमेशा चलने वाली (stable) होनी चाहिए।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "tree",
+      "title": "Branches",
+      "root": {
+       "label": "main",
+       "children": [
+        {
+         "label": "feature/rag-chat",
+         "children": []
+        },
+        {
+         "label": "fix/predict-bug",
+         "children": []
+        }
+       ]
+      }
+     }
+    ],
+    [
+     "code",
+     "bash",
+     "git branch                    # saari branches dekho\ngit checkout -b feature/rag-chat   # nayi branch banao + uspe jao\n# (naya command: git switch -c feature/rag-chat)\n# ... code likho ...\ngit add .\ngit commit -m \"Add RAG chat endpoint\"\ngit push -u origin feature/rag-chat\n\ngit checkout main             # wapas main pe\ngit merge feature/rag-chat    # feature ko main mein milao",
+     ""
+    ],
+    [
+     "p",
+     "**Pull Request (PR)** = GitHub पर request: \"मेरी branch का code main में मिला दो\"। Team review करती है, comments देती है, tests (CI) चलते हैं, फिर **merge** होता है। Company में code हमेशा PR से ही main में जाता है, direct push नहीं।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "PR workflow",
+      "steps": [
+       "Branch बनाओ",
+       "Commit + push",
+       "PR खोलो",
+       "Review + CI",
+       "Merge"
+      ],
+      "dir": "v"
+     }
+    ],
+    [
+     "p",
+     "**Merge conflict** = दो लोगों ने एक ही file की एक ही line अलग-अलग बदली। Git confuse है, तुमसे पूछता है। File में ऐसा दिखता है:"
+    ],
+    [
+     "code",
+     "text",
+     "<<<<<<< HEAD\nthreshold = 0.5\n=======\nthreshold = 0.7\n>>>>>>> feature/tune\n",
+     ""
+    ],
+    [
+     "p",
+     "सही line रखो, `<<<<<<<`, `=======`, `>>>>>>>` markers हटाओ, फिर `git add` + `git commit`। बस।"
+    ],
+    [
+     "code",
+     "bash",
+     "# .gitignore file — yeh cheezein kabhi commit mat karo\n.env\n__pycache__/\nvenv/\n*.pkl\ndata/raw/\n.ipynb_checkpoints/",
+     ""
+    ],
+    [
+     "warn",
+     "आम गलती: `.env` (API keys) commit कर देना। GitHub पर public हो गया तो bots मिनटों में key चुरा लेते हैं। गलती हो गई तो key तुरंत **revoke** करो, सिर्फ file delete करना काफ़ी नहीं (history में रह जाती है)।"
+    ],
+    [
+     "code",
+     "bash",
+     "# Galti sudharne ke commands\ngit restore app.py            # file ke unsaved changes hatao\ngit restore --staged app.py   # staging se nikaalo (changes rehte hain)\ngit commit --amend -m \"Better message\"  # last commit ka message badlo (push se pehle)\ngit revert <commit_id>        # purane commit ko ulta karne wala naya commit (safe)\ngit stash                     # adhoora kaam side mein rakho\ngit stash pop                 # wapas laao",
+     ""
+    ],
+    [
+     "tip",
+     "IQ का favourite: `git merge` vs `git rebase`। Merge = दोनों history जोड़ो, एक merge commit बनता है (safe, history सच दिखती है)। Rebase = अपने commits को latest main के ऊपर दोबारा लगाओ (history सीधी line)। Shared branch पर rebase मत करो।"
+    ]
+   ]
+  },
+  {
+   "title": "Docker — ML app को tiffin box में pack करो",
+   "blocks": [
+    [
+     "p",
+     "Problem: तुम्हारे laptop पर model चल रहा है, server पर `ModuleNotFoundError` या version mismatch। **\"मेरी machine पर तो चल रहा था!\"** Docker यह problem खत्म करता है।"
+    ],
+    [
+     "analogy",
+     "**Docker = tiffin box।** खाना (code) + चम्मच (libraries) + napkin (Python version, OS settings) सब एक डिब्बे में packed। कहीं भी ले जाओ, खोलो और खाओ — वही स्वाद।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "Image vs Container",
+      "left": {
+       "title": "Image",
+       "items": [
+        "Recipe + सामान",
+        "Read-only",
+        "एक बार build",
+        "docker build"
+       ]
+      },
+      "right": {
+       "title": "Container",
+       "items": [
+        "पकती हुई dish",
+        "Running process",
+        "कई बना सकते हो",
+        "docker run"
+       ]
+      }
+     }
+    ],
+    [
+     "list",
+     [
+      "**Dockerfile** = recipe (steps लिखे हैं)।",
+      "**Image** = recipe से बना packed डिब्बा (build का result)।",
+      "**Container** = image का चलता हुआ रूप। एक image से 10 containers चला सकते हो।",
+      "**Registry (Docker Hub)** = images की दुकान, जहाँ से `pull` / `push` करते हो।"
+     ]
+    ],
+    [
+     "p",
+     "अब एक FastAPI ML app pack करते हैं। Project में `main.py`, `model.pkl`, `requirements.txt` हैं:"
+    ],
+    [
+     "code",
+     "python",
+     "# main.py  (Stage 7 ka FastAPI + Stage 10 ka model)\nfrom fastapi import FastAPI\nfrom pydantic import BaseModel\nimport joblib\n\napp = FastAPI()\nmodel = joblib.load(\"model.pkl\")   # server start pe EK baar load\n\nclass Cable(BaseModel):\n    length_m: float\n    sqmm: float\n\n@app.get(\"/health\")\ndef health():\n    return {\"status\": \"ok\"}\n\n@app.post(\"/predict\")\ndef predict(c: Cable):\n    price = model.predict([[c.length_m, c.sqmm]])[0]\n    return {\"price\": round(float(price), 2)}",
+     ""
+    ],
+    [
+     "p",
+     "यह server code है, इसलिए यहाँ output नहीं। अब इसका **Dockerfile** (file का नाम बिल्कुल `Dockerfile`, कोई extension नहीं):"
+    ],
+    [
+     "code",
+     "text",
+     "FROM python:3.12-slim\n\nWORKDIR /app\n\nCOPY requirements.txt .\nRUN pip install --no-cache-dir -r requirements.txt\n\nCOPY . .\n\nEXPOSE 8000\n\nCMD [\"uvicorn\", \"main:app\", \"--host\", \"0.0.0.0\", \"--port\", \"8000\"]",
+     ""
+    ],
+    [
+     "sketch",
+     {
+      "k": "stack",
+      "title": "Image की layers",
+      "items": [
+       "CMD uvicorn",
+       "COPY . .",
+       "RUN pip install",
+       "COPY requirements",
+       "WORKDIR /app",
+       "FROM python:3.12-slim"
+      ]
+     }
+    ],
+    [
+     "list",
+     [
+      "`FROM` = base image (Python वाला छोटा Linux)।",
+      "`WORKDIR` = container के अंदर काम का folder।",
+      "`COPY requirements.txt .` पहले, अकेले — **cache trick**: code बदला पर requirements नहीं, तो pip install दोबारा नहीं चलेगा, build fast।",
+      "`RUN` = build के समय command चलाओ।",
+      "`EXPOSE` = कौन सा port use होगा (documentation)।",
+      "`CMD` = container start होने पर क्या चले। `0.0.0.0` ज़रूरी है, वरना बाहर से request नहीं आएगी।"
+     ]
+    ],
+    [
+     "code",
+     "bash",
+     "docker build -t cable-ml-api .          # image banao, naam (tag) do\ndocker images                            # images dekho\ndocker run -d -p 8000:8000 cable-ml-api  # chalao: host port : container port\ndocker ps                                # chal rahe containers\ndocker logs <container_id>               # print/errors dekho\ndocker exec -it <container_id> bash      # container ke andar ghuso\ndocker stop <container_id>",
+     ""
+    ],
+    [
+     "p",
+     "अब browser में `http://localhost:8000/docs` खोलो — FastAPI का Swagger page दिखेगा, और `/health` `{\"status\": \"ok\"}` देगा।"
+    ],
+    [
+     "warn",
+     "आम गलती: `-p` भूल जाना। Container चल रहा है पर बाहर से बंद है। `-p 8000:8000` = laptop का 8000 → container का 8000। दूसरी गलती: `.env` या 2GB data image में copy हो जाना — `.dockerignore` file बनाओ (venv, .env, data/raw)।"
+    ],
+    [
+     "p",
+     "**docker-compose** = जब एक से ज़्यादा services हों (API + Streamlit + database), सबको एक YAML file से एक command में चलाओ।"
+    ],
+    [
+     "code",
+     "text",
+     "# docker-compose.yml\nservices:\n  api:\n    build: .\n    ports:\n      - \"8000:8000\"\n    env_file: .env\n    depends_on:\n      - db\n  ui:\n    build: ./frontend\n    ports:\n      - \"8501:8501\"\n    environment:\n      - API_URL=http://api:8000\n    depends_on:\n      - api\n  db:\n    image: postgres:16\n    environment:\n      - POSTGRES_PASSWORD=secret\n    volumes:\n      - pgdata:/var/lib/postgresql/data\nvolumes:\n  pgdata:",
+     ""
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Compose network",
+      "steps": [
+       "ui :8501",
+       "api :8000",
+       "db :5432"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "tip",
+     "ध्यान से देखो: compose के अंदर एक service दूसरी को **service के नाम** से बुलाती है: `http://api:8000`, `localhost` नहीं। क्योंकि हर container का अपना localhost होता है।"
+    ],
+    [
+     "code",
+     "bash",
+     "docker compose up -d --build   # sab build + start\ndocker compose logs -f api     # api ke logs live\ndocker compose down            # sab band",
+     ""
+    ],
+    [
+     "p",
+     "**Volume** = container के बाहर data रखने की जगह। Container delete हुआ तो अंदर का data गया, लेकिन volume का data बचा रहता है (database के लिए ज़रूरी)।"
+    ]
+   ]
+  },
+  {
+   "title": "Streamlit front-end और end-to-end AI app",
+   "blocks": [
+    [
+     "p",
+     "**Streamlit** = सिर्फ़ Python लिखकर web app का UI। HTML/CSS/JS नहीं चाहिए। ML demo, chatbot, dashboard — 20 lines में। Portfolio के लिए best, क्योंकि recruiter link खोलकर तुरंत try कर सकता है।"
+    ],
+    [
+     "analogy",
+     "FastAPI = दुकान का **गोदाम और कारीगर** (काम पीछे होता है)। Streamlit = दुकान का **counter** जहाँ customer आता है, button दबाता है, जवाब लेता है।"
+    ],
+    [
+     "code",
+     "python",
+     "# app.py  — run: streamlit run app.py\nimport streamlit as st\nimport requests\n\nst.set_page_config(page_title=\"Cable Price AI\", page_icon=\"⚡\")\nst.title(\"Cable Price Predictor\")\n\nlength = st.number_input(\"Length (m)\", min_value=1.0, value=100.0)\nsqmm = st.selectbox(\"Size (sqmm)\", [1.5, 2.5, 4, 6, 10, 16])\n\nif st.button(\"Predict\"):\n    r = requests.post(\"http://localhost:8000/predict\",\n                      json={\"length_m\": length, \"sqmm\": sqmm}, timeout=10)\n    st.success(f\"Estimated price: Rs {r.json()['price']}\")",
+     ""
+    ],
+    [
+     "p",
+     "यह browser app है, इसलिए output यहाँ नहीं। Browser में एक form खुलेगा: length box, size dropdown, Predict button। Button दबाते ही FastAPI को request जाती है और हरे (success) box में price दिखता है।"
+    ],
+    [
+     "tip",
+     "Streamlit का राज़: **हर click पर पूरी script ऊपर से नीचे दोबारा चलती है।** इसलिए जो चीज़ याद रखनी हो (chat history) वह `st.session_state` में रखो, और भारी चीज़ (model load) `@st.cache_resource` से एक ही बार।"
+    ],
+    [
+     "code",
+     "python",
+     "# Chatbot UI (LLM wala Stage 12 se)\nimport streamlit as st\n\nif \"messages\" not in st.session_state:\n    st.session_state.messages = []          # refresh pe bhi yaad\n\nfor m in st.session_state.messages:\n    with st.chat_message(m[\"role\"]):\n        st.write(m[\"content\"])\n\nif q := st.chat_input(\"Cable ke baare mein poocho...\"):\n    st.session_state.messages.append({\"role\": \"user\", \"content\": q})\n    answer = ask_rag_api(q)                 # tumhara FastAPI /chat\n    st.session_state.messages.append({\"role\": \"assistant\", \"content\": answer})\n    st.rerun()",
+     ""
+    ],
+    [
+     "p",
+     "यह ChatGPT जैसी chat screen देता है: ऊपर bubbles, नीचे input box।"
+    ],
+    [
+     "list",
+     [
+      "`st.sidebar` = left panel (settings, API key)।",
+      "`st.file_uploader` = PDF upload (RAG के लिए)।",
+      "`st.dataframe`, `st.line_chart` = data दिखाना।",
+      "`st.spinner(\"Soch raha hoon...\")` = loading animation।"
+     ]
+    ],
+    [
+     "p",
+     "अब सब जोड़ो। **End-to-end AI app** की 4 layers:"
+    ],
+    [
+     "sketch",
+     {
+      "k": "stack",
+      "title": "End-to-end AI app",
+      "items": [
+       "User (browser)",
+       "Streamlit UI",
+       "FastAPI backend",
+       "AI engine (ML/RAG)",
+       "Data (DB + vectors)"
+      ]
+     }
+    ],
+    [
+     "code",
+     "text",
+     "cable-ai-app/\n  app/\n    main.py            # FastAPI entry\n    config.py          # settings, .env se\n    routers/chat.py    # /chat endpoint\n    services/rag.py    # retrieval + LLM call\n    models/schemas.py  # Pydantic\n  frontend/\n    streamlit_app.py\n  tests/test_api.py\n  data/\n  .env.example\n  .gitignore\n  requirements.txt\n  Dockerfile\n  docker-compose.yml\n  README.md",
+     ""
+    ],
+    [
+     "p",
+     "एक request का सफ़र: user सवाल लिखता है → Streamlit `POST /chat` भेजता है → FastAPI Pydantic से validate करता है → RAG service relevant chunks ढूँढती है → LLM जवाब बनाता है → JSON वापस → Streamlit bubble में दिखाता है।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Request का सफ़र",
+      "steps": [
+       "सवाल",
+       "POST /chat",
+       "Retrieve",
+       "LLM",
+       "जवाब"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "यह flow Python के function chain जैसा है। देखो एक offline mini version (सिर्फ़ idea समझने के लिए):"
+    ],
+    [
+     "code",
+     "python",
+     "docs = {\"d1\": \"XLPE cable 90 degree tak chalti hai\",\n        \"d2\": \"PVC cable 70 degree tak chalti hai\"}\n\ndef retrieve(q):\n    qw = set(q.lower().split())\n    return max(docs.values(), key=lambda d: len(qw & set(d.lower().split())))\n\ndef llm(q, ctx):\n    return f\"Context ke hisaab se: {ctx}\"\n\ndef chat_api(q):\n    if not q.strip():\n        return {\"error\": \"empty question\"}\n    return {\"answer\": llm(q, retrieve(q))}\n\nprint(chat_api(\"XLPE kitne degree tak?\"))\nprint(chat_api(\"  \"))",
+     "{'answer': 'Context ke hisaab se: XLPE cable 90 degree tak chalti hai'}\n{'error': 'empty question'}"
+    ],
+    [
+     "p",
+     "**Production checklist** (deploy से पहले):"
+    ],
+    [
+     "list",
+     [
+      "Error handling: हर LLM/API call `try/except` में, timeout के साथ।",
+      "API keys `.env` में, code/GitHub में कभी नहीं।",
+      "Input validation: Pydantic से।",
+      "Logging: हर request, latency, tokens।",
+      "`/health` endpoint (Docker/load balancer check करते हैं)।",
+      "Caching: वही सवाल = cached जवाब (पैसा बचता है)।",
+      "Rate limit + cost tracking रखो।",
+      "Tests: `pytest` से कम से कम API के basic tests।"
+     ]
+    ],
+    [
+     "p",
+     "**Deploy कहाँ करें?** Streamlit Community Cloud (free, GitHub repo से सीधा), Hugging Face Spaces (free demo), Render/Railway (Docker app), AWS/GCP/Azure (company level)। Portfolio के लिए free option से **live link** ज़रूर बनाओ।"
+    ],
+    [
+     "warn",
+     "आम गलती: model को हर request पर `joblib.load` करना। बहुत slow। Server start पर एक बार load करो (global या startup event)।"
+    ]
+   ]
+  },
+  {
+   "title": "DSA भाग 1 — Big-O, arrays, hashing, two pointers, sliding window",
+   "blocks": [
+    [
+     "p",
+     "AI/ML IQ में भी **coding round** होता है। वे देखते हैं कि तुम problem को तोड़कर सोच सकते हो या नहीं। अच्छी बात: ज़्यादातर सवाल **8-10 patterns** से ही आते हैं। Pattern पहचानो, सवाल solve।\n\n**Big-O** = input बढ़ने पर code कितना slow होता है। Exact seconds नहीं, **growth** नापते हैं।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Big-O cheat sheet",
+      "head": [
+       "Big-O",
+       "नाम",
+       "उदाहरण"
+      ],
+      "rows": [
+       [
+        "O(1)",
+        "Constant",
+        "dict lookup"
+       ],
+       [
+        "O(log n)",
+        "Log",
+        "binary search"
+       ],
+       [
+        "O(n)",
+        "Linear",
+        "एक loop"
+       ],
+       [
+        "O(n log n)",
+        "Linearithmic",
+        "sorted()"
+       ],
+       [
+        "O(n²)",
+        "Quadratic",
+        "nested loops"
+       ]
+      ]
+     }
+    ],
+    [
+     "analogy",
+     "1000 cable drums में से एक ढूँढना: register का index देखो = O(1)। हर drum एक-एक check करो = O(n)। हर drum को हर drum से compare करो = O(n²) — पूरा दिन लग जाएगा।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "chart",
+      "title": "Growth",
+      "type": "line",
+      "points": [
+       [
+        1,
+        1
+       ],
+       [
+        2,
+        4
+       ],
+       [
+        3,
+        9
+       ],
+       [
+        4,
+        16
+       ],
+       [
+        5,
+        25
+       ]
+      ],
+      "line": [
+       [
+        0,
+        0
+       ],
+       [
+        5,
+        5
+       ]
+      ],
+      "xl": "n",
+      "yl": "steps"
+     }
+    ],
+    [
+     "code",
+     "python",
+     "n = 1000\nprint(\"O(1):\", 1)\nprint(\"O(log n):\", n.bit_length())\nprint(\"O(n):\", n)\nprint(\"O(n^2):\", n * n)",
+     "O(1): 1\nO(log n): 10\nO(n): 1000\nO(n^2): 1000000"
+    ],
+    [
+     "tip",
+     "Space complexity भी पूछते हैं: extra memory कितनी ली। एक dict बनाया जो n items रखता है = O(n) space। सिर्फ़ 2 variables = O(1) space।"
+    ],
+    [
+     "list",
+     [
+      "**Python के महँगे/सस्ते operations:** `list[i]`, `append` = O(1)। `x in list` = O(n) (एक-एक देखता है)।",
+      "`x in set` / `x in dict` = O(1) average (hashing).",
+      "`list.insert(0, x)` / `pop(0)` = O(n) (सब खिसकते हैं) → queue के लिए `deque`।",
+      "`sorted()` = O(n log n)। Loop में string जोड़ना `+=` = slow, `\"\".join()` fast।"
+     ]
+    ],
+    [
+     "p",
+     "**Pattern 1: Hashing (dict/set)।** जब भी \"पहले देखा है क्या?\" या \"कितनी बार आया?\" वाला सवाल हो — dict सोचो। **Two Sum** सबसे famous IQ सवाल है:"
+    ],
+    [
+     "code",
+     "python",
+     "def two_sum(nums, target):\n    seen = {}                      # value -> index\n    for i, x in enumerate(nums):\n        need = target - x\n        if need in seen:           # O(1) check\n            return [seen[need], i]\n        seen[x] = i\n    return []\n\nprint(two_sum([2, 7, 11, 15], 9))\nprint(two_sum([3, 2, 4], 6))\nprint(two_sum([1, 2], 10))",
+     "[0, 1]\n[1, 2]\n[]"
+    ],
+    [
+     "p",
+     "Brute force = दो loop, हर pair check = O(n²)। Dict वाला = एक loop = **O(n) time, O(n) space**। IQ में दोनों बताओ: पहले brute, फिर optimize।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "boxes",
+      "title": "seen dict (target 9)",
+      "items": [
+       {
+        "label": "2",
+        "value": "index 0"
+       },
+       {
+        "label": "need at i=1",
+        "value": "9-7 = 2 ✓"
+       }
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "from collections import Counter\n\ndef is_anagram(a, b):\n    return Counter(a) == Counter(b)\n\ndef group_anagrams(words):\n    groups = {}\n    for w in words:\n        key = \"\".join(sorted(w))\n        groups.setdefault(key, []).append(w)\n    return list(groups.values())\n\nprint(is_anagram(\"listen\", \"silent\"))\nprint(group_anagrams([\"eat\", \"tea\", \"tan\", \"ate\", \"nat\"]))",
+     "True\n[['eat', 'tea', 'ate'], ['tan', 'nat']]"
+    ],
+    [
+     "p",
+     "**Pattern 2: Two pointers।** दो उँगलियाँ: एक शुरू में, एक आख़िर में, बीच की तरफ़ चलो। Sorted array या palindrome में काम आता है। O(n) time, O(1) space।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "array",
+      "title": "Two pointers",
+      "items": [
+       "L→",
+       "a",
+       "b",
+       "b",
+       "a",
+       "←R"
+      ],
+      "index": false
+     }
+    ],
+    [
+     "code",
+     "python",
+     "def is_palindrome(s):\n    s = [c.lower() for c in s if c.isalnum()]\n    l, r = 0, len(s) - 1\n    while l < r:\n        if s[l] != s[r]:\n            return False\n        l += 1\n        r -= 1\n    return True\n\ndef pair_sum_sorted(nums, target):\n    l, r = 0, len(nums) - 1\n    while l < r:\n        s = nums[l] + nums[r]\n        if s == target:\n            return (nums[l], nums[r])\n        if s < target:\n            l += 1          # chhota hai, bada lo\n        else:\n            r -= 1          # bada hai, chhota lo\n    return None\n\nprint(is_palindrome(\"A man, a plan, a canal: Panama\"))\nprint(pair_sum_sorted([1, 3, 4, 6, 8, 11], 10))",
+     "True\n(4, 6)"
+    ],
+    [
+     "p",
+     "**Pattern 3: Sliding window।** लगातार (continuous) हिस्से का सवाल: \"k दिन का max total\", \"बिना repeat वाली सबसे लंबी substring\"। Window आगे खिसकाओ, पूरा दोबारा मत जोड़ो।"
+    ],
+    [
+     "analogy",
+     "Train की खिड़की: train आगे बढ़ती है, एक नया खंभा खिड़की में आता है, एक पुराना निकल जाता है। पूरा नज़ारा दोबारा नहीं गिनते।"
+    ],
+    [
+     "code",
+     "python",
+     "def max_sum_k(nums, k):\n    window = sum(nums[:k])\n    best = window\n    for i in range(k, len(nums)):\n        window += nums[i] - nums[i - k]   # naya aaya, purana gaya\n        best = max(best, window)\n    return best\n\ndef longest_unique(s):\n    last = {}\n    start = best = 0\n    for i, c in enumerate(s):\n        if c in last and last[c] >= start:\n            start = last[c] + 1\n        last[c] = i\n        best = max(best, i - start + 1)\n    return best\n\nprint(max_sum_k([2, 1, 5, 1, 3, 2], 3))\nprint(longest_unique(\"abcabcbb\"))\n\ndef max_profit(prices):\n    low = prices[0]\n    best = 0\n    for p in prices:\n        low = min(low, p)          # ab tak ka sasta din\n        best = max(best, p - low)  # aaj bechu toh?\n    return best\n\nprint(max_profit([7, 1, 5, 3, 6, 4]))",
+     "9\n3\n5"
+    ],
+    [
+     "warn",
+     "आम गलती: IQ में सीधा code लिखना शुरू कर देना। पहले सवाल clear करो (empty list? negative numbers? duplicates?), example पर ज़ोर से सोचो, फिर code। Interviewer को तुम्हारी **सोच** सुननी है।"
+    ]
+   ]
+  },
+  {
+   "title": "DSA भाग 2 — stack, queue, binary search, sorting, recursion",
+   "blocks": [
+    [
+     "p",
+     "**Stack** = LIFO (Last In First Out)। जो आख़िर में आया, वह पहले निकलेगा। Python में list ही stack है: `append` = push, `pop` = pop, दोनों O(1)। काम: undo button, browser back, function call stack, brackets check।"
+    ],
+    [
+     "analogy",
+     "Stack = plates का ढेर: ऊपर रखो, ऊपर से उठाओ। **Queue** = चाय की line: जो पहले आया, उसे पहले चाय (FIFO)।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "stack",
+      "title": "Stack: \"([{\"",
+      "items": [
+       "{  ← top",
+       "[",
+       "("
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "def valid_parentheses(s):\n    pairs = {\")\": \"(\", \"]\": \"[\", \"}\": \"{\"}\n    stack = []\n    for ch in s:\n        if ch in \"([{\":\n            stack.append(ch)\n        elif ch in pairs:\n            if not stack or stack.pop() != pairs[ch]:\n                return False\n    return not stack\n\nfor t in [\"()[]{}\", \"([)]\", \"{[]}\", \"((\"]:\n    print(t, valid_parentheses(t))",
+     "()[]{} True\n([)] False\n{[]} True\n(( False"
+    ],
+    [
+     "tip",
+     "ध्यान से देखो: आख़िर में `return not stack` — अगर कोई bracket खुला रह गया (\"((\") तो stack खाली नहीं, मतलब False। यह edge case लोग भूल जाते हैं।"
+    ],
+    [
+     "code",
+     "python",
+     "from collections import deque\n\nq = deque()\nq.append(\"order1\")\nq.append(\"order2\")\nq.append(\"order3\")\nprint(q.popleft())     # FIFO: pehla aaya pehle gaya\nprint(list(q))\n\n# Last 3 sensor readings ka moving window\nlast3 = deque(maxlen=3)\nfor r in [10, 20, 30, 40]:\n    last3.append(r)\nprint(list(last3), sum(last3) / len(last3))",
+     "order1\n['order2', 'order3']\n[20, 30, 40] 30.0"
+    ],
+    [
+     "warn",
+     "आम गलती: queue के लिए `list.pop(0)` use करना। यह O(n) है (सारे items खिसकते हैं)। `deque.popleft()` O(1) है।"
+    ],
+    [
+     "p",
+     "**Binary search** = **sorted** list में बीच में देखो; target छोटा है तो left आधा, बड़ा है तो right आधा। हर step में आधा काम खत्म = **O(log n)**। 10 लाख items में सिर्फ़ ~20 steps।"
+    ],
+    [
+     "analogy",
+     "Dictionary (शब्दकोश) में \"Python\" ढूँढना: बीच में खोलो, P से पहले है या बाद में? आधा फेंक दो। Page by page कोई नहीं ढूँढता।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "array",
+      "title": "Binary search: 23",
+      "items": [
+       "2",
+       "5",
+       "8",
+       "12",
+       "16",
+       "23",
+       "38"
+      ],
+      "index": true
+     }
+    ],
+    [
+     "code",
+     "python",
+     "def binary_search(arr, target):\n    lo, hi = 0, len(arr) - 1\n    steps = 0\n    while lo <= hi:\n        steps += 1\n        mid = (lo + hi) // 2\n        if arr[mid] == target:\n            return mid, steps\n        if arr[mid] < target:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return -1, steps\n\narr = [2, 5, 8, 12, 16, 23, 38]\nprint(binary_search(arr, 23))\nprint(binary_search(arr, 7))\nprint(binary_search(list(range(1_000_000)), 999_999))\n\nimport bisect   # ready-made binary search\nprint(bisect.bisect_left([40, 55, 70, 85, 90], 72))",
+     "(5, 2)\n(-1, 3)\n(999999, 20)\n3"
+    ],
+    [
+     "tip",
+     "ML connection: decision tree split ढूँढना, threshold tune करना, sorted embeddings में range — सबमें binary search वाली सोच आती है। `while lo <= hi` और `mid ± 1` — off-by-one गलती से बचो।"
+    ],
+    [
+     "p",
+     "**Sorting।** Python का `sorted()` / `.sort()` = **Timsort**, O(n log n), stable (बराबर values का order नहीं बदलता)। IQ में `key=` बहुत पूछते हैं। कभी ख़ुद sort लिखने को बोलते हैं — तब **merge sort** (divide and conquer) लिखो, नीचे है।"
+    ],
+    [
+     "code",
+     "python",
+     "models = [(\"svm\", 0.86), (\"rf\", 0.91), (\"lr\", 0.84), (\"xgb\", 0.91)]\nprint(sorted(models, key=lambda m: m[1], reverse=True))\nprint(sorted(models, key=lambda m: (-m[1], m[0])))",
+     "[('rf', 0.91), ('xgb', 0.91), ('svm', 0.86), ('lr', 0.84)]\n[('rf', 0.91), ('xgb', 0.91), ('svm', 0.86), ('lr', 0.84)]"
+    ],
+    [
+     "sketch",
+     {
+      "k": "tree",
+      "title": "Merge sort",
+      "root": {
+       "label": "[5,2,4,1]",
+       "children": [
+        {
+         "label": "[5,2]",
+         "children": [
+          {
+           "label": "[5]",
+           "children": []
+          },
+          {
+           "label": "[2]",
+           "children": []
+          }
+         ]
+        },
+        {
+         "label": "[4,1]",
+         "children": [
+          {
+           "label": "[4]",
+           "children": []
+          },
+          {
+           "label": "[1]",
+           "children": []
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ],
+    [
+     "code",
+     "python",
+     "def merge_sort(a):\n    if len(a) <= 1:             # base case\n        return a\n    mid = len(a) // 2\n    left = merge_sort(a[:mid])  # recursion\n    right = merge_sort(a[mid:])\n    out, i, j = [], 0, 0\n    while i < len(left) and j < len(right):\n        if left[i] <= right[j]:\n            out.append(left[i]); i += 1\n        else:\n            out.append(right[j]); j += 1\n    return out + left[i:] + right[j:]\n\nprint(merge_sort([5, 2, 4, 1, 9, 3]))",
+     "[1, 2, 3, 4, 5, 9]"
+    ],
+    [
+     "p",
+     "**Recursion** = function ख़ुद को छोटे input के साथ बुलाता है। दो चीज़ें ज़रूरी: **base case** (कब रुकना है) और **छोटा step** (हर बार problem छोटी हो)।"
+    ],
+    [
+     "code",
+     "python",
+     "def factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n - 1)\n\nfrom functools import lru_cache\n\n@lru_cache(maxsize=None)\ndef fib(n):\n    if n < 2:\n        return n\n    return fib(n - 1) + fib(n - 2)\n\ndef climb_stairs(n):           # 1 ya 2 step: kitne tareeke?\n    a, b = 1, 1\n    for _ in range(n):\n        a, b = b, a + b\n    return a\n\nprint(factorial(5), fib(30), climb_stairs(5))",
+     "120 832040 8"
+    ],
+    [
+     "warn",
+     "आम गलती: base case भूल जाना → `RecursionError: maximum recursion depth exceeded`। और बिना cache के `fib(40)` बहुत slow (O(2^n))। `lru_cache` (memoization) से O(n)। यही **dynamic programming** का बीज है।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "IQ coding: 6 steps",
+      "steps": [
+       "Clarify",
+       "Brute force",
+       "Optimize",
+       "Code",
+       "Dry run",
+       "Big-O बताओ"
+      ],
+      "dir": "v"
+     }
+    ]
+   ]
+  },
+  {
+   "title": "Portfolio, IQ rounds, STAR और career roadmap",
+   "blocks": [
+    [
+     "p",
+     "Resume पर \"Python, ML, LLM\" लिखना आसान है। **दिखाना** मुश्किल है। Recruiter पहले GitHub और live demo देखता है। 3-5 **अच्छे, पूरे** projects = 30 अधूरे notebooks से ज़्यादा काम के। नीचे वे projects हैं जो hire करवाते हैं, और हर एक में क्या दिखाना है:"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Portfolio projects",
+      "head": [
+       "Project",
+       "Stack",
+       "क्या दिखाओ"
+      ],
+      "rows": [
+       [
+        "RAG doc chatbot",
+        "LangChain+FAISS+FastAPI",
+        "Sources, eval"
+       ],
+       [
+        "ML pipeline + API",
+        "sklearn+FastAPI+Docker",
+        "EDA, 3+ models"
+       ],
+       [
+        "Factory defect CV",
+        "CNN/YOLO+Streamlit",
+        "Before/after"
+       ],
+       [
+        "AI agent tool",
+        "LLM+tools+memory",
+        "Tool calls log"
+       ],
+       [
+        "Prod AI app",
+        "Compose+tests+CI",
+        "Live link"
+       ]
+      ]
+     }
+    ],
+    [
+     "list",
+     [
+      "**1. RAG Document Chatbot** (cable TDS/IS standards के PDFs पर): PDF upload, chunking, embeddings, source citation। दिखाओ: chunk size का experiment, 20 सवालों का eval set, \"जवाब नहीं मिला\" handle करना।",
+      "**2. ML pipeline + API** (cable price / order delay prediction): EDA, feature engineering, 3-5 models compare, cross-validation, best model FastAPI + Docker में। दिखाओ: metrics table और यह model क्यों चुना।",
+      "**3. Computer vision** (cable surface defect या drum label OCR): data collect, augmentation, accuracy/confusion matrix, Streamlit demo। दिखाओ: गलत predictions का analysis।",
+      "**4. AI agent** (ERP से stock/order पूछने वाला agent): tools (SQL query, calculator), memory, guardrails। दिखाओ: agent के steps का log, failure cases।",
+      "**5. Production AI app**: ऊपर वालों में से किसी एक को Streamlit + FastAPI + docker-compose + tests + GitHub Actions CI के साथ। यह **centerpiece** है।"
+     ]
+    ],
+    [
+     "tip",
+     "तुम्हारा unique advantage: तुम एक असली factory (GEEP, cable manufacturing) में काम करते हो। असली business problem + असली data (anonymised) वाला project = 95% candidates से अलग। \"मैंने Kaggle Titanic किया\" सब बोलते हैं।"
+    ],
+    [
+     "p",
+     "**हर project के README में:** problem (business की भाषा में), demo GIF/screenshot + live link, architecture diagram, tech stack, setup steps (`git clone`, `docker compose up`), results (numbers!), आगे क्या improve करोगे। Repo में `.gitignore`, `requirements.txt` (pinned), `.env.example`, `Dockerfile`, `tests/`।"
+    ],
+    [
+     "p",
+     "**AI/ML IQ rounds कैसे होते हैं:**"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "IQ rounds",
+      "steps": [
+       "HR screening",
+       "Coding (DSA)",
+       "ML/LLM theory",
+       "Project deep-dive",
+       "System design",
+       "HR/offer"
+      ],
+      "dir": "v"
+     }
+    ],
+    [
+     "list",
+     [
+      "**Screening (20-30 min):** \"Tell me about yourself\", यह role क्यों, notice period, salary। 2-minute intro तैयार रखो।",
+      "**Coding (45-60 min):** 1-2 DSA सवाल (Lesson 4-5 के patterns) + कभी-कभी pandas/SQL।",
+      "**ML/LLM theory:** bias-variance, overfitting, metrics, gradient descent, transformers, RAG, embeddings जैसे topics।",
+      "**Project deep-dive:** तुम्हारे resume का project — हर line पर \"क्यों?\" पूछेंगे।",
+      "**System design (mid level):** \"design a support chatbot\" — clarify, architecture, data, scale, monitoring, सब बताओ।",
+      "**HR/managerial:** teamwork, conflict, failure से क्या सीखा।"
+     ]
+    ],
+    [
+     "sketch",
+     {
+      "k": "boxes",
+      "title": "Project समझाओ: STAR",
+      "items": [
+       {
+        "label": "S - Situation",
+        "value": "क्या हालात थे"
+       },
+       {
+        "label": "T - Task",
+        "value": "मेरा काम क्या"
+       },
+       {
+        "label": "A - Action",
+        "value": "मैंने क्या किया"
+       },
+       {
+        "label": "R - Result",
+        "value": "number में फ़ायदा"
+       }
+      ]
+     }
+    ],
+    [
+     "code",
+     "text",
+     "S: GEEP mein sales team ko har cable quote ke liye TDS aur IS standard\n   PDFs mein haath se dhoondhna padta tha, ek quote mein ~20 min.\nT: Mujhe aisa tool banana tha jo sawaal ka jawab source ke saath de.\nA: Maine 300 PDFs ko chunk kiya (500 tokens, 50 overlap), embeddings\n   FAISS mein rakhi, FastAPI /chat endpoint banaya, Streamlit UI,\n   Docker se server pe deploy kiya. 40 sawaalon ka eval set banaya.\nR: Search time 20 min se ~2 min, eval pe 85% sahi jawab.\n   Galat jawab kam karne ke liye re-ranking add kiya (72% -> 85%).",
+     ""
+    ],
+    [
+     "tip",
+     "ध्यान से देखो: Action में \"**मैंने**\" बोलो, \"हमने\" नहीं — interviewer तुम्हारा काम जानना चाहता है। Result में **number** दो। और एक **challenge + trade-off** ज़रूर बताओ (\"chunk छोटे किए तो context टूटा, इसलिए overlap रखा\")।"
+    ],
+    [
+     "p",
+     "**सबसे ज़्यादा पूछे जाने वाले theory सवाल** (इनके जवाब IQ section में हैं, और पिछले stages में detail में):"
+    ],
+    [
+     "list",
+     [
+      "Overfitting क्या है, कैसे रोकें? Bias-variance trade-off।",
+      "Precision vs recall vs F1 — कब कौन सा? Imbalanced data में accuracy धोखा क्यों देती है।",
+      "Train/validation/test split और cross-validation क्यों।",
+      "Gradient descent, learning rate, L1 vs L2 regularization।",
+      "Random forest vs gradient boosting।",
+      "Transformer / attention आसान शब्दों में। Tokens, context window, temperature।",
+      "RAG क्या है, fine-tuning कब? Hallucination कैसे कम करें।",
+      "Embeddings और cosine similarity। Vector DB क्यों।",
+      "Model को production में कैसे monitor करें (data drift)।"
+     ]
+    ],
+    [
+     "p",
+     "**Career roadmap** (तुम्हारे लिए practical):"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Roadmap",
+      "head": [
+       "समय",
+       "Focus",
+       "Output"
+      ],
+      "rows": [
+       [
+        "महीना 1-2",
+        "DSA रोज़ 1-2 सवाल",
+        "60 problems"
+       ],
+       [
+        "महीना 2-3",
+        "Project 1-2 + Docker",
+        "GitHub + demo"
+       ],
+       [
+        "महीना 3-4",
+        "Project 3-5, README",
+        "Live links"
+       ],
+       [
+        "महीना 4+",
+        "Apply + mock IQ",
+        "Calls"
+       ]
+      ]
+     }
+    ],
+    [
+     "p",
+     "**Resume tips:**"
+    ],
+    [
+     "list",
+     [
+      "**1 page।** ऊपर: नाम, phone, email, GitHub, LinkedIn, portfolio link।",
+      "Headline: \"AI/ML Engineer | Python | ML | LLM/RAG | FastAPI | Docker\"।",
+      "Projects section education के ऊपर (fresher/switcher के लिए)।",
+      "हर line = action verb + क्या + कैसे + **number**: \"Built RAG chatbot over 300 TDS PDFs; cut search time 90%\"।",
+      "Current job को AI angle से लिखो: automation, data, ERP integration — जो भी असल में किया।",
+      "Generic objective, rating bars (Python 4/5), photo — मत डालो। Skills वही लिखो जिन पर सवाल झेल सको।",
+      "ATS के लिए job description के keywords (जो सच हैं) use करो।"
+     ]
+    ],
+    [
+     "warn",
+     "आम गलती: resume पर वह लिखना जो आता नहीं (\"Kubernetes expert\")। Interviewer वही पूछता है और trust टूट जाता है। ईमानदारी + \"मैं यह सीख रहा हूँ\" ज़्यादा अच्छा लगता है।"
+    ],
+    [
+     "p",
+     "**Job कहाँ ढूँढें:** LinkedIn, Naukri, Instahyre, Wellfound (startups), company career pages। सबसे असरदार = **referral**: LinkedIn पर लोगों से जुड़ो, अपना project post करो, फिर politely referral माँगो। Mock IQ दोस्तों के साथ या ख़ुद को record करके practice करो।"
+    ]
+   ]
+  }
+ ],
+ "teach": [
+  {
+   "say": "आख़िरी stage! अब तक model बनाना सीखा। अब सीखेंगे उसे दुनिया तक पहुँचाना, और job पकड़ना।",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Code",
+     "Git",
+     "Docker",
+     "Deploy",
+     "Job"
+    ],
+    "dir": "h"
+   },
+   "code": null
+  },
+  {
+   "say": "Git एक diary है। add से staging, commit से photo, push से GitHub पर।",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Edit",
+     "git add",
+     "git commit",
+     "git push"
+    ],
+    "dir": "h"
+   },
+   "code": "git add .\ngit commit -m \"Add predict API\"\ngit push"
+  },
+  {
+   "say": "नया feature हमेशा नई branch पर। काम हो गया तो Pull Request खोलो, review के बाद merge।",
+   "sketch": {
+    "k": "tree",
+    "root": {
+     "label": "main",
+     "children": [
+      {
+       "label": "feature/x",
+       "children": []
+      },
+      {
+       "label": "fix/y",
+       "children": []
+      }
+     ]
+    }
+   },
+   "code": "git checkout -b feature/x"
+  },
+  {
+   "say": "Docker tiffin box है। Dockerfile recipe, image packed डिब्बा, container खुला हुआ चलता खाना।",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Dockerfile",
+     "docker build",
+     "Image",
+     "docker run",
+     "Container"
+    ],
+    "dir": "h"
+   },
+   "code": "docker build -t ml-api .\ndocker run -p 8000:8000 ml-api"
+  },
+  {
+   "say": "तीन services एक साथ? docker-compose। एक YAML, एक command, सब चालू।",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Streamlit",
+     "FastAPI",
+     "Postgres"
+    ],
+    "dir": "h"
+   },
+   "code": "docker compose up -d"
+  },
+  {
+   "say": "Streamlit counter है, FastAPI गोदाम। User counter पर button दबाता है, गोदाम में model काम करता है।",
+   "sketch": {
+    "k": "stack",
+    "items": [
+     "User",
+     "Streamlit UI",
+     "FastAPI",
+     "Model / RAG",
+     "Data"
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "Big-O मतलब input बढ़े तो काम कितना बढ़े। Dict lookup O(1), एक loop O(n), nested loop O(n²)।",
+   "sketch": {
+    "k": "chart",
+    "type": "bar",
+    "points": [
+     [
+      "O(1)",
+      1
+     ],
+     [
+      "O(log n)",
+      3
+     ],
+     [
+      "O(n)",
+      8
+     ],
+     [
+      "O(n²)",
+      20
+     ]
+    ],
+    "xl": "",
+    "yl": "steps"
+   },
+   "code": null
+  },
+  {
+   "say": "Two Sum: हर number पर पूछो, मेरा जोड़ीदार पहले देखा है क्या? Dict में देखो। एक ही loop।",
+   "sketch": {
+    "k": "boxes",
+    "items": [
+     {
+      "label": "seen",
+      "value": "{2: 0}"
+     },
+     {
+      "label": "x = 7",
+      "value": "need 2 ✓"
+     }
+    ]
+   },
+   "code": "need = target - x\nif need in seen: return [seen[need], i]"
+  },
+  {
+   "say": "Brackets check करने के लिए stack। खुला bracket ऊपर रखो, बंद bracket आए तो ऊपर वाले से match करो।",
+   "sketch": {
+    "k": "stack",
+    "items": [
+     "[  ← top",
+     "(",
+     "{"
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "IQ में project STAR से बताओ: Situation, Task, Action, Result। Result में number ज़रूर।",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Situation",
+     "Task",
+     "Action",
+     "Result"
+    ],
+    "dir": "h"
+   },
+   "code": null
+  }
+ ],
+ "practice": [
+  {
+   "q": "**Two Sum (dict से)** — `two_sum(nums, target)` लिखो जो उन दो numbers के index list में return करे जिनका जोड़ target हो (न मिलें तो `[]`)। सिर्फ़ एक loop और dict use करो। फिर ये 3 print करो:\n`two_sum([2, 7, 11, 15], 9)`\n`two_sum([3, 2, 4], 6)`\n`two_sum([1, 5, 3], 100)`",
+   "starter": "def two_sum(nums, target):\n    seen = {}  # value -> index\n    for i, x in enumerate(nums):\n        # TODO: need = target - x\n        # TODO: agar need seen mein hai toh [seen[need], i] return karo\n        # TODO: seen[x] = i\n        pass\n    return []\n\nprint(two_sum([2, 7, 11, 15], 9))\nprint(two_sum([3, 2, 4], 6))\nprint(two_sum([1, 5, 3], 100))\n",
+   "expect": "[0, 1]\n[1, 2]\n[]",
+   "hint": "पहले check करो, फिर dict में डालो। उल्टा करोगे तो [3,2,4] में 3 ख़ुद से जुड़ जाएगा (3+3=6)।",
+   "solution": "def two_sum(nums, target):\n    seen = {}\n    for i, x in enumerate(nums):\n        need = target - x\n        if need in seen:\n            return [seen[need], i]\n        seen[x] = i\n    return []\n\nprint(two_sum([2, 7, 11, 15], 9))\nprint(two_sum([3, 2, 4], 6))\nprint(two_sum([1, 5, 3], 100))\n"
+  },
+  {
+   "q": "**Valid Parentheses (stack से)** — `is_valid(s)` लिखो जो True/False दे: हर खुला bracket `( [ {` सही order में बंद हुआ या नहीं। फिर इन strings के लिए `string -> result` print करो: `\"()[]{}\"`, `\"([)]\"`, `\"{[()]}\"`, `\"(((\"`, `\"\"`।",
+   "starter": "def is_valid(s):\n    pairs = {')': '(', ']': '[', '}': '{'}\n    stack = []\n    for ch in s:\n        if ch in '([{':\n            pass  # TODO: push karo\n        else:\n            pass  # TODO: stack khaali ya upar wala match nahi -> False\n    return False  # TODO: sahi condition (stack khaali?)\n\nfor t in [\"()[]{}\", \"([)]\", \"{[()]}\", \"(((\", \"\"]:\n    print(repr(t), '->', is_valid(t))\n",
+   "expect": "'()[]{}' -> True\n'([)]' -> False\n'{[()]}' -> True\n'(((' -> False\n'' -> True",
+   "hint": "Closing bracket पर: `if not stack or stack.pop() != pairs[ch]: return False`। आख़िर में `return not stack`।",
+   "solution": "def is_valid(s):\n    pairs = {')': '(', ']': '[', '}': '{'}\n    stack = []\n    for ch in s:\n        if ch in '([{':\n            stack.append(ch)\n        else:\n            if not stack or stack.pop() != pairs[ch]:\n                return False\n    return not stack\n\nfor t in [\"()[]{}\", \"([)]\", \"{[()]}\", \"(((\", \"\"]:\n    print(repr(t), '->', is_valid(t))\n"
+  },
+  {
+   "q": "**Binary search + steps** — sorted cable sizes `[1.5, 2.5, 4, 6, 10, 16, 25, 35, 50]` में `binary_search(arr, target)` लिखो जो `(index, steps)` return करे (न मिले तो index `-1`)। steps = loop कितनी बार चला। `16`, `1.5` और `20` के लिए print करो, format: `16 -> (index, steps)`।",
+   "starter": "def binary_search(arr, target):\n    lo, hi = 0, len(arr) - 1\n    steps = 0\n    while lo <= hi:\n        steps += 1\n        mid = (lo + hi) // 2\n        # TODO: mila -> (mid, steps)\n        # TODO: arr[mid] < target -> lo = mid + 1, warna hi = mid - 1\n        break\n    return (-1, steps)\n\nsizes = [1.5, 2.5, 4, 6, 10, 16, 25, 35, 50]\nfor t in [16, 1.5, 20]:\n    print(t, '->', binary_search(sizes, t))\n",
+   "expect": "16 -> (5, 3)\n1.5 -> (0, 3)\n20 -> (-1, 3)",
+   "hint": "पहला mid = (0+8)//2 = 4 (value 10)। 16 बड़ा है तो right side। `break` हटा देना।",
+   "solution": "def binary_search(arr, target):\n    lo, hi = 0, len(arr) - 1\n    steps = 0\n    while lo <= hi:\n        steps += 1\n        mid = (lo + hi) // 2\n        if arr[mid] == target:\n            return (mid, steps)\n        if arr[mid] < target:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return (-1, steps)\n\nsizes = [1.5, 2.5, 4, 6, 10, 16, 25, 35, 50]\nfor t in [16, 1.5, 20]:\n    print(t, '->', binary_search(sizes, t))\n"
+  }
+ ],
+ "quiz": [
+  {
+   "q": "कौन सा command file को staging area में भेजता है?",
+   "o": [
+    "git commit",
+    "git add",
+    "git push",
+    "git init"
+   ],
+   "a": 1,
+   "why": "`git add` staging में रखता है; `commit` उसकी photo लेता है; `push` GitHub पर भेजता है।"
+  },
+  {
+   "q": "Pull Request (PR) का main काम क्या है?",
+   "o": [
+    "Branch का code review के बाद main में merge करवाना",
+    "GitHub से code download करना",
+    "पुराना commit delete करना",
+    "Docker image बनाना"
+   ],
+   "a": 0,
+   "why": "PR = \"मेरी branch main में मिलाओ\" — review और CI के बाद merge होता है।"
+  },
+  {
+   "q": "Docker image और container में सही फ़र्क?",
+   "o": [
+    "दोनों एक ही चीज़ हैं",
+    "Container recipe है, image चलता process",
+    "Image packed template है, container उसका चलता हुआ instance",
+    "Image सिर्फ़ Windows पर चलती है"
+   ],
+   "a": 2,
+   "why": "Image read-only template (डिब्बा); container उससे चला हुआ process। एक image से कई containers।"
+  },
+  {
+   "q": "Dockerfile में `COPY requirements.txt .` को `COPY . .` से पहले अलग क्यों लिखते हैं?",
+   "o": [
+    "Security के लिए",
+    "Image छोटी करने के लिए",
+    "यह ज़रूरी syntax है",
+    "Layer cache: code बदले तो भी pip install दोबारा न चले"
+   ],
+   "a": 3,
+   "why": "Requirements वाली layer cache हो जाती है; सिर्फ़ code बदलने पर build fast रहता है।"
+  },
+  {
+   "q": "docker-compose में `ui` service `api` service को किस URL से बुलाएगी?",
+   "o": [
+    "http://localhost:8000",
+    "http://api:8000",
+    "http://127.0.0.1:8501",
+    "http://docker:8000"
+   ],
+   "a": 1,
+   "why": "Compose network में service का नाम ही hostname है। हर container का localhost अलग होता है।"
+  },
+  {
+   "q": "Streamlit में chat history normal list में रखो तो refresh/click पर क्यों मिट जाती है?",
+   "o": [
+    "हर interaction पर पूरी script दोबारा चलती है",
+    "Streamlit list support नहीं करता",
+    "Browser cache clear होता है",
+    "Python memory leak"
+   ],
+   "a": 0,
+   "why": "Streamlit har click pe script upar se chalata hai; yaad rakhne ke liye `st.session_state` use karo."
+  },
+  {
+   "q": "Two Sum का dict वाला solution कितना time लेता है?",
+   "o": [
+    "O(n²)",
+    "O(log n)",
+    "O(n)",
+    "O(1)"
+   ],
+   "a": 2,
+   "why": "एक loop (n) और हर step पर dict lookup O(1) → O(n) time, O(n) space।"
+  },
+  {
+   "q": "10 लाख items की sorted list में binary search लगभग कितने steps लेता है?",
+   "o": [
+    "10 लाख",
+    "1000",
+    "500",
+    "20"
+   ],
+   "a": 3,
+   "why": "हर step आधा करता है: log2(10,00,000) ≈ 20।"
+  },
+  {
+   "q": "Queue (FIFO) के लिए Python में best choice?",
+   "o": [
+    "list.pop(0)",
+    "collections.deque.popleft()",
+    "set.pop()",
+    "dict.popitem()"
+   ],
+   "a": 1,
+   "why": "`deque.popleft()` O(1) है; `list.pop(0)` O(n) क्योंकि सारे items खिसकते हैं।"
+  },
+  {
+   "q": "STAR method में 'R' में सबसे अच्छा क्या बोलना चाहिए?",
+   "o": [
+    "Measurable result, जैसे \"search time 20 min से 2 min\"",
+    "Team ने क्या किया",
+    "कौन सी language use की",
+    "Project का नाम"
+   ],
+   "a": 0,
+   "why": "Result = number में फ़ायदा। इससे impact साफ़ दिखता है।"
+  }
+ ],
+ "iq": [
+  {
+   "q": "Tell me about yourself (AI/ML role के लिए 2-minute जवाब कैसा हो?)",
+   "a": "Present → past → future format: \"मैं अभी GEEP Polymers (cable manufacturing) में software developer हूँ, जहाँ मैं ERP automation और data tools पर काम करता हूँ। पिछले महीनों में मैंने ML और LLM पर focus किया — एक RAG chatbot बनाया जो TDS PDFs से source के साथ जवाब देता है, और एक price prediction API FastAPI + Docker पर। अब मैं एक AI/ML engineer role चाहता हूँ जहाँ असली business problems पर models production में ले जाऊँ।\" 2 minute से कम, projects और numbers के साथ।"
+  },
+  {
+   "q": "अपना best project समझाओ। (Project deep-dive)",
+   "a": "STAR use करो: Situation (business का दर्द), Task (तुम्हारा role), Action (architecture, data, model choice और क्यों, एक trade-off), Result (number)। फिर ख़ुद बता दो क्या improve करोगे (eval set बड़ा, re-ranking, monitoring)। Interviewer हर choice पर \"क्यों\" पूछेगा, जैसे \"FAISS क्यों, Postgres pgvector क्यों नहीं?\" — इसलिए हर decision का reason तैयार रखो।"
+  },
+  {
+   "q": "Two Sum solve करो और complexity बताओ।",
+   "a": "Brute force: हर pair check, O(n²)। Optimized: एक dict में value→index रखो; हर number x पर `target - x` dict में ढूँढो। मिला तो दोनों index return। O(n) time, O(n) space।\n`need = target - x; if need in seen: return [seen[need], i]; seen[x] = i`\nपहले check, फिर insert — ताकि element ख़ुद से न जुड़े।"
+  },
+  {
+   "q": "Time complexity और space complexity में क्या फ़र्क है? Python list vs set में `in` की complexity?",
+   "a": "Time complexity = input बढ़ने पर steps कैसे बढ़ते हैं; space = extra memory कितनी बढ़ती है। `x in list` O(n) है क्योंकि एक-एक element देखता है; `x in set` average O(1) क्योंकि hashing से सीधा bucket पर जाता है। इसलिए बार-बार membership check करना हो तो पहले set बना लो।"
+  },
+  {
+   "q": "Overfitting क्या है और कैसे रोकते हो?",
+   "a": "Model training data रट लेता है — train पर accuracy बहुत अच्छी, test/new data पर खराब (high variance)। रोकने के तरीके: ज़्यादा data / augmentation, simple model, regularization (L1/L2, dropout), early stopping, cross-validation से tune करना, tree में max_depth limit। पहचान: train vs validation score का बड़ा gap।"
+  },
+  {
+   "q": "Precision, recall, F1 — कब क्या use करोगे?",
+   "a": "Precision = जिन्हें positive बोला उनमें कितने सच (false alarm कम करना हो, जैसे spam filter)। Recall = असली positives में से कितने पकड़े (miss महँगा हो, जैसे cable defect या cancer detection)। F1 = दोनों का harmonic mean, imbalanced data पर। Imbalanced data (99% normal) में accuracy धोखा देती है — सबको normal बोलकर भी 99%।"
+  },
+  {
+   "q": "RAG क्या है और fine-tuning से कब बेहतर है?",
+   "a": "RAG = सवाल के हिसाब से अपने documents से relevant chunks retrieve करो (embeddings + vector search), और LLM को context के साथ दो, ताकि जवाब grounded हो और source दिखे। जब knowledge बार-बार बदलती है, citations चाहिए, या data private है — RAG बेहतर और सस्ता। Fine-tuning तब जब model का style/format/behaviour बदलना हो, नया knowledge डालने के लिए नहीं। अक्सर दोनों साथ भी use होते हैं।"
+  },
+  {
+   "q": "Transformer में attention आसान शब्दों में समझाओ।",
+   "a": "हर token बाकी सब tokens को देखकर तय करता है कि किस पर कितना ध्यान दे। हर token का Query, Key, Value vector बनता है; Query·Key से score, softmax से weights, और Values का weighted sum नया representation। इससे \"bank\" का मतलब context (river या money) से समझ आता है, और RNN की तरह एक-एक step नहीं, सब parallel चलता है — इसलिए fast training।"
+  },
+  {
+   "q": "ML deployment में Docker क्यों use करते हो? Image vs container?",
+   "a": "Docker code, libraries, Python version और OS settings एक image में pack करता है, तो laptop, test server और cloud पर एक जैसा चलता है — \"works on my machine\" खत्म, और scaling/rollback आसान। Image = read-only template (Dockerfile से build), container = उस image का चलता हुआ instance। Compose से API + UI + DB एक command में।"
+  },
+  {
+   "q": "git merge और git rebase में फ़र्क? Merge conflict कैसे solve करते हो?",
+   "a": "Merge दो branches की history जोड़ता है और एक merge commit बनाता है — safe, असली history दिखती है। Rebase अपने commits को latest main के ऊपर दोबारा लगाता है — सीधी history, पर shared/pushed branch पर rebase नहीं करते क्योंकि history बदल जाती है। Conflict: file खोलो, `<<<<<<<`/`=======`/`>>>>>>>` के बीच सही code रखो, markers हटाओ, test चलाओ, `git add` + `git commit`।"
+  },
+  {
+   "q": "एक trained model को production में कैसे ले जाओगे? (Mini system design)",
+   "a": "Model को joblib/ONNX में save, FastAPI service में startup पर एक बार load, Pydantic से input validation, `/predict` और `/health` endpoints। Docker image, CI (tests) के बाद deploy। Logging (latency, inputs, predictions), data drift और accuracy के लिए monitoring, model versioning (MLflow), और rollback plan। LLM app हो तो caching, rate limit और token cost tracking भी।"
+  },
+  {
+   "q": "आपकी weakness क्या है? / आपके पास CS degree या ML experience नहीं, तो आपको क्यों लें?",
+   "a": "ईमानदार और सुधार वाला जवाब: \"मेरा formal ML industry experience कम है, इसलिए मैंने 5 end-to-end projects बनाए, जिनमें से दो मेरी factory की असली problems पर हैं, और रोज़ DSA practice करता हूँ।\" फिर strength जोड़ो: असली business की समझ, production data के साथ काम, जल्दी सीखना। कभी fake weakness (\"मैं ज़्यादा मेहनत करता हूँ\") मत बोलो।"
+  }
+ ]
+}

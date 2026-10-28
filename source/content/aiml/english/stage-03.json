@@ -1,0 +1,1010 @@
+{
+ "n": 3,
+ "id": "aiml-03",
+ "title": "Functions & Modules",
+ "goal": "You will learn to make your own functions, understand parameters, default/keyword args, *args/**kwargs, return, scope, lambda, map/filter and recursion, and split your code into clean files by importing modules.",
+ "lessons": [
+  {
+   "title": "What is a function — def and parameters",
+   "blocks": [
+    [
+     "p",
+     "**Function** = a **reusable block** of code. Write it once, give it a name, and call it by name whenever you need it. No need to repeat code."
+    ],
+    [
+     "analogy",
+     "A tea machine: press the button (function call), the process inside (body) runs, and tea comes out (result). You don't have to build the machine again every time."
+    ],
+    [
+     "p",
+     "Real use: in an ERP, build \"calculate tax\" once, then call it in 100 places. If you find a mistake, fix it in just one place."
+    ],
+    [
+     "code",
+     "python",
+     "def greet(name):\n    print(f\"Hello {name}! Welcome to GEEP\")\n\ngreet(\"Anna\")\ngreet(\"Rohan\")\ngreet(\"Deepak\")",
+     "Hello Anna! Welcome to GEEP\nHello Rohan! Welcome to GEEP\nHello Deepak! Welcome to GEEP"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Parts of a function",
+      "head": [
+       "Part",
+       "Meaning"
+      ],
+      "rows": [
+       [
+        "def",
+        "define a function"
+       ],
+       [
+        "greet",
+        "function name"
+       ],
+       [
+        "(name)",
+        "parameter (input)"
+       ],
+       [
+        ":",
+        "body starts"
+       ],
+       [
+        "greet(\"Anna\")",
+        "call, Anna passed"
+       ]
+      ]
+     }
+    ],
+    [
+     "p",
+     "**Defining** and **calling** are two different things. `def` only writes the recipe; nothing runs until you call it."
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Journey of a call",
+      "steps": [
+       "greet(\"Anna\")",
+       "name = \"Anna\"",
+       "Body runs",
+       "Back, move on"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "**Parameter** vs **argument**: the name you write in the brackets when making the function (`name`) is the parameter. The real value you send when calling (`\"Anna\"`) is the argument."
+    ],
+    [
+     "code",
+     "python",
+     "def cable_cost(meters, rate):\n    print(f\"{meters} m x Rs {rate} = Rs {meters * rate}\")\n\ncable_cost(100, 45)\ncable_cost(250, 38)",
+     "100 m x Rs 45 = Rs 4500\n250 m x Rs 38 = Rs 9500"
+    ],
+    [
+     "tip",
+     "Look carefully: arguments go by **order**. The first argument goes into the first parameter, the second into the second."
+    ],
+    [
+     "warn",
+     "Common mistake: calling a function before defining it gives `NameError`. Python reads from top to bottom, so `def` must come first."
+    ],
+    [
+     "warn",
+     "Common mistake: sending too few or too many arguments. If you write `cable_cost(100)` you get `TypeError: missing 1 required positional argument: 'rate'`."
+    ],
+    [
+     "p",
+     "**Docstring** = a small note in triple quotes at the start of a function: what the function does. In professional code every function has a docstring."
+    ],
+    [
+     "code",
+     "python",
+     "def area(length, width):\n    \"\"\"Rectangle ka area return karta hai.\"\"\"\n    return length * width\n\nprint(area.__doc__)",
+     "Rectangle ka area return karta hai."
+    ],
+    [
+     "tip",
+     "Name a function like a **verb** that tells its job: `calculate_tax`, `clean_text`, `load_data`. And one function = one job."
+    ]
+   ]
+  },
+  {
+   "title": "return vs print — getting a value back",
+   "blocks": [
+    [
+     "p",
+     "`print` = **shown** on the screen, that's it. `return` = value **handed back to you**, now you can use it further."
+    ],
+    [
+     "code",
+     "python",
+     "def add_print(a, b):\n    print(a + b)\n\ndef add_return(a, b):\n    return a + b\n\nx = add_print(2, 3)\nprint(\"x =\", x)\ny = add_return(2, 3)\nprint(\"y =\", y)\nprint(\"y * 10 =\", y * 10)",
+     "5\nx = None\ny = 5\ny * 10 = 50"
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "print vs return",
+      "left": {
+       "title": "print",
+       "items": [
+        "Shows on screen",
+        "No value back",
+        "Result: None",
+        "Can't use later"
+       ]
+      },
+      "right": {
+       "title": "return",
+       "items": [
+        "Gives value back",
+        "Store in variable",
+        "Calculate further",
+        "Used in real code"
+       ]
+      }
+     }
+    ],
+    [
+     "tip",
+     "Look carefully: `add_print` showed 5, but `x` got **None**. A function without `return` quietly returns `None`."
+    ],
+    [
+     "analogy",
+     "The shopkeeper **shows** you the bill (print) vs **hands** you the bill (return). Only if it is in your hand can you submit it at the office later."
+    ],
+    [
+     "p",
+     "In real projects 99% of functions `return`. `predictions = model.predict(data)` — `predict` returns, it doesn't print, so the result can be used further."
+    ],
+    [
+     "code",
+     "python",
+     "def calculate_tax(salary, tax_percent=10):\n    tax = salary * tax_percent / 100\n    net = salary - tax\n    return net\n\ns1 = calculate_tax(50000)\ns2 = calculate_tax(80000, 20)\nprint(f\"50K salary, 10% tax: {s1}\")\nprint(f\"80K salary, 20% tax: {s2}\")",
+     "50K salary, 10% tax: 45000.0\n80K salary, 20% tax: 64000.0"
+    ],
+    [
+     "warn",
+     "Common mistake: writing `return net` but never creating a variable called `net` (you wrote `salary = salary - tax`). Result: `NameError`. Return the variable you actually created."
+    ],
+    [
+     "p",
+     "After `return` the function **stops right away**. The lines below don't run. This is called an **early return**."
+    ],
+    [
+     "code",
+     "python",
+     "def check(n):\n    if n > 0:\n        return \"Positive\"\n    if n < 0:\n        return \"Negative\"\n    return \"Zero\"\n\nprint(check(7), check(-2), check(0))",
+     "Positive Negative Zero"
+    ],
+    [
+     "p",
+     "**Returning multiple values:** use commas. Python packs them into one **tuple**, and you can open them into separate boxes (**unpacking**)."
+    ],
+    [
+     "code",
+     "python",
+     "def cable_report(length, defects):\n    quality = \"PASS\" if defects == 0 else \"FAIL\"\n    cost = length * 50\n    return quality, cost\n\nq, c = cable_report(100, 0)\nprint(f\"Quality: {q}, Cost: {c}\")\nprint(cable_report(200, 3))",
+     "Quality: PASS, Cost: 5000\n('FAIL', 10000)"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Multiple return",
+      "steps": [
+       "return q, c",
+       "(\"PASS\", 5000)",
+       "q, c = ..."
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "code",
+     "python",
+     "def stats(nums):\n    return min(nums), max(nums), sum(nums) / len(nums)\n\nlow, high, avg = stats([4, 9, 2, 5])\nprint(low, high, avg)",
+     "2 9 5.0"
+    ],
+    [
+     "tip",
+     "You will see this everywhere in ML: `X_train, X_test, y_train, y_test = train_test_split(...)` — one function, four values back."
+    ]
+   ]
+  },
+  {
+   "title": "Default, keyword, *args and **kwargs",
+   "blocks": [
+    [
+     "p",
+     "**Default parameter:** if no value is given, a preset value is used. GST is mostly 18%, so set the default to 18."
+    ],
+    [
+     "code",
+     "python",
+     "def total(rate, meters, gst=18):\n    amount = rate * meters\n    return amount + amount * gst / 100\n\nprint(total(100, 10))\nprint(total(100, 10, 5))",
+     "1180.0\n1050.0"
+    ],
+    [
+     "warn",
+     "Parameters with defaults always go **at the end**. Writing `def f(gst=18, rate):` gives a SyntaxError."
+    ],
+    [
+     "p",
+     "**Keyword arguments:** give values by name when calling. Then order doesn't matter, and the code is easier to read."
+    ],
+    [
+     "code",
+     "python",
+     "def total(rate, meters, gst=18):\n    amount = rate * meters\n    return amount + amount * gst / 100\n\nprint(total(meters=10, rate=100))\nprint(total(100, 10, gst=12))",
+     "1180.0\n1120.0"
+    ],
+    [
+     "tip",
+     "Keyword arguments are everywhere in ML libraries: `RandomForestClassifier(n_estimators=100, max_depth=5, random_state=42)`. The names tell you which value is for what."
+    ],
+    [
+     "p",
+     "`*args` = send as many positional values as you like, they all land in one **tuple**."
+    ],
+    [
+     "code",
+     "python",
+     "def add_all(*args):\n    print(args)\n    return sum(args)\n\nprint(add_all(1, 2, 3))\nprint(add_all(5, 10))",
+     "(1, 2, 3)\n6\n(5, 10)\n15"
+    ],
+    [
+     "p",
+     "`**kwargs` = send as many **named** values as you like, they all land in one **dictionary** (dict in detail in Stage 4)."
+    ],
+    [
+     "code",
+     "python",
+     "def info(**kwargs):\n    for key, value in kwargs.items():\n        print(f\"{key} = {value}\")\n\ninfo(name=\"Akash\", city=\"Bhiwadi\", role=\"developer\")",
+     "name = Akash\ncity = Bhiwadi\nrole = developer"
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "One star vs two stars",
+      "left": {
+       "title": "*args",
+       "items": [
+        "Values without names",
+        "Makes a tuple",
+        "add_all(1, 2, 3)"
+       ]
+      },
+      "right": {
+       "title": "**kwargs",
+       "items": [
+        "Named values",
+        "Makes a dict",
+        "info(name=\"A\")"
+       ]
+      }
+     }
+    ],
+    [
+     "tip",
+     "Remember: **one star = tuple, two stars = dict.** The names `args`/`kwargs` are just a convention; the real work is done by `*` and `**`."
+    ],
+    [
+     "p",
+     "When all are used together the order is fixed: normal → `*args` → default/keyword-only → `**kwargs`."
+    ],
+    [
+     "code",
+     "python",
+     "def train(model, *layers, epochs=10, **opts):\n    print(model, layers, epochs, opts)\n\ntrain(\"net\", 64, 32, epochs=5, lr=0.01)",
+     "net (64, 32) 5 {'lr': 0.01}"
+    ],
+    [
+     "warn",
+     "Common mistake (IQ favourite): **mutable default**. `def add_item(item, lst=[]):` — this list is created only **once** and the same old list is used in every call."
+    ],
+    [
+     "code",
+     "python",
+     "def add_item(item, lst=[]):\n    lst.append(item)\n    return lst\n\nprint(add_item(\"a\"))\nprint(add_item(\"b\"))\n\ndef add_item_safe(item, lst=None):\n    if lst is None:\n        lst = []\n    lst.append(item)\n    return lst\n\nprint(add_item_safe(\"a\"))\nprint(add_item_safe(\"b\"))",
+     "['a']\n['a', 'b']\n['a']\n['b']"
+    ],
+    [
+     "tip",
+     "Fix: set the default to `None` and create a new list inside. Never put `[]` or `{}` as a default."
+    ]
+   ]
+  },
+  {
+   "title": "Scope — how far a variable can be seen",
+   "blocks": [
+    [
+     "p",
+     "**Scope** = the area where a variable can be seen and used. A variable made inside a function is **local**: alive only inside, and when the function ends, it ends too."
+    ],
+    [
+     "analogy",
+     "Rooms in a house: something kept inside a room (local) is found only in that room. Something kept in the courtyard (global) can be seen from every room."
+    ],
+    [
+     "code",
+     "python",
+     "def f():\n    x = 10\n    print(\"andar:\", x)\n\nf()\ntry:\n    print(x)\nexcept NameError as e:\n    print(\"bahar: NameError ->\", e)",
+     "andar: 10\nbahar: NameError -> name 'x' is not defined"
+    ],
+    [
+     "p",
+     "(`try/except` is a way to catch errors, in detail in Stage 5. Here it is just to show the error.)"
+    ],
+    [
+     "sketch",
+     {
+      "k": "boxes",
+      "title": "Global vs local",
+      "items": [
+       {
+        "label": "global: rate",
+        "value": "45"
+       },
+       {
+        "label": "f() local: x",
+        "value": "10"
+       }
+      ]
+     }
+    ],
+    [
+     "p",
+     "A **global** variable (made at the top level of the file) can be **read** inside a function:"
+    ],
+    [
+     "code",
+     "python",
+     "rate = 45\n\ndef cost(meters):\n    return meters * rate\n\nprint(cost(10))",
+     "450"
+    ],
+    [
+     "p",
+     "But if you **assign a value** to the same name inside the function, Python creates a **new local** variable. The outside one does not change."
+    ],
+    [
+     "code",
+     "python",
+     "count = 0\n\ndef bump():\n    count = 99\n    print(\"andar:\", count)\n\nbump()\nprint(\"bahar:\", count)",
+     "andar: 99\nbahar: 0"
+    ],
+    [
+     "p",
+     "If you really want to change the outside one, use the `global` keyword:"
+    ],
+    [
+     "code",
+     "python",
+     "count = 0\n\ndef bump():\n    global count\n    count += 1\n\nbump()\nbump()\nprint(count)",
+     "2"
+    ],
+    [
+     "warn",
+     "Use `global` as little as possible. When every function quietly changes globals, bugs become hard to find. Better way: **pass the value in as a parameter, get it back with return**: `count = bump(count)`."
+    ],
+    [
+     "p",
+     "Python's order for finding a name: **LEGB** — Local, Enclosing (the outer function), Global, Built-in (like `print`, `len`)."
+    ],
+    [
+     "sketch",
+     {
+      "k": "stack",
+      "title": "LEGB: where to find a name",
+      "items": [
+       "Local",
+       "Enclosing",
+       "Global",
+       "Built-in"
+      ]
+     }
+    ],
+    [
+     "warn",
+     "Common mistake: using a built-in name for a variable, like `sum = 10` or `list = [1, 2]`. Then `sum([1, 2])` gives an error, because the global `sum` hides the built-in."
+    ]
+   ]
+  },
+  {
+   "title": "lambda, map, filter and recursion",
+   "blocks": [
+    [
+     "p",
+     "**lambda** = a small one-line function without a name. Format: `lambda inputs: expression`. No need to write `return`, the value of the expression comes back on its own."
+    ],
+    [
+     "code",
+     "python",
+     "square = lambda x: x * x\nprint(square(4))\n\ndef square2(x):\n    return x * x\nprint(square2(4))",
+     "16\n16"
+    ],
+    [
+     "p",
+     "The real use of lambda: giving a small job to another function, like the key for **sorting**."
+    ],
+    [
+     "code",
+     "python",
+     "leads = [(\"Rahul\", 500), (\"Neha\", 900), (\"Amit\", 300)]\nprint(sorted(leads, key=lambda l: l[1]))\nprint(max(leads, key=lambda l: l[1]))",
+     "[('Amit', 300), ('Rahul', 500), ('Neha', 900)]\n('Neha', 900)"
+    ],
+    [
+     "tip",
+     "`key=lambda l: l[1]` means \"sort by looking at index 1 (amount) of each item\"."
+    ],
+    [
+     "p",
+     "**map** = apply a function to every item. **filter** = keep only the items for which the function gives True. You must wrap both in `list()` to see the result."
+    ],
+    [
+     "code",
+     "python",
+     "prices = [100, 250, 80, 400]\nwith_gst = list(map(lambda p: round(p * 1.18, 2), prices))\nprint(with_gst)\ncostly = list(filter(lambda p: p > 150, prices))\nprint(costly)",
+     "[118.0, 295.0, 94.4, 472.0]\n[250, 400]"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "map and filter",
+      "steps": [
+       "[100, 250, 80]",
+       "map: x 1.18",
+       "filter: > 150",
+       "Result"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "tip",
+     "Many people prefer **list comprehension** over map/filter: `[p * 1.18 for p in prices]`. That is in Stage 4. For an IQ you should know both."
+    ],
+    [
+     "p",
+     "**Recursion** = a function that **calls itself**. Every recursion needs two things: a **base case** (when to stop) and a **smaller problem** (each call makes the problem smaller)."
+    ],
+    [
+     "analogy",
+     "Going down stairs: \"go down one step, then go down the rest of the steps\". When you reach the floor (base case), stop."
+    ],
+    [
+     "code",
+     "python",
+     "def factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n - 1)\n\nprint(factorial(5))",
+     "120"
+    ],
+    [
+     "sketch",
+     {
+      "k": "stack",
+      "title": "Call stack: factorial(4)",
+      "items": [
+       "factorial(1) = 1",
+       "factorial(2) = 2 x 1",
+       "factorial(3) = 3 x 2",
+       "factorial(4) = 4 x 6"
+      ]
+     }
+    ],
+    [
+     "p",
+     "Each call is placed on top of a **stack** (a pile of plates). As soon as the base case is reached, answers return back down: 1, 2, 6, 24."
+    ],
+    [
+     "warn",
+     "Common mistake: if you forget the base case, the function keeps calling itself and you get `RecursionError: maximum recursion depth exceeded` (default limit is about 1000)."
+    ],
+    [
+     "code",
+     "python",
+     "def countdown(n):\n    if n == 0:\n        print(\"GO!\")\n        return\n    print(n, end=\" \")\n    countdown(n - 1)\n\ncountdown(3)",
+     "3 2 1 GO!"
+    ],
+    [
+     "tip",
+     "Recursion is natural for trees, folders and nested data. But for simple counting a loop is faster and safer."
+    ]
+   ]
+  },
+  {
+   "title": "Modules, import and __name__ == \"__main__\"",
+   "blocks": [
+    [
+     "p",
+     "**Module** = a `.py` file that has functions and variables. With **import** you use code from another file in your file. Python comes with many free modules (the **standard library**)."
+    ],
+    [
+     "analogy",
+     "Toolbox: you don't need to make every tool yourself. `import math` = you opened the maths box."
+    ],
+    [
+     "code",
+     "python",
+     "import math\nprint(math.sqrt(16))\nprint(math.pi)\nprint(math.ceil(4.2), math.floor(4.8))",
+     "4.0\n3.141592653589793\n5 4"
+    ],
+    [
+     "p",
+     "Ways to import:"
+    ],
+    [
+     "code",
+     "python",
+     "from math import sqrt, pi\nprint(sqrt(25))\n\nimport statistics as st\nprint(st.mean([2, 4, 6]))",
+     "5.0\n4"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Ways to import",
+      "head": [
+       "Write",
+       "Use"
+      ],
+      "rows": [
+       [
+        "import math",
+        "math.sqrt(4)"
+       ],
+       [
+        "from math import sqrt",
+        "sqrt(4)"
+       ],
+       [
+        "import numpy as np",
+        "np.array(...)"
+       ]
+      ]
+     }
+    ],
+    [
+     "tip",
+     "`import numpy as np`, `import pandas as pd` — this **alias** (short name) is the standard across the whole ML world. You will write it daily in Stage 8."
+    ],
+    [
+     "warn",
+     "Common mistake: `from module import *` — all names come in at once and can clash with your variables. Avoid it."
+    ],
+    [
+     "p",
+     "Set a **seed** with the `random` module and you get the same \"random\" numbers every time. In ML this is the same idea used to repeat results (`random_state=42`)."
+    ],
+    [
+     "code",
+     "python",
+     "import random\nrandom.seed(42)\nprint(random.randint(1, 100), random.randint(1, 100))\nrandom.seed(42)\nprint(random.randint(1, 100), random.randint(1, 100))",
+     "82 15\n82 15"
+    ],
+    [
+     "p",
+     "**Making your own module**: create a file `cable_utils.py` and write functions in it. Then import it in another file."
+    ],
+    [
+     "code",
+     "python",
+     "# cable_utils.py\ndef cost(meters, rate=45):\n    return meters * rate\n\nif __name__ == \"__main__\":\n    print(\"Test:\", cost(10))",
+     ""
+    ],
+    [
+     "code",
+     "python",
+     "# main.py (same folder)\nimport cable_utils\nprint(cable_utils.cost(100))",
+     ""
+    ],
+    [
+     "p",
+     "Running `python cable_utils.py` prints `Test: 450`. But running `python main.py` gives only `4500` — the test line will **not** run."
+    ],
+    [
+     "p",
+     "Why? Every file has a special variable `__name__`. If you **run the file directly**, `__name__` = `\"__main__\"`. If the file is **imported**, `__name__` = the file's name (`\"cable_utils\"`)."
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "Value of __name__",
+      "left": {
+       "title": "Run directly",
+       "items": [
+        "python cable_utils.py",
+        "__name__ = \"__main__\"",
+        "Test runs"
+       ]
+      },
+      "right": {
+       "title": "Imported",
+       "items": [
+        "import cable_utils",
+        "__name__ = \"cable_utils\"",
+        "Test won't run"
+       ]
+      }
+     }
+    ],
+    [
+     "code",
+     "python",
+     "print(__name__)",
+     "__main__"
+    ],
+    [
+     "tip",
+     "Rule: put every script's \"run\" code inside `if __name__ == \"__main__\":`. Then the file can be both a **module** and a **script**. FastAPI, training scripts all use this pattern."
+    ],
+    [
+     "p",
+     "**pip** installs outside packages: `pip install numpy`. Then `import numpy` will work. The standard library doesn't need installing."
+    ]
+   ]
+  }
+ ],
+ "teach": [
+  {
+   "say": "A function is a reusable box of code. Make it once with def, then call it by name as many times as you like.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Input",
+     "Function body",
+     "Output"
+    ],
+    "dir": "h"
+   },
+   "code": "def greet(name):\n    print(f\"Hello {name}\")\n\ngreet(\"Akash\")"
+  },
+  {
+   "say": "The name written in the brackets is the parameter. The value you send when calling is the argument.",
+   "sketch": {
+    "k": "boxes",
+    "items": [
+     {
+      "label": "parameter",
+      "value": "name"
+     },
+     {
+      "label": "argument",
+      "value": "\"Akash\""
+     }
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "print only shows, return gives the value back. If there is no return, the function gives None.",
+   "sketch": {
+    "k": "compare",
+    "left": {
+     "title": "print",
+     "items": [
+      "Just shown",
+      "x = None"
+     ]
+    },
+    "right": {
+     "title": "return",
+     "items": [
+      "Handed back",
+      "y = 5"
+     ]
+    }
+   },
+   "code": "def add(a, b):\n    return a + b\n\ny = add(2, 3)"
+  },
+  {
+   "say": "With commas you can return many values. They come in a tuple, and we open them into separate boxes.",
+   "sketch": {
+    "k": "boxes",
+    "items": [
+     {
+      "label": "q",
+      "value": "\"PASS\""
+     },
+     {
+      "label": "c",
+      "value": "5000"
+     }
+    ]
+   },
+   "code": "q, c = cable_report(100, 0)"
+  },
+  {
+   "say": "A default value makes a parameter optional, and with a keyword argument you send the value with its name, so no worry about order.",
+   "sketch": {
+    "k": "table",
+    "head": [
+     "Call",
+     "gst"
+    ],
+    "rows": [
+     [
+      "total(100, 10)",
+      "18 (default)"
+     ],
+     [
+      "total(100, 10, gst=5)",
+      "5"
+     ]
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "One star args collects all extra values into a tuple, two star kwargs collects named values into a dict.",
+   "sketch": {
+    "k": "compare",
+    "left": {
+     "title": "*args",
+     "items": [
+      "(1, 2, 3)"
+     ]
+    },
+    "right": {
+     "title": "**kwargs",
+     "items": [
+      "{'name': 'A'}"
+     ]
+    }
+   },
+   "code": null
+  },
+  {
+   "say": "A variable made inside a function is local, it isn't visible outside. The order for finding a name is LEGB: Local, Enclosing, Global, Built-in.",
+   "sketch": {
+    "k": "stack",
+    "items": [
+     "Local",
+     "Enclosing",
+     "Global",
+     "Built-in"
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "lambda is a one-line function without a name. It is most useful as a sorting key, and in map and filter.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "x",
+     "lambda x: x * x",
+     "x squared"
+    ],
+    "dir": "h"
+   },
+   "code": "sorted(leads, key=lambda l: l[1])"
+  },
+  {
+   "say": "In recursion a function calls itself. A base case is a must, otherwise RecursionError. Each call goes up on the stack and the answer comes back down.",
+   "sketch": {
+    "k": "stack",
+    "items": [
+     "fact(1) = 1",
+     "fact(2) = 2",
+     "fact(3) = 6"
+    ]
+   },
+   "code": "def fact(n):\n    if n <= 1:\n        return 1\n    return n * fact(n - 1)"
+  },
+  {
+   "say": "A module is just a py file. Use it with import. And the code inside if name equals main runs only when the file is run directly, not on import. Now go practice!",
+   "sketch": {
+    "k": "tree",
+    "root": {
+     "label": "cable_utils.py",
+     "children": [
+      {
+       "label": "Direct run: test runs",
+       "children": []
+      },
+      {
+       "label": "Import: no test",
+       "children": []
+      }
+     ]
+    }
+   },
+   "code": "if __name__ == \"__main__\":\n    main()"
+  }
+ ],
+ "practice": [
+  {
+   "q": "Write a function `mean_std(nums)` that returns both the **mean** and the **standard deviation** (population) of the numbers. Don't use a library, work it out yourself with loops. Output:\nMean: 5.0\nStd: 2.0",
+   "starter": "def mean_std(nums):\n    # TODO: mean = total / count\n    # TODO: add (x - mean) ** 2 for every number, divide by count, then ** 0.5\n    pass\n\nm, s = mean_std([2, 4, 4, 4, 5, 5, 7, 9])\nprint(f\"Mean: {m}\")\nprint(f\"Std: {s}\")\n",
+   "expect": "Mean: 5.0\nStd: 2.0",
+   "hint": "Two loops: first the mean from the total, then the total of squared differences. `return mean, std` gives both back.",
+   "solution": "def mean_std(nums):\n    total = 0\n    for x in nums:\n        total += x\n    mean = total / len(nums)\n    sq = 0\n    for x in nums:\n        sq += (x - mean) ** 2\n    std = (sq / len(nums)) ** 0.5\n    return mean, std\n\nm, s = mean_std([2, 4, 4, 4, 5, 5, 7, 9])\nprint(f\"Mean: {m}\")\nprint(f\"Std: {s}\")"
+  },
+  {
+   "q": "**Min-max scaling** (common ML preprocessing): write a function `scale(x, lo, hi)` that returns `(x - lo) / (hi - lo)`. Then scale all values with `map` + `lambda`, and use `filter` to count how many are 0.5 or more. Output:\n[0.0, 0.25, 0.5, 0.75, 1.0]\nHigh values: 3",
+   "starter": "def scale(x, lo, hi):\n    # TODO: return the formula\n    pass\n\nvalues = [10, 20, 30, 40, 50]\nlo, hi = min(values), max(values)\n# TODO: scaled = list(map(lambda ..., values))\n# TODO: high = list(filter(lambda ..., scaled))\n# TODO: print both\n",
+   "expect": "[0.0, 0.25, 0.5, 0.75, 1.0]\nHigh values: 3",
+   "hint": "`map(lambda v: scale(v, lo, hi), values)`. In the filter lambda the condition is `v >= 0.5`.",
+   "solution": "def scale(x, lo, hi):\n    return (x - lo) / (hi - lo)\n\nvalues = [10, 20, 30, 40, 50]\nlo, hi = min(values), max(values)\nscaled = list(map(lambda v: scale(v, lo, hi), values))\nprint(scaled)\nhigh = list(filter(lambda v: v >= 0.5, scaled))\nprint(f\"High values: {len(high)}\")"
+  },
+  {
+   "q": "Make a recursive `factorial(n)`, and with its help write `ncr(n, r)` = n! / (r! x (n-r)!) (combinations, used a lot in probability). Use integer division `//`. Output:\n5! = 120\n5C2 = 10\n10C3 = 120",
+   "starter": "def factorial(n):\n    # TODO: base case: if n <= 1, return 1\n    # TODO: otherwise n * factorial(n - 1)\n    pass\n\ndef ncr(n, r):\n    # TODO: formula, divide with //\n    pass\n\nprint(f\"5! = {factorial(5)}\")\nprint(f\"5C2 = {ncr(5, 2)}\")\nprint(f\"10C3 = {ncr(10, 3)}\")\n",
+   "expect": "5! = 120\n5C2 = 10\n10C3 = 120",
+   "hint": "Write the base case first. ncr has three factorial calls: `factorial(n) // (factorial(r) * factorial(n - r))`.",
+   "solution": "def factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n - 1)\n\ndef ncr(n, r):\n    return factorial(n) // (factorial(r) * factorial(n - r))\n\nprint(f\"5! = {factorial(5)}\")\nprint(f\"5C2 = {ncr(5, 2)}\")\nprint(f\"10C3 = {ncr(10, 3)}\")"
+  }
+ ],
+ "quiz": [
+  {
+   "q": "What does a function without `return` return?",
+   "o": [
+    "0",
+    "None",
+    "Error",
+    "Empty string"
+   ],
+   "a": 1,
+   "why": "A function without return automatically returns `None`."
+  },
+  {
+   "q": "If `def total(rate, meters, gst=18)`, what is gst in `total(100, 10)`?",
+   "o": [
+    "0",
+    "10",
+    "18",
+    "Error"
+   ],
+   "a": 2,
+   "why": "gst was not given, so the default value 18 was used."
+  },
+  {
+   "q": "If `def f(*args): return args`, what does `f(1, 2, 3)` give?",
+   "o": [
+    "(1, 2, 3)",
+    "[1, 2, 3]",
+    "6",
+    "{1, 2, 3}"
+   ],
+   "a": 0,
+   "why": "*args packs all extra positional values into one tuple."
+  },
+  {
+   "q": "What type do the values inside `**kwargs` come in?",
+   "o": [
+    "list",
+    "tuple",
+    "set",
+    "dict"
+   ],
+   "a": 3,
+   "why": "Named values are key-value pairs, so a dict is made."
+  },
+  {
+   "q": "What is the result of `(lambda x: x * 2)(5)`?",
+   "o": [
+    "5",
+    "25",
+    "10",
+    "Error"
+   ],
+   "a": 2,
+   "why": "lambda got 5, and the expression 5 * 2 = 10 came back."
+  },
+  {
+   "q": "Inside a function you made `x = 10`. What happens on `print(x)` outside (no x outside)?",
+   "o": [
+    "NameError",
+    "10",
+    "None",
+    "0"
+   ],
+   "a": 0,
+   "why": "x is local, it exists only inside the function."
+  },
+  {
+   "q": "What happens if a recursive function has no base case?",
+   "o": [
+    "Function returns 0",
+    "Runs once and stops",
+    "SyntaxError",
+    "RecursionError"
+   ],
+   "a": 3,
+   "why": "The function keeps calling itself until the recursion limit (~1000) is crossed, then RecursionError."
+  },
+  {
+   "q": "When does the code inside `if __name__ == \"__main__\":` run?",
+   "o": [
+    "When the file is imported",
+    "When the file is run directly",
+    "Never",
+    "Always"
+   ],
+   "a": 1,
+   "why": "When run directly `__name__` is \"__main__\"; on import it is the file's name."
+  },
+  {
+   "q": "What is the output of `list(filter(lambda n: n % 2 == 0, [1, 2, 3, 4]))`?",
+   "o": [
+    "[1, 3]",
+    "[True, False]",
+    "[2, 4]",
+    "[1, 2, 3, 4]"
+   ],
+   "a": 2,
+   "why": "filter keeps only the items for which the lambda gives True: the even numbers 2 and 4."
+  },
+  {
+   "q": "`def add_item(item, lst=[])` is called twice: `add_item(\"a\")`, then `add_item(\"b\")`. What does the second call return?",
+   "o": [
+    "['b']",
+    "['a', 'b']",
+    "['a']",
+    "Error"
+   ],
+   "a": 1,
+   "why": "The mutable default list is made only once and is shared between calls, so 'a' stayed. Fix: `lst=None`."
+  }
+ ],
+ "iq": [
+  {
+   "q": "What is a function and why do we use it?",
+   "a": "A function is a named, reusable block of code that takes input (parameters) and returns output. Benefits: no repeated code (DRY), easier testing, fix in one place and it is fixed everywhere, and a big program is split into small pieces that are easy to understand."
+  },
+  {
+   "q": "Difference between print and return?",
+   "a": "print only shows on the console and the function's result stays None. return gives the value back to the caller, which you can store in a variable and use further, and the function stops right at return. In production code functions return; print is only for debugging or CLI output."
+  },
+  {
+   "q": "What are *args and **kwargs? When do you use them?",
+   "a": "*args takes a variable number of positional arguments into a tuple, **kwargs takes keyword arguments into a dict. Use: when the number of inputs isn't fixed, or when making a wrapper/decorator that passes arguments on: `def wrapper(*args, **kwargs): return func(*args, **kwargs)`."
+  },
+  {
+   "q": "Explain the mutable default argument problem.",
+   "a": "Default values are created only once, when the function is defined. In `def f(x, lst=[])` the same list is shared by every call, so data from earlier calls stays. Fix: use `lst=None` and inside write `if lst is None: lst = []`."
+  },
+  {
+   "q": "What is lambda? What is its limitation?",
+   "a": "lambda is an anonymous one-line function: `lambda x: x * 2`. Mostly used for short logic in sort keys, map and filter. Limitation: only one expression, no statements (loop, assignment), and having no name makes debugging a bit harder. Use `def` for complex logic."
+  },
+  {
+   "q": "Difference between map, filter and reduce?",
+   "a": "map applies a function to every item (output of the same length). filter keeps only the items where the function gives True. reduce (from functools) combines all items into one value, like a total: `reduce(lambda a, b: a + b, nums)`. In Python 3 map/filter give lazy iterators, so we wrap them in `list()`."
+  },
+  {
+   "q": "What are local and global scope? The LEGB rule?",
+   "a": "A variable assigned inside a function is local and is visible only inside. One made at file level is global. Python looks for names in this order: Local, Enclosing, Global, Built-in. To change a global from inside use the `global` keyword; for the outer function's variable in a nested function use `nonlocal`."
+  },
+  {
+   "q": "What is recursion? When is it better than iteration?",
+   "a": "A function calling itself with a smaller input and stopping at a base case. It feels natural for tree traversal, nested folders and divide-and-conquer (merge sort). Downside: every call uses stack memory and Python's limit is ~1000, so a loop is better for simple counting."
+  },
+  {
+   "q": "What does `if __name__ == \"__main__\"` do?",
+   "a": "Every module has a `__name__`; if the file is run directly it is \"__main__\", if imported it is the module's name. Code inside this check runs only on a direct run. So one file can be both a reusable module and a standalone script, and test/training code doesn't run on its own when imported."
+  },
+  {
+   "q": "Difference between a module and a package?",
+   "a": "A module is a single .py file. A package is a folder of modules (traditionally with `__init__.py`), like the `sklearn.linear_model` module inside the `sklearn` package. A library = a collection of packages installed with pip."
+  },
+  {
+   "q": "In Python, are arguments pass-by-value or pass-by-reference?",
+   "a": "Neither fully one nor the other: \"pass by object reference\". The function gets a reference to the object. If you modify a mutable object (list, dict) inside, it changes outside too; if you reassign an immutable one (int, str), only the local name changes and the outside one stays the same."
+  },
+  {
+   "q": "What should the order of positional, keyword and default arguments be?",
+   "a": "In the definition: normal positional → *args → keyword-only/default → **kwargs, like `def f(a, b, *args, option=True, **kwargs)`. When calling, positional arguments come before keyword arguments; `f(a=1, 2)` is a SyntaxError."
+  }
+ ]
+}

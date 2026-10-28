@@ -1,0 +1,1045 @@
+{
+ "n": 2,
+ "id": "aiml-02",
+ "title": "Conditions & Loops",
+ "goal": "You will learn to ask questions with comparison and logical operators, make decisions with if/elif/else, and repeat work with for/while loops, break/continue and nested loops.",
+ "lessons": [
+  {
+   "title": "Comparison and logical operators — asking questions",
+   "blocks": [
+    [
+     "p",
+     "In Stage 1 we learned to keep values in boxes (variables). Now we teach the program to **think**. To think, you first have to ask a **question**: \"are the marks more than 90?\", \"is the cable defective?\""
+    ],
+    [
+     "p",
+     "Every question has only one of two answers: **True** (yes) or **False** (no). This is the `bool` type we saw in Stage 1."
+    ],
+    [
+     "analogy",
+     "The guard at the factory gate asks: \"Do you have an ID card?\" The answer is yes or no. Yes, you go in. No, you stay out. A program makes every decision the same way, with a yes/no question."
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Comparison operators",
+      "head": [
+       "Operator",
+       "Meaning",
+       "Example",
+       "Result"
+      ],
+      "rows": [
+       [
+        "==",
+        "equal?",
+        "5 == 5",
+        "True"
+       ],
+       [
+        "!=",
+        "not equal?",
+        "5 != 3",
+        "True"
+       ],
+       [
+        ">",
+        "greater?",
+        "7 > 9",
+        "False"
+       ],
+       [
+        "<",
+        "smaller?",
+        "2 < 4",
+        "True"
+       ],
+       [
+        ">=",
+        "greater or equal",
+        "18 >= 18",
+        "True"
+       ],
+       [
+        "<=",
+        "smaller or equal",
+        "3 <= 1",
+        "False"
+       ]
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "marks = 85\nprint(marks > 90)\nprint(marks >= 85)\nprint(marks == 85)\nprint(marks != 100)",
+     "False\nTrue\nTrue\nTrue"
+    ],
+    [
+     "warn",
+     "Common mistake: mixing up `=` and `==`. `marks = 85` **puts** a value in the box. `marks == 85` only **asks** \"is it equal?\". If you write `if marks = 85:` you get a SyntaxError."
+    ],
+    [
+     "code",
+     "python",
+     "print(\"apple\" == \"apple\")\nprint(\"Apple\" == \"apple\")\nprint(\"10\" == 10)",
+     "True\nFalse\nFalse"
+    ],
+    [
+     "tip",
+     "Look carefully: when comparing text, capital and small letters matter. And `\"10\"` (text) is never equal to `10` (number)."
+    ],
+    [
+     "p",
+     "Sometimes one question is not enough. \"Age 18+ **and** has an ID card?\" For this we have **logical operators**: `and`, `or`, `not`."
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "and / or / not",
+      "head": [
+       "Operator",
+       "When True?",
+       "Example"
+      ],
+      "rows": [
+       [
+        "and",
+        "both True",
+        "True and False -> False"
+       ],
+       [
+        "or",
+        "any one True",
+        "True or False -> True"
+       ],
+       [
+        "not",
+        "flip it",
+        "not True -> False"
+       ]
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "age = 22\nhas_id = True\nprint(age >= 18 and has_id)\nprint(age < 18 or has_id)\nprint(not has_id)",
+     "True\nTrue\nFalse"
+    ],
+    [
+     "analogy",
+     "`and` = a door with two locks: it opens only when both keys are used. `or` = two doors: if any one is open, you can go in."
+    ],
+    [
+     "code",
+     "python",
+     "temp = 75\nprint(60 <= temp <= 80)",
+     "True"
+    ],
+    [
+     "tip",
+     "In Python you can write a range check directly: `60 <= temp <= 80`. It is the same as `temp >= 60 and temp <= 80`, and easier to read."
+    ],
+    [
+     "p",
+     "**Truthy and Falsy:** in Python some values count as False in a condition: `0`, `0.0`, `\"\"` (empty text), `None`, and the empty list `[]`. Everything else counts as True."
+    ],
+    [
+     "code",
+     "python",
+     "print(bool(0), bool(5))\nprint(bool(\"\"), bool(\"Akash\"))\nprint(bool(None))",
+     "False True\nFalse True\nFalse"
+    ]
+   ]
+  },
+  {
+   "title": "if, elif, else — the program decides",
+   "blocks": [
+    [
+     "p",
+     "Now we use the answer to a question to make a **decision**. `if` says: \"if the condition is True, do this job\"."
+    ],
+    [
+     "code",
+     "python",
+     "age = 21\nif age >= 18:\n    print(\"Adult ho! Vote de sakte ho.\")\nprint(f\"Tumhari age {age} hai.\")",
+     "Adult ho! Vote de sakte ho.\nTumhari age 21 hai."
+    ],
+    [
+     "p",
+     "Want to do something else when the condition is False? Use `else`:"
+    ],
+    [
+     "code",
+     "python",
+     "age = 15\nif age >= 18:\n    print(\"Adult ho! Vote de sakte ho.\")\nelse:\n    print(\"Minor ho! Abhi wait karo.\")",
+     "Minor ho! Abhi wait karo."
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "The if / else path",
+      "steps": [
+       "Condition check",
+       "True: if block",
+       "False: else block",
+       "Code after"
+      ],
+      "dir": "v"
+     }
+    ],
+    [
+     "p",
+     "More than two paths? Add `elif` (else if). Python checks **from top to bottom**, and as soon as it finds the **first True** condition, it runs that block and skips all the rest."
+    ],
+    [
+     "code",
+     "python",
+     "marks = 72\nif marks >= 90:\n    print(\"Grade A - Excellent!\")\nelif marks >= 80:\n    print(\"Grade B - Very Good!\")\nelif marks >= 70:\n    print(\"Grade C - Good\")\nelif marks >= 60:\n    print(\"Grade D - Average\")\nelse:\n    print(\"Grade F - Fail\")",
+     "Grade C - Good"
+    ],
+    [
+     "sketch",
+     {
+      "k": "tree",
+      "title": "Deciding the grade",
+      "root": {
+       "label": "marks?",
+       "children": [
+        {
+         "label": ">= 90: A",
+         "children": []
+        },
+        {
+         "label": ">= 80: B",
+         "children": []
+        },
+        {
+         "label": ">= 70: C",
+         "children": []
+        },
+        {
+         "label": "else: F",
+         "children": []
+        }
+       ]
+      }
+     }
+    ],
+    [
+     "tip",
+     "Look carefully: for 72, `marks >= 60` is also True, but \"Grade D\" was not printed. That is because `>= 70` was True first and the rest of the chain was skipped."
+    ],
+    [
+     "warn",
+     "Common mistake: writing the order backwards. If you write `if marks >= 60:` first, a student with 95 marks also gets \"D\", because 95 >= 60 is already True. **The strictest condition goes at the top.**"
+    ],
+    [
+     "p",
+     "**Indentation** = spaces at the start of a line. In Python this is not decoration, it is a **rule**. After `if` comes `:`, and every line inside it is moved **4 spaces** in. This is how Python knows which lines are inside the if."
+    ],
+    [
+     "code",
+     "python",
+     "defects = 0\nif defects == 0:\n    print(\"Cable PASS\")\n    print(\"Packing mein bhejo\")\nprint(\"Check khatam\")",
+     "Cable PASS\nPacking mein bhejo\nCheck khatam"
+    ],
+    [
+     "p",
+     "Both prints are 4 spaces in, so both are inside the if. The last print is at 0 spaces, so it always runs."
+    ],
+    [
+     "warn",
+     "Common mistake: forgetting the `:` after `if` (SyntaxError), or not giving the inner line any spaces (`IndentationError: expected an indented block`). Do not mix tabs and spaces, always use 4 spaces."
+    ],
+    [
+     "p",
+     "**One-line if/else (ternary):** small decisions in one line:"
+    ],
+    [
+     "code",
+     "python",
+     "defects = 3\nquality = \"PASS\" if defects == 0 else \"FAIL\"\nprint(quality)",
+     "FAIL"
+    ]
+   ]
+  },
+  {
+   "title": "Nested if and real-world decisions",
+   "blocks": [
+    [
+     "p",
+     "**Nested if** = an if inside an if. Use it when you want to ask the second question only if the first answer is yes."
+    ],
+    [
+     "analogy",
+     "Bank loan: first ask \"is the salary 30,000+?\" If yes, then ask \"is the credit score 700+?\". If the salary is already too low, there is no point asking about the credit score."
+    ],
+    [
+     "code",
+     "python",
+     "salary = 45000\nscore = 680\nif salary >= 30000:\n    if score >= 700:\n        print(\"Loan approved\")\n    else:\n        print(\"Score kam hai, loan reject\")\nelse:\n    print(\"Salary kam hai, loan reject\")",
+     "Score kam hai, loan reject"
+    ],
+    [
+     "sketch",
+     {
+      "k": "tree",
+      "title": "Nested if",
+      "root": {
+       "label": "salary >= 30000?",
+       "children": [
+        {
+         "label": "Yes: score?",
+         "children": [
+          {
+           "label": ">= 700: Approve",
+           "children": []
+          },
+          {
+           "label": "else: Reject",
+           "children": []
+          }
+         ]
+        },
+        {
+         "label": "No: Reject",
+         "children": []
+        }
+       ]
+      }
+     }
+    ],
+    [
+     "p",
+     "Count the spaces: 4 spaces inside the first `if`, 8 spaces inside the inner `if` (4 + 4). Each level adds 4 more."
+    ],
+    [
+     "tip",
+     "Very deep nesting (3-4 levels) is hard to read. You can often flatten it with `and`: `if salary >= 30000 and score >= 700:`."
+    ],
+    [
+     "code",
+     "python",
+     "salary = 45000\nscore = 720\nif salary >= 30000 and score >= 700:\n    print(\"Loan approved\")\nelse:\n    print(\"Loan reject\")",
+     "Loan approved"
+    ],
+    [
+     "p",
+     "ML uses the same thinking. A model gives a probability (between 0 and 1), and we set a **threshold** to decide. That is really just an `if`!"
+    ],
+    [
+     "code",
+     "python",
+     "prob = 0.83\nif prob >= 0.5:\n    label = \"Spam\"\nelse:\n    label = \"Not spam\"\nprint(label)",
+     "Spam"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Decision from a model",
+      "steps": [
+       "Email",
+       "Model",
+       "prob = 0.83",
+       "if >= 0.5",
+       "Spam"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "The ML model called **Decision Tree** (coming in Stage 10) works exactly like nested if-else: one question at each node, and the decision comes as you go down."
+    ],
+    [
+     "warn",
+     "Common mistake: writing `if x == 1 or 2:`. This is always True, because `2` by itself is truthy. Correct: `if x == 1 or x == 2:`."
+    ]
+   ]
+  },
+  {
+   "title": "for loop and range — doing work again and again",
+   "blocks": [
+    [
+     "p",
+     "**Loop** = doing one job again and again. In the factory, a quality check on 100 cables, the same process for each cable. You will not write the code 100 times, you will use a loop."
+    ],
+    [
+     "p",
+     "Two types of loop: **for** (when you know how many times) and **while** (as long as a condition is True)."
+    ],
+    [
+     "code",
+     "python",
+     "for i in range(1, 6):\n    print(f\"Cable {i}: Inspection Done\")",
+     "Cable 1: Inspection Done\nCable 2: Inspection Done\nCable 3: Inspection Done\nCable 4: Inspection Done\nCable 5: Inspection Done"
+    ],
+    [
+     "p",
+     "In each round a new number goes into the box named `i`: 1, then 2, then 3... The loop body (the lines inside) runs in every round."
+    ],
+    [
+     "sketch",
+     {
+      "k": "cycle",
+      "title": "The for loop cycle",
+      "steps": [
+       "Take next number",
+       "Put it in i",
+       "Run the body",
+       "Numbers left?"
+      ]
+     }
+    ],
+    [
+     "p",
+     "`range(start, stop, step)` makes numbers. Begin at **start**, stop **BEFORE stop**, and jump ahead by **step**."
+    ],
+    [
+     "sketch",
+     {
+      "k": "array",
+      "title": "range(2, 10, 3)",
+      "items": [
+       "2",
+       "5",
+       "8"
+      ],
+      "index": true
+     }
+    ],
+    [
+     "code",
+     "python",
+     "print(list(range(5)))\nprint(list(range(1, 6)))\nprint(list(range(2, 10, 3)))\nprint(list(range(10, 0, -2)))",
+     "[0, 1, 2, 3, 4]\n[1, 2, 3, 4, 5]\n[2, 5, 8]\n[10, 8, 6, 4, 2]"
+    ],
+    [
+     "tip",
+     "Look carefully: `range(5)` starts at 0 and ends at 4. The stop number is **never included**. For 1 to 10, use `range(1, 11)`."
+    ],
+    [
+     "p",
+     "With `print(..., end=\" \")` everything comes on one line (a space instead of a new line):"
+    ],
+    [
+     "code",
+     "python",
+     "for i in range(2, 11, 2):\n    print(i, end=\" \")\nprint()",
+     "2 4 6 8 10 "
+    ],
+    [
+     "p",
+     "The most common use of a loop: **adding up a total**. Start a box at 0 and keep adding to it in every round. This is called the **accumulator** pattern."
+    ],
+    [
+     "code",
+     "python",
+     "total = 0\nfor i in range(1, 101):\n    total = total + i\nprint(total)",
+     "5050"
+    ],
+    [
+     "analogy",
+     "Like a piggy bank: empty at first (0), then you drop in money every day, and at the end you have the full total."
+    ],
+    [
+     "p",
+     "A for loop works not only on numbers but on any **sequence**: on each letter of a text, or on each value of a list (lists in detail in Stage 4)."
+    ],
+    [
+     "code",
+     "python",
+     "for ch in \"GEEP\":\n    print(ch, end=\"-\")\nprint()\nfruits = [\"Apple\", \"Banana\", \"Mango\"]\nfor i, fruit in enumerate(fruits):\n    print(f\"{i}: {fruit}\")",
+     "G-E-E-P-\n0: Apple\n1: Banana\n2: Mango"
+    ],
+    [
+     "tip",
+     "`enumerate` gives both the index and the value. It is cleaner than writing `range(len(fruits))`."
+    ]
+   ]
+  },
+  {
+   "title": "while loop, break and continue",
+   "blocks": [
+    [
+     "p",
+     "A **while** loop runs as long as the condition is True. When you do not know how many rounds it will take, use while."
+    ],
+    [
+     "analogy",
+     "Keep the machine running until the production target is met. You do not know in advance how long it will take."
+    ],
+    [
+     "code",
+     "python",
+     "target = 5\nproduced = 0\nwhile produced < target:\n    produced += 1\n    print(f\"Cable {produced} produced\")\nprint(f\"Target {target} complete!\")",
+     "Cable 1 produced\nCable 2 produced\nCable 3 produced\nCable 4 produced\nCable 5 produced\nTarget 5 complete!"
+    ],
+    [
+     "sketch",
+     {
+      "k": "cycle",
+      "title": "The while cycle",
+      "steps": [
+       "Condition check",
+       "True: run body",
+       "Value update",
+       "Check again"
+      ]
+     }
+    ],
+    [
+     "p",
+     "`produced += 1` means `produced = produced + 1`. This line slowly moves the condition towards False."
+    ],
+    [
+     "warn",
+     "Common mistake: **infinite loop**. If you forget the update line (`count -= 1`), the condition stays True forever and the loop never stops. Press Ctrl+C to stop it. Rule: a while loop MUST have a line that makes the condition False."
+    ],
+    [
+     "p",
+     "**break** = stop the loop **right now** and get out. **continue** = **skip only this round** and go to the next one."
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "break vs continue",
+      "left": {
+       "title": "break",
+       "items": [
+        "Whole loop stops",
+        "Defective found: STOP",
+        "No more rounds"
+       ]
+      },
+      "right": {
+       "title": "continue",
+       "items": [
+        "Skip only this round",
+        "Even found: skip",
+        "Loop keeps going"
+       ]
+      }
+     }
+    ],
+    [
+     "code",
+     "python",
+     "for i in range(1, 11):\n    if i == 6:\n        print(f\"Cable {i}: DEFECTIVE! STOP!\")\n        break\n    print(f\"Cable {i}: OK\")\nprint(\"Production stopped!\")",
+     "Cable 1: OK\nCable 2: OK\nCable 3: OK\nCable 4: OK\nCable 5: OK\nCable 6: DEFECTIVE! STOP!\nProduction stopped!"
+    ],
+    [
+     "p",
+     "Cables 7 to 10 were never checked. break ended the loop right there, and the line after the loop ran next."
+    ],
+    [
+     "code",
+     "python",
+     "for i in range(1, 11):\n    if i % 2 == 0:\n        continue\n    print(f\"Cable {i}: Checked\")",
+     "Cable 1: Checked\nCable 3: Checked\nCable 5: Checked\nCable 7: Checked\nCable 9: Checked"
+    ],
+    [
+     "p",
+     "`i % 2` = the remainder after dividing by 2. If it is 0, the number is even. After continue, the print below was skipped, so only the odd cables were printed."
+    ],
+    [
+     "p",
+     "**while True + break** is a very common pattern: use it when you find out the stopping condition in the middle of the loop."
+    ],
+    [
+     "code",
+     "python",
+     "balance = 1000\nmonth = 0\nwhile True:\n    month += 1\n    balance = balance * 2\n    if balance >= 10000:\n        break\nprint(f\"{month} mahine mein {balance}\")",
+     "4 mahine mein 16000"
+    ],
+    [
+     "p",
+     "ML training is also a loop like this: in each **epoch** the model learns a little, and when the loss stops improving we stop training with `break`. This is called **early stopping**."
+    ],
+    [
+     "tip",
+     "Bonus: a loop can also have an `else`. It runs only when the loop finishes completely **without a break**. It is useful for searching: put the \"not found\" message in the else."
+    ],
+    [
+     "code",
+     "python",
+     "for n in range(2, 7):\n    if n == 9:\n        print(\"Mil gaya\")\n        break\nelse:\n    print(\"9 nahi mila\")",
+     "9 nahi mila"
+    ]
+   ]
+  },
+  {
+   "title": "Nested loops, patterns and common loop bugs",
+   "blocks": [
+    [
+     "p",
+     "**Nested loop** = a loop inside a loop. For each single round of the outer loop, the inner loop runs **completely**."
+    ],
+    [
+     "analogy",
+     "A clock: by the time the hour hand moves forward once, the minute hand has gone round a full 60 times."
+    ],
+    [
+     "code",
+     "python",
+     "for row in range(1, 4):\n    for col in range(1, 4):\n        print(row * col, end=\" \")\n    print()",
+     "1 2 3 \n2 4 6 \n3 6 9 "
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Table: row x col",
+      "head": [
+       "",
+       "col 1",
+       "col 2",
+       "col 3"
+      ],
+      "rows": [
+       [
+        "row 1",
+        "1",
+        "2",
+        "3"
+       ],
+       [
+        "row 2",
+        "2",
+        "4",
+        "6"
+       ],
+       [
+        "row 3",
+        "3",
+        "6",
+        "9"
+       ]
+      ]
+     }
+    ],
+    [
+     "p",
+     "The inner empty `print()` gives a new line after each row. 3 outer rounds x 3 inner rounds = the body ran 9 times."
+    ],
+    [
+     "p",
+     "**Patterns** are a favourite for IQ and practice. Multiply text by a number and it repeats: `\"*\" * 3` = `***`."
+    ],
+    [
+     "code",
+     "python",
+     "for i in range(1, 5):\n    print(\"*\" * i)",
+     "*\n**\n***\n****"
+    ],
+    [
+     "code",
+     "python",
+     "n = 4\nfor i in range(1, n + 1):\n    print(\" \" * (n - i) + \"*\" * (2 * i - 1))",
+     "   *\n  ***\n *****\n*******"
+    ],
+    [
+     "tip",
+     "The pattern trick: for each row, think \"how many spaces, how many stars?\" and write it as a formula of `i`. Row 1: 3 spaces + 1 star, row 2: 2 spaces + 3 stars..."
+    ],
+    [
+     "p",
+     "A real use of nested loops: making **pairs**. For example, trying every setting combination for a model (**grid search** in Stage 10 does exactly this)."
+    ],
+    [
+     "code",
+     "python",
+     "for lr in [0.1, 0.01]:\n    for depth in [2, 4]:\n        print(f\"lr={lr}, depth={depth}\")",
+     "lr=0.1, depth=2\nlr=0.1, depth=4\nlr=0.01, depth=2\nlr=0.01, depth=4"
+    ],
+    [
+     "warn",
+     "Nested loops can be slow: 1000 x 1000 = 1 million rounds. That is why in ML we use NumPy (Stage 8) instead of loops on big data."
+    ],
+    [
+     "p",
+     "**Common loop bugs** — learn to spot these and half your debugging is done:"
+    ],
+    [
+     "list",
+     [
+      "**Off-by-one:** you needed 1 to 10, wrote `range(1, 10)`, and 10 got left out. Correct: `range(1, 11)`.",
+      "**Infinite while:** you forgot the update line.",
+      "**Wrong indentation:** the total print went inside the loop, so it printed every round.",
+      "**Accumulator reset inside the loop:** you wrote `total = 0` inside the loop, so it became 0 every time.",
+      "**Changing the loop variable inside:** writing `i = i + 2` in a for loop does nothing useful; the next round still takes the next number from range."
+     ]
+    ],
+    [
+     "code",
+     "python",
+     "# Bug: total = 0 inside the loop\nfor i in range(1, 4):\n    total = 0\n    total += i\nprint(\"Galat:\", total)\n\n# Fix: total = 0 before the loop\ntotal = 0\nfor i in range(1, 4):\n    total += i\nprint(\"Sahi:\", total)",
+     "Galat: 3\nSahi: 6"
+    ],
+    [
+     "tip",
+     "A simple way to debug: put `print(i, total)` inside the loop and see what happens in each round. Professionals do this too."
+    ]
+   ]
+  }
+ ],
+ "teach": [
+  {
+   "say": "In Stage 2 we teach the program to think. To think, you first need a question, and the answer is only True or False.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Question",
+     "True / False",
+     "Decision"
+    ],
+    "dir": "h"
+   },
+   "code": "print(85 > 90)   # False"
+  },
+  {
+   "say": "Two equal signs mean asking, one equal sign means putting. This difference is asked in IQ too.",
+   "sketch": {
+    "k": "compare",
+    "left": {
+     "title": "=",
+     "items": [
+      "Put a value",
+      "x = 5"
+     ]
+    },
+    "right": {
+     "title": "==",
+     "items": [
+      "Is it equal?",
+      "x == 5 -> True"
+     ]
+    }
+   },
+   "code": null
+  },
+  {
+   "say": "and means both are true, or means any one is true, not means the opposite.",
+   "sketch": {
+    "k": "table",
+    "head": [
+     "A",
+     "B",
+     "A and B",
+     "A or B"
+    ],
+    "rows": [
+     [
+      "T",
+      "T",
+      "T",
+      "T"
+     ],
+     [
+      "T",
+      "F",
+      "F",
+      "T"
+     ],
+     [
+      "F",
+      "F",
+      "F",
+      "F"
+     ]
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "Now the decision: after if comes the condition, then a colon. The lines inside go 4 spaces in. If True, the if block runs, otherwise the else block.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "age >= 18?",
+     "Yes: Vote",
+     "No: Wait"
+    ],
+    "dir": "v"
+   },
+   "code": "if age >= 18:\n    print(\"Vote\")\nelse:\n    print(\"Wait\")"
+  },
+  {
+   "say": "For more paths, use elif. Checking goes top to bottom, and the first True condition wins. So the strictest condition goes at the top.",
+   "sketch": {
+    "k": "stack",
+    "items": [
+     ">= 90: A",
+     ">= 80: B",
+     ">= 70: C",
+     "else: F"
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "Now loops. A for loop runs the body for every number in the range. The stop number of range is never included.",
+   "sketch": {
+    "k": "array",
+    "title": "range(1, 6)",
+    "items": [
+     "1",
+     "2",
+     "3",
+     "4",
+     "5"
+    ],
+    "index": true
+   },
+   "code": "for i in range(1, 6):\n    print(i)"
+  },
+  {
+   "say": "range has three parts: start, stop, step. range from 2 to 10 with step 3 gives 2, 5, 8. The next would be 11, which is past 10.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "2",
+     "5",
+     "8",
+     "11? Stop"
+    ],
+    "dir": "h"
+   },
+   "code": null
+  },
+  {
+   "say": "while runs as long as the condition is True. Forget the update line and you get an infinite loop.",
+   "sketch": {
+    "k": "cycle",
+    "steps": [
+     "Check",
+     "Body",
+     "Update"
+    ]
+   },
+   "code": "count = 3\nwhile count > 0:\n    print(count)\n    count -= 1"
+  },
+  {
+   "say": "break stops the whole loop, continue only skips this round. Found a defective cable? break. Want to skip even cables? continue.",
+   "sketch": {
+    "k": "compare",
+    "left": {
+     "title": "break",
+     "items": [
+      "1 2 3 STOP"
+     ]
+    },
+    "right": {
+     "title": "continue",
+     "items": [
+      "1 _ 3 _ 5"
+     ]
+    }
+   },
+   "code": null
+  },
+  {
+   "say": "A loop inside a loop: one round outside, a full cycle inside. That is how patterns and tables are made. Now go practise!",
+   "sketch": {
+    "k": "array",
+    "title": "Star pattern",
+    "items": [
+     "*",
+     "**",
+     "***",
+     "****"
+    ],
+    "index": false
+   },
+   "code": "for i in range(1, 5):\n    print(\"*\" * i)"
+  }
+ ],
+ "practice": [
+  {
+   "q": "Run a loop over the numbers 1 to 50. Find two things: the total of all **even** numbers, and how many numbers are **divisible by 3**. Output:\nEven total: 650\nDivisible by 3: 16",
+   "starter": "even_total = 0\ncount3 = 0\nfor n in range(1, 51):\n    # TODO: if even, add to even_total\n    # TODO: if divisible by 3, increase count3\n    pass\nprint(f\"Even total: {even_total}\")\nprint(f\"Divisible by 3: {count3}\")\n",
+   "expect": "Even total: 650\nDivisible by 3: 16",
+   "hint": "Use two separate `if`s (not elif), because a number like 6 is both even and divisible by 3. For even, use `n % 2 == 0`.",
+   "solution": "even_total = 0\ncount3 = 0\nfor n in range(1, 51):\n    if n % 2 == 0:\n        even_total += n\n    if n % 3 == 0:\n        count3 += 1\nprint(f\"Even total: {even_total}\")\nprint(f\"Divisible by 3: {count3}\")"
+  },
+  {
+   "q": "A model made predictions for 8 emails. Use a loop to find the **accuracy** (how many predictions were right). Output:\nCorrect: 6/8\nAccuracy: 75.0%",
+   "starter": "pred = [1, 0, 1, 1, 0, 1, 0, 0]\nactual = [1, 0, 0, 1, 0, 1, 1, 0]\ncorrect = 0\nfor i in range(len(pred)):\n    # TODO: if pred[i] and actual[i] are equal, increase correct\n    pass\n# TODO: print Correct and Accuracy\n",
+   "expect": "Correct: 6/8\nAccuracy: 75.0%",
+   "hint": "`pred[i]` gives the i-th value. Accuracy = correct / total * 100.",
+   "solution": "pred = [1, 0, 1, 1, 0, 1, 0, 0]\nactual = [1, 0, 0, 1, 0, 1, 1, 0]\ncorrect = 0\nfor i in range(len(pred)):\n    if pred[i] == actual[i]:\n        correct += 1\nprint(f\"Correct: {correct}/{len(pred)}\")\nprint(f\"Accuracy: {correct / len(pred) * 100}%\")"
+  },
+  {
+   "q": "Build **early stopping**: the loss for each epoch is given. As long as the loss is lower than the previous best, print it. As soon as the loss goes up, print \"Early stop\" and `break`. Output:\nEpoch 1: loss 0.9\nEpoch 2: loss 0.7\nEpoch 3: loss 0.55\nEpoch 4: loss 0.5\nEarly stop at epoch 5, best loss 0.5",
+   "starter": "losses = [0.9, 0.7, 0.55, 0.5, 0.52, 0.6, 0.45]\nbest = 999\nfor epoch in range(1, len(losses) + 1):\n    loss = losses[epoch - 1]\n    # TODO: if loss < best, update best and print\n    # TODO: otherwise print the Early stop message and break\n",
+   "expect": "Epoch 1: loss 0.9\nEpoch 2: loss 0.7\nEpoch 3: loss 0.55\nEpoch 4: loss 0.5\nEarly stop at epoch 5, best loss 0.5",
+   "hint": "Put an if/else inside the loop. In the else, `break` after the print. Note: 0.45 will never show, because the break happened first.",
+   "solution": "losses = [0.9, 0.7, 0.55, 0.5, 0.52, 0.6, 0.45]\nbest = 999\nfor epoch in range(1, len(losses) + 1):\n    loss = losses[epoch - 1]\n    if loss < best:\n        best = loss\n        print(f\"Epoch {epoch}: loss {loss}\")\n    else:\n        print(f\"Early stop at epoch {epoch}, best loss {best}\")\n        break"
+  }
+ ],
+ "quiz": [
+  {
+   "q": "What is the output of `print(7 >= 7 and 3 > 5)`?",
+   "o": [
+    "True",
+    "False",
+    "Error",
+    "7"
+   ],
+   "a": 1,
+   "why": "`7 >= 7` is True but `3 > 5` is False. `and` needs both to be True, so the result is False."
+  },
+  {
+   "q": "What does `list(range(2, 10, 3))` give?",
+   "o": [
+    "[2, 5, 8]",
+    "[2, 4, 6, 8]",
+    "[3, 6, 9]",
+    "[2, 5, 8, 11]"
+   ],
+   "a": 0,
+   "why": "Start at 2, step of 3, stop before 10: 2, 5, 8."
+  },
+  {
+   "q": "marks = 95, the first condition is `if marks >= 60:` (Grade D), then `elif marks >= 90:` (Grade A). What is printed?",
+   "o": [
+    "Grade A",
+    "Both",
+    "Grade D",
+    "Nothing"
+   ],
+   "a": 2,
+   "why": "In an elif chain the first True condition wins. 95 >= 60 was True first, so D. The strict condition should be at the top."
+  },
+  {
+   "q": "In `for i in range(5): print(i)`, what is the last number printed?",
+   "o": [
+    "5",
+    "0",
+    "6",
+    "4"
+   ],
+   "a": 3,
+   "why": "range(5) = 0, 1, 2, 3, 4. The stop number is not included."
+  },
+  {
+   "q": "What happens if you forget the update line (`count -= 1`) in a while loop?",
+   "o": [
+    "SyntaxError",
+    "Loop runs once",
+    "Infinite loop",
+    "Loop does not run at all"
+   ],
+   "a": 2,
+   "why": "The condition will never become False, so the loop will never stop."
+  },
+  {
+   "q": "What is the correct difference between `break` and `continue`?",
+   "o": [
+    "break skips a round, continue stops the loop",
+    "break stops the loop, continue only skips a round",
+    "Both are the same",
+    "Both work only in while"
+   ],
+   "a": 1,
+   "why": "break ends the whole loop; continue just leaves the current round and moves to the next. Both work in for and while."
+  },
+  {
+   "q": "Which value counts as **False** in a condition?",
+   "o": [
+    "\"0\"",
+    "[0]",
+    "-1",
+    "\"\""
+   ],
+   "a": 3,
+   "why": "Empty text `\"\"` is falsy. `\"0\"` is non-empty text, `[0]` is a non-empty list, and -1 is non-zero, so all three are truthy."
+  },
+  {
+   "q": "Nested loop: outer `range(3)`, inner `range(4)`. How many times does the inner body run?",
+   "o": [
+    "12",
+    "7",
+    "4",
+    "3"
+   ],
+   "a": 0,
+   "why": "In each outer round, the inner loop runs completely: 3 x 4 = 12."
+  },
+  {
+   "q": "What is true about `if x == 1 or 2:`?",
+   "o": [
+    "True only when x is 1 or 2",
+    "Always True, because 2 is truthy",
+    "SyntaxError",
+    "Always False"
+   ],
+   "a": 1,
+   "why": "Python reads it as `(x == 1) or 2`, and `2` by itself counts as True. Correct: `x == 1 or x == 2`."
+  },
+  {
+   "q": "What does `\"PASS\" if defects == 0 else \"FAIL\"` give when defects = 2?",
+   "o": [
+    "PASS",
+    "Error",
+    "FAIL",
+    "None"
+   ],
+   "a": 2,
+   "why": "Ternary: the condition is False (2 != 0), so the else value FAIL is used."
+  }
+ ],
+ "iq": [
+  {
+   "q": "What is the difference between `==` and `is`?",
+   "a": "`==` compares values (is the content of both the same?). `is` compares identity (are both exactly the same object, at the same place in memory?). For a `None` check we always use `is`: `if x is None:`."
+  },
+  {
+   "q": "What is the role of indentation in Python?",
+   "a": "In Python, indentation itself makes a block; there are no `{ }` like in C/Java. After if, for, while, def comes `:` and the lines inside have the same indent (PEP 8: 4 spaces). Wrong indentation gives an IndentationError, or the logic silently becomes wrong."
+  },
+  {
+   "q": "When do you use a for loop and when a while loop?",
+   "a": "for when the sequence or count is known in advance (items of a list, range(10)). while when the stopping condition is not known in advance, for example until the user gives valid input, or until the loss converges. A for loop has less risk of an infinite loop."
+  },
+  {
+   "q": "Explain the difference between break, continue and pass.",
+   "a": "break stops the loop immediately. continue skips the current iteration and moves to the next. pass does nothing; it is just a placeholder where the syntax needs a statement (like an empty if or function)."
+  },
+  {
+   "q": "When does the else of a loop run?",
+   "a": "The else of a for/while runs only when the loop ends normally, that is, when no break happened. It is useful in search: found it with break, otherwise \"not found\" in the else."
+  },
+  {
+   "q": "What are truthy and falsy values?",
+   "a": "In a condition some values automatically count as False: 0, 0.0, \"\", None, [], {}, (), set(). Everything else is truthy. That is why you can write `if my_list:` to check that a list is not empty."
+  },
+  {
+   "q": "What is short-circuit evaluation?",
+   "a": "With `and`, if the first value is False the second is not even checked; with `or`, if the first is True the second is skipped. This lets you write safe checks: in `if count > 0 and total / count > 5:` you will not get a divide-by-zero error."
+  },
+  {
+   "q": "Write FizzBuzz (1 to 15).",
+   "a": "Check 15 (both) first, then 3, then 5:\n`for i in range(1, 16):\n    if i % 15 == 0: print(\"FizzBuzz\")\n    elif i % 3 == 0: print(\"Fizz\")\n    elif i % 5 == 0: print(\"Buzz\")\n    else: print(i)`\nThis tests whether you understand elif order."
+  },
+  {
+   "q": "What is the time complexity of a nested loop?",
+   "a": "If both loops run n times, the body runs n x n = O(n^2) times. At n = 10,000 that is 100 million operations, very slow. That is why on big data we use vectorized NumPy or a better algorithm (like a set/dict lookup)."
+  },
+  {
+   "q": "Where do loops and conditions show up in ML?",
+   "a": "The training loop (every epoch, every batch), early stopping (break `if val_loss` goes up), deciding the class with a threshold (`1 if prob >= 0.5 else 0`), hyperparameter grid search (nested loops). A decision tree model is also nested if-else on the inside."
+  },
+  {
+   "q": "Does Python have switch-case?",
+   "a": "Older Python did not have it; people used if/elif/else or a dict mapping. Since Python 3.10 there is `match`/`case` (structural pattern matching), which works like switch and can also match patterns."
+  }
+ ]
+}

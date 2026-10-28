@@ -1,0 +1,1309 @@
+{
+ "n": 10,
+ "id": "aiml-10",
+ "title": "Machine Learning with scikit-learn",
+ "goal": "ML का मतलब समझकर scikit-learn से regression, classification और clustering models बनाओगे, उन्हें सही metrics से judge करोगे, और overfitting पकड़कर GridSearchCV से tune कर पाओगे।",
+ "lessons": [
+  {
+   "title": "ML क्या है — rules बनाम data से सीखना",
+   "blocks": [
+    [
+     "p",
+     "अब तक हमने data **तैयार** किया (NumPy, Pandas, graphs)। अब असली काम: **model** बनाना जो data देखकर खुद **pattern** सीखे और नए data पर **predict** करे। यही **Machine Learning (ML)** है।"
+    ],
+    [
+     "p",
+     "Normal programming में **तुम rules लिखते हो**: `if marks >= 40: pass`। ML में **तुम data देते हो** (पुराने marks + pass/fail), और model **rules खुद ढूँढता है**।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "Normal code बनाम ML",
+      "left": {
+       "title": "Normal code",
+       "items": [
+        "Rules + Data",
+        "→ Answer",
+        "Rules इंसान लिखे",
+        "नया case? Code बदलो"
+       ]
+      },
+      "right": {
+       "title": "Machine Learning",
+       "items": [
+        "Data + Answers",
+        "→ Rules (model)",
+        "Model खुद सीखे",
+        "नया data? Retrain"
+       ]
+      }
+     }
+    ],
+    [
+     "analogy",
+     "नया helper factory में आया। तुम उसे 1000 rules की किताब नहीं देते। तुम उसे 100 cables दिखाते हो: \"यह सही, यह reject\"। कुछ दिन में वह खुद पहचान लेता है। Model भी ऐसे ही **examples से** सीखता है।"
+    ],
+    [
+     "p",
+     "**ML के 3 type:**"
+    ],
+    [
+     "sketch",
+     {
+      "k": "tree",
+      "title": "ML के प्रकार",
+      "root": {
+       "label": "Machine Learning",
+       "children": [
+        {
+         "label": "Supervised",
+         "children": [
+          {
+           "label": "Regression",
+           "children": []
+          },
+          {
+           "label": "Classification",
+           "children": []
+          }
+         ]
+        },
+        {
+         "label": "Unsupervised",
+         "children": [
+          {
+           "label": "Clustering",
+           "children": []
+          }
+         ]
+        },
+        {
+         "label": "Reinforcement",
+         "children": [
+          {
+           "label": "Reward से सीखो",
+           "children": []
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ],
+    [
+     "list",
+     [
+      "**Supervised** = data के साथ **सही जवाब (label)** भी दिया। जैसे teacher answer key के साथ पढ़ाए। Example: घर का size → price, email → spam/not spam।",
+      "**Unsupervised** = label **नहीं** दिया। Model खुद groups ढूँढे। Example: customers को उनकी खरीदारी के हिसाब से 3 groups में बाँटो।",
+      "**Reinforcement** = model (agent) कुछ **करता** है, और **reward या सज़ा** मिलती है। Example: game खेलने वाला AI, robot चलना सीखे।"
+     ]
+    ],
+    [
+     "p",
+     "Supervised के 2 काम: **Regression** = number predict करो (price, temperature)। **Classification** = category predict करो (spam/not spam, pass/fail, कौन सा फूल)।"
+    ],
+    [
+     "p",
+     "**Features (X)** = input columns जिनसे predict करते हो। **Label / Target (y)** = जो predict करना है। Convention: `X` capital (table, 2D), `y` small (एक column, 1D)।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Features और Label",
+      "head": [
+       "size (X)",
+       "rooms (X)",
+       "price (y)"
+      ],
+      "rows": [
+       [
+        "500",
+        "1",
+        "25"
+       ],
+       [
+        "800",
+        "2",
+        "40"
+       ],
+       [
+        "1200",
+        "3",
+        "62"
+       ]
+      ]
+     }
+    ],
+    [
+     "p",
+     "**Train/Test split:** सारा data model को पढ़ाने में मत लगाओ। ~80% से model **सीखता** है (train), ~20% **छुपाकर** रखो और बाद में उस पर **test** करो। इससे पता चलता है model नए data पर कैसा चलेगा।"
+    ],
+    [
+     "analogy",
+     "Exam के सवाल अगर पढ़ाई में ही दिखा दिए, तो 100 नंबर आएँगे लेकिन समझ zero। Test data = **नया exam paper** जो model ने पहले कभी नहीं देखा।"
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\nfrom sklearn.model_selection import train_test_split\n\nX = np.arange(20).reshape(10, 2)   # 10 rows, 2 features\ny = np.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 1])\n\nX_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.2, random_state=42)\n\nprint(X_train.shape, X_test.shape)\nprint(y_test)",
+     "(8, 2) (2, 2)\n[0 1]"
+    ],
+    [
+     "tip",
+     "ध्यान से देखो: `train_test_split` **4 चीज़ें** लौटाता है, order याद रखो: `X_train, X_test, y_train, y_test`। `random_state=42` = हर बार **same split** (result repeat हो सके)। Classification में `stratify=y` लगाओ तो class का ratio दोनों हिस्सों में same रहता है।"
+    ],
+    [
+     "p",
+     "scikit-learn की सबसे बड़ी खूबी: **हर model की API same है**। बस 3 कदम:"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "हर sklearn model",
+      "steps": [
+       "model = Model()",
+       "model.fit(X, y)",
+       "model.predict(X_new)"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "warn",
+     "आम गलती: `y` को 2D बना देना या `X` को 1D देना। sklearn को `X` हमेशा 2D चाहिए। एक ही feature हो तो भी `X.reshape(-1, 1)` या `df[[\"size\"]]` (double bracket) use करो।"
+    ]
+   ]
+  },
+  {
+   "title": "Linear Regression — number predict करो",
+   "blocks": [
+    [
+     "p",
+     "**Linear Regression** = data के बीच से एक **सीधी line** खींचो जो सबसे कम गलती करे। Line का formula: `y = m*x + c` (m = slope / weight, c = intercept / bias)।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "chart",
+      "title": "Size बनाम Price",
+      "type": "scatter",
+      "points": [
+       [
+        5,
+        26
+       ],
+       [
+        8,
+        39
+       ],
+       [
+        10,
+        52
+       ],
+       [
+        12,
+        59
+       ],
+       [
+        15,
+        77
+       ]
+      ],
+      "line": [
+       [
+        4,
+        21
+       ],
+       [
+        16,
+        81
+       ]
+      ],
+      "xl": "size (100 sqft)",
+      "yl": "price (लाख)"
+     }
+    ],
+    [
+     "analogy",
+     "चायवाला देखता है: 10 cup पर 100 रुपये, 20 cup पर 200। Line समझ आ गई: हर cup = 10 रुपये। अब 35 cup का bill बिना गिने बता देगा। Model भी points देखकर **slope** सीखता है।"
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\nfrom sklearn.linear_model import LinearRegression\n\n# घर का size (100 sqft में) -> price (लाख)\nX = np.array([[5], [8], [10], [12], [15]])\ny = np.array([26, 39, 52, 59, 77])\n\nmodel = LinearRegression()\nmodel.fit(X, y)\n\nprint(\"slope m:\", round(model.coef_[0], 2))\nprint(\"intercept c:\", round(model.intercept_, 2))\nprint(\"20 ka price:\", round(model.predict([[20]])[0], 1))",
+     "slope m: 5.09\nintercept c: -0.26\n20 ka price: 101.5"
+    ],
+    [
+     "p",
+     "Model ने खुद सीखा: हर 100 sqft बढ़ने पर price लगभग **5 लाख** बढ़ता है। `coef_` और `intercept_` के आखिर में `_` का मतलब: यह value **fit के बाद** सीखी गई है।"
+    ],
+    [
+     "p",
+     "Line कैसे चुनी? हर point की गलती (actual − predicted) निकालो, **square** करो, सबको जोड़ो। जो line यह total सबसे **कम** करे, वही best। इसे **Least Squares** कहते हैं।"
+    ],
+    [
+     "p",
+     "**Regression metrics** — model कितना अच्छा है:"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Regression metrics",
+      "head": [
+       "Metric",
+       "मतलब",
+       "अच्छा"
+      ],
+      "rows": [
+       [
+        "MAE",
+        "avg |गलती|",
+        "कम"
+       ],
+       [
+        "MSE",
+        "avg गलती²",
+        "कम"
+       ],
+       [
+        "RMSE",
+        "√MSE, y की unit",
+        "कम"
+       ],
+       [
+        "R²",
+        "कितना समझाया",
+        "1 के पास"
+       ]
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\nfrom sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score\n\ny_true = np.array([30, 45, 50, 65])\ny_pred = np.array([32, 40, 53, 66])\n\nmae = mean_absolute_error(y_true, y_pred)\nmse = mean_squared_error(y_true, y_pred)\nrmse = np.sqrt(mse)\nr2 = r2_score(y_true, y_pred)\nprint(\"MAE:\", mae)\nprint(\"MSE:\", mse)\nprint(\"RMSE:\", round(rmse, 2))\nprint(\"R2:\", round(r2, 3))",
+     "MAE: 2.75\nMSE: 9.75\nRMSE: 3.12\nR2: 0.938"
+    ],
+    [
+     "list",
+     [
+      "**MAE** — गलतियों का सीधा average। समझने में सबसे आसान: \"avg 2.75 लाख की गलती\"।",
+      "**MSE** — गलती को square करता है, तो **बड़ी गलती को ज़्यादा सज़ा**। लेकिन unit भी square हो जाती है (lakh²)।",
+      "**RMSE** — MSE का square root, वापस **y की unit** में। बड़ी गलती पर sensitive।",
+      "**R²** — 1 = perfect, 0 = model सिर्फ average बोल रहा है, negative = average से भी बेकार।"
+     ]
+    ],
+    [
+     "tip",
+     "ध्यान से देखो: अगर data में कुछ **outliers** (बहुत अजीब values) हैं और उनकी गलती बहुत भारी पड़ती है तो RMSE देखो; अगर सब गलती बराबर मायने रखती है तो MAE।"
+    ],
+    [
+     "p",
+     "एक से ज़्यादा features हों तो भी same code: `X` में बस ज़्यादा columns। इसे **Multiple Linear Regression** कहते हैं: `price = w1*size + w2*rooms + w3*age + c`।"
+    ],
+    [
+     "warn",
+     "आम गलती: Linear Regression को category (yes/no) predict करने में लगाना। वह number देता है जैसे 0.7 या 1.4। Category के लिए **classification** model चाहिए (अगला lesson)।"
+    ]
+   ]
+  },
+  {
+   "title": "Classification models — LogReg, KNN, Tree, Forest",
+   "blocks": [
+    [
+     "p",
+     "Classification = **category** predict करना। हम sklearn का built-in **Iris** dataset लेंगे: 150 फूल, 4 features (petal/sepal की लंबाई-चौड़ाई), 3 types (setosa, versicolor, virginica)।"
+    ],
+    [
+     "code",
+     "python",
+     "from sklearn.datasets import load_iris\nfrom sklearn.model_selection import train_test_split\n\nX, y = load_iris(return_X_y=True)\nprint(X.shape, y.shape)\nprint(\"classes:\", sorted(set(y.tolist())))\n\nX_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.2, random_state=42, stratify=y)\nprint(len(X_train), len(X_test))",
+     "(150, 4) (150,)\nclasses: [0, 1, 2]\n120 30"
+    ],
+    [
+     "p",
+     "**1. Logistic Regression** — नाम में regression है लेकिन काम **classification**। Line का output **sigmoid** से गुज़रकर 0 से 1 के बीच **probability** बन जाता है। 0.5 से ऊपर = class 1।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "chart",
+      "title": "Sigmoid: score → prob",
+      "type": "line",
+      "points": [
+       [
+        -6,
+        0.0
+       ],
+       [
+        -4,
+        0.02
+       ],
+       [
+        -2,
+        0.12
+       ],
+       [
+        0,
+        0.5
+       ],
+       [
+        2,
+        0.88
+       ],
+       [
+        4,
+        0.98
+       ],
+       [
+        6,
+        1.0
+       ]
+      ],
+      "xl": "score",
+      "yl": "probability"
+     }
+    ],
+    [
+     "p",
+     "**2. KNN (K-Nearest Neighbors)** — नए point के **सबसे पास के K पड़ोसी** देखो, जो class ज़्यादा, वही जवाब। कोई training नहीं, बस याद रखना।"
+    ],
+    [
+     "analogy",
+     "नए मोहल्ले में घर लिया। जानना है यहाँ लोग कौन सी team support करते हैं? 5 सबसे पास के पड़ोसी पूछो। 4 बोले CSK, तो तुम भी CSK area में हो। यही KNN है (K = 5)।"
+    ],
+    [
+     "p",
+     "**3. Decision Tree** — हाँ/ना सवालों की **chain**: \"petal length < 2.5?\" → हाँ → setosa। इंसान भी पढ़ सकता है कि यह decision क्यों लिया।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "tree",
+      "title": "Decision Tree",
+      "root": {
+       "label": "petal len < 2.5?",
+       "children": [
+        {
+         "label": "हाँ: setosa",
+         "children": []
+        },
+        {
+         "label": "ना: width < 1.8?",
+         "children": [
+          {
+           "label": "हाँ: versicolor",
+           "children": []
+          },
+          {
+           "label": "ना: virginica",
+           "children": []
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ],
+    [
+     "p",
+     "**4. Random Forest** — **बहुत सारे decision trees** (हर एक थोड़े अलग data पर), सब vote करते हैं, majority जीतेगी। एक tree गलती करे तो बाकी सँभाल लेते हैं।"
+    ],
+    [
+     "analogy",
+     "एक doctor की राय बनाम 100 doctors की voting। 100 का फ़ैसला ज़्यादा भरोसेमंद। इसे **ensemble** कहते हैं।"
+    ],
+    [
+     "code",
+     "python",
+     "from sklearn.datasets import load_iris\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.linear_model import LogisticRegression\nfrom sklearn.neighbors import KNeighborsClassifier\nfrom sklearn.tree import DecisionTreeClassifier\nfrom sklearn.ensemble import RandomForestClassifier\n\nX, y = load_iris(return_X_y=True)\nX_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.2, random_state=42, stratify=y)\n\nmodels = {\n    \"LogReg\": LogisticRegression(max_iter=1000),\n    \"KNN\": KNeighborsClassifier(n_neighbors=5),\n    \"Tree\": DecisionTreeClassifier(random_state=42),\n    \"Forest\": RandomForestClassifier(n_estimators=100, random_state=42),\n}\nfor name, m in models.items():\n    m.fit(X_train, y_train)\n    print(f\"{name}: {m.score(X_test, y_test):.3f}\")",
+     "LogReg: 0.967\nKNN: 1.000\nTree: 0.933\nForest: 0.900"
+    ],
+    [
+     "tip",
+     "ध्यान से देखो: 4 अलग models, लेकिन code **बिल्कुल same**: `fit` और `score`। सिर्फ model का नाम बदला। यही scikit-learn की beauty है। `score()` classification में **accuracy** देता है।"
+    ],
+    [
+     "warn",
+     "आम गलती: इस एक result से 'KNN सबसे best' मान लेना। Test में सिर्फ 30 फूल हैं, 1 गलती = 3.3% का फ़र्क। Split बदलो तो ranking बदल सकती है। इसलिए models को **cross-validation** (Lesson 6) से compare करते हैं।"
+    ],
+    [
+     "code",
+     "python",
+     "from sklearn.datasets import load_iris\nfrom sklearn.linear_model import LogisticRegression\n\nX, y = load_iris(return_X_y=True)\nmodel = LogisticRegression(max_iter=1000).fit(X, y)\n\nflower = [[5.0, 3.4, 1.5, 0.2]]\nprint(\"class:\", model.predict(flower)[0])\nprint(\"probs:\", model.predict_proba(flower).round(3)[0].tolist())",
+     "class: 0\nprobs: [0.976, 0.024, 0.0]"
+    ],
+    [
+     "p",
+     "`predict` = सीधा class। `predict_proba` = हर class की **probability** (सब मिलाकर 1)। Probability बहुत काम की है: जैसे \"90% से ऊपर sure हो तभी auto-approve करो\"।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "कब कौन सा model",
+      "head": [
+       "Model",
+       "खूबी",
+       "कमी"
+      ],
+      "rows": [
+       [
+        "LogReg",
+        "तेज़, simple",
+        "सिर्फ सीधी line"
+       ],
+       [
+        "KNN",
+        "कोई training नहीं",
+        "बड़े data पर slow"
+       ],
+       [
+        "Tree",
+        "समझ आता है",
+        "जल्दी overfit"
+       ],
+       [
+        "Forest",
+        "strong, stable",
+        "slow, कम समझाए"
+       ]
+      ]
+     }
+    ],
+    [
+     "warn",
+     "आम गलती: `LogisticRegression()` को बिना `max_iter` के चलाना और `ConvergenceWarning` आना। `max_iter=1000` दो, या features को scale करो (Lesson 5)।"
+    ]
+   ]
+  },
+  {
+   "title": "Classification metrics — accuracy का धोखा",
+   "blocks": [
+    [
+     "p",
+     "**Accuracy** = कितने सही / total। Simple है, लेकिन **धोखा** दे सकती है।"
+    ],
+    [
+     "analogy",
+     "100 emails में से सिर्फ 1 spam है। एक बेवकूफ़ model हर email को \"not spam\" बोल दे। Accuracy = 99%! लेकिन वह एक भी spam नहीं पकड़ता। बेकार model, अच्छा number। इसलिए **class imbalance** में accuracy पर भरोसा मत करो।"
+    ],
+    [
+     "p",
+     "**Confusion Matrix** = 2x2 table जो बताता है model **कहाँ** सही और **कहाँ** गलत था।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Confusion Matrix",
+      "head": [
+       "",
+       "Pred: No",
+       "Pred: Yes"
+      ],
+      "rows": [
+       [
+        "Actual: No",
+        "TN",
+        "FP (false alarm)"
+       ],
+       [
+        "Actual: Yes",
+        "FN (miss)",
+        "TP"
+       ]
+      ]
+     }
+    ],
+    [
+     "list",
+     [
+      "**TP** (True Positive) = था Yes, बोला Yes। सही।",
+      "**TN** (True Negative) = था No, बोला No। सही।",
+      "**FP** (False Positive) = था No, बोला Yes। **False alarm**।",
+      "**FN** (False Negative) = था Yes, बोला No। **Miss** कर दिया।"
+     ]
+    ],
+    [
+     "p",
+     "अब तीन ज़रूरी metrics:"
+    ],
+    [
+     "list",
+     [
+      "**Precision** = TP / (TP + FP)। \"जितनों को Yes बोला, उनमें से कितने सच में Yes?\" कम false alarm चाहिए तो precision देखो। Example: spam filter (ज़रूरी email spam में न जाए)।",
+      "**Recall** = TP / (TP + FN)। \"जितने असली Yes थे, उनमें से कितने पकड़े?\" कोई miss न हो तो recall देखो। Example: cancer detection, fraud।",
+      "**F1** = 2·P·R / (P + R)। Precision और Recall का **balance**। जब दोनों ज़रूरी हों।"
+     ]
+    ],
+    [
+     "code",
+     "python",
+     "from sklearn.metrics import confusion_matrix, accuracy_score\nfrom sklearn.metrics import precision_score, recall_score, f1_score\n\ny_true = [1, 0, 1, 1, 0, 0, 1, 0, 1, 0]\ny_pred = [1, 0, 0, 1, 0, 1, 1, 0, 0, 0]\n\nprint(confusion_matrix(y_true, y_pred))\nprint(\"accuracy:\", accuracy_score(y_true, y_pred))\nprint(\"precision:\", precision_score(y_true, y_pred))\nprint(\"recall:\", recall_score(y_true, y_pred))\nprint(\"f1:\", round(f1_score(y_true, y_pred), 3))",
+     "[[4 1]\n [2 3]]\naccuracy: 0.7\nprecision: 0.75\nrecall: 0.6\nf1: 0.667"
+    ],
+    [
+     "p",
+     "sklearn का matrix layout: ऊपर की row = actual 0 → `[TN FP]`, नीचे की row = actual 1 → `[FN TP]`। यहाँ TN=4, FP=1, FN=2, TP=3। Precision = 3/4 = 0.75, Recall = 3/5 = 0.6।"
+    ],
+    [
+     "tip",
+     "ध्यान से देखो: precision और recall में **रस्साकशी (tug-of-war)** है। Threshold नीचे करो (0.5 → 0.3) तो ज़्यादा Yes बोलोगे: recall बढ़ेगा, precision गिरेगा। Business तय करता है कौन सी गलती ज़्यादा महँगी है।"
+    ],
+    [
+     "p",
+     "**ROC-AUC** — model की **ranking** कितनी अच्छी है। एक random Yes और एक random No लो; AUC = probability कि model Yes वाले को **ज़्यादा score** देगा। 1.0 = perfect, 0.5 = सिक्का उछालना।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "chart",
+      "title": "ROC curve",
+      "type": "line",
+      "points": [
+       [
+        0,
+        0
+       ],
+       [
+        0.1,
+        0.6
+       ],
+       [
+        0.2,
+        0.8
+       ],
+       [
+        0.4,
+        0.92
+       ],
+       [
+        1,
+        1
+       ]
+      ],
+      "line": [
+       [
+        0,
+        0
+       ],
+       [
+        1,
+        1
+       ]
+      ],
+      "xl": "False Pos Rate",
+      "yl": "True Pos Rate"
+     }
+    ],
+    [
+     "code",
+     "python",
+     "from sklearn.datasets import load_breast_cancer\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.ensemble import RandomForestClassifier\nfrom sklearn.metrics import roc_auc_score, classification_report\n\nX, y = load_breast_cancer(return_X_y=True)\nX_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.25, random_state=0, stratify=y)\n\nmodel = RandomForestClassifier(n_estimators=100, random_state=0)\nmodel.fit(X_train, y_train)\nprob = model.predict_proba(X_test)[:, 1]   # class 1 की probability\nprint(\"ROC-AUC:\", round(roc_auc_score(y_test, prob), 3))",
+     "ROC-AUC: 0.977"
+    ],
+    [
+     "warn",
+     "आम गलती: `roc_auc_score` में `predict()` का 0/1 output देना। AUC को **probability / score** चाहिए: `predict_proba(X)[:, 1]`।"
+    ],
+    [
+     "p",
+     "`classification_report(y_test, y_pred)` एक shot में हर class का precision, recall, F1 और support (कितने samples) print कर देता है। Real project में यही सबसे पहले देखते हैं।"
+    ]
+   ]
+  },
+  {
+   "title": "Data तैयारी: scaling, encoding, pipeline + k-means",
+   "blocks": [
+    [
+     "p",
+     "Model को data **साफ़ और number** में चाहिए। दो बड़े काम: **scaling** (सब features एक जैसी range में) और **encoding** (text → number)।"
+    ],
+    [
+     "p",
+     "**Feature scaling क्यों?** Salary 50000 और age 25। KNN distance निकालेगा तो salary का फ़र्क ही सब कुछ तय करेगा, age की कोई औकात नहीं। Scaling दोनों को बराबर का मौका देती है।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "2 scalers",
+      "left": {
+       "title": "StandardScaler",
+       "items": [
+        "(x - mean) / std",
+        "mean 0, std 1",
+        "ज़्यादा use होता है"
+       ]
+      },
+      "right": {
+       "title": "MinMaxScaler",
+       "items": [
+        "(x - min)/(max - min)",
+        "range 0 से 1",
+        "images, NN में"
+       ]
+      }
+     }
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\nfrom sklearn.preprocessing import StandardScaler\n\nX_train = np.array([[25, 30000], [35, 50000], [45, 70000]])\nX_test = np.array([[30, 40000]])\n\nscaler = StandardScaler()\nX_train_s = scaler.fit_transform(X_train)   # train पर fit + transform\nX_test_s = scaler.transform(X_test)         # test पर सिर्फ transform\nprint(X_train_s.round(2))\nprint(X_test_s.round(2))",
+     "[[-1.22 -1.22]\n [ 0.    0.  ]\n [ 1.22  1.22]]\n[[-0.61 -0.61]]"
+    ],
+    [
+     "warn",
+     "आम गलती (IQ में reject करवा देगी): test data पर `fit` या `fit_transform` करना। इससे test की जानकारी training में घुस जाती है = **data leakage** = cheating। Rule: **fit सिर्फ train पर**, test पर सिर्फ `transform`।"
+    ],
+    [
+     "p",
+     "**Encoding:** model `\"Delhi\"` नहीं समझता। **OneHotEncoder** हर category का अलग 0/1 column बनाता है। Order वाली category (small < medium < large) हो तो **OrdinalEncoder**।"
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\nfrom sklearn.preprocessing import OneHotEncoder\n\ncity = np.array([[\"Delhi\"], [\"Bhiwadi\"], [\"Delhi\"], [\"Jaipur\"]])\nenc = OneHotEncoder()\nout = enc.fit_transform(city).toarray()\nprint(enc.categories_[0].tolist())\nprint(out.astype(int))",
+     "['Bhiwadi', 'Delhi', 'Jaipur']\n[[0 1 0]\n [1 0 0]\n [0 1 0]\n [0 0 1]]"
+    ],
+    [
+     "tip",
+     "ध्यान से देखो: OneHot में Delhi=1, Jaipur=2 जैसे number क्यों नहीं दिए? क्योंकि तब model सोचेगा Jaipur \"Delhi का double\" है। Category का कोई order नहीं, इसलिए अलग-अलग 0/1 column।"
+    ],
+    [
+     "p",
+     "**Pipeline** = सारे steps (scale → model) एक डिब्बे में। `fit` करो तो हर step सही order में चलता है, और leakage का डर खत्म।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Pipeline",
+      "steps": [
+       "Raw X",
+       "Scaler",
+       "Model",
+       "Prediction"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "code",
+     "python",
+     "from sklearn.datasets import load_iris\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.neighbors import KNeighborsClassifier\n\nX, y = load_iris(return_X_y=True)\nX_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.2, random_state=42, stratify=y)\n\npipe = Pipeline([\n    (\"scale\", StandardScaler()),\n    (\"knn\", KNeighborsClassifier(n_neighbors=5)),\n])\npipe.fit(X_train, y_train)\nprint(\"test accuracy:\", round(pipe.score(X_test, y_test), 3))",
+     "test accuracy: 0.933"
+    ],
+    [
+     "tip",
+     "ध्यान से देखो: Iris के सारे features पहले से same unit (cm) और मिलती-जुलती range में हैं, इसलिए यहाँ scaling से score नहीं बढ़ा। Salary + age जैसे data में (Lesson का पहला example) scaling KNN का result पूरा बदल देती है। Pipeline का असली फ़ायदा: leakage से बचाव और साफ़ code।"
+    ],
+    [
+     "p",
+     "असली table में number और text दोनों columns होते हैं। तब `ColumnTransformer` use करते हैं: number columns पर `StandardScaler`, text columns पर `OneHotEncoder`, फिर model। सब एक ही Pipeline में।"
+    ],
+    [
+     "p",
+     "**K-Means Clustering (unsupervised):** label नहीं है, फिर भी groups ढूँढो। तुम K बताओ (कितने groups), algorithm K centre रखता है, हर point सबसे पास वाले centre को जाता है, centre group के बीच में खिसकता है, repeat।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "cycle",
+      "title": "K-Means loop",
+      "steps": [
+       "K centre रखो",
+       "Point → पास का centre",
+       "Centre = group का mean",
+       "बदला? Repeat"
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\nfrom sklearn.cluster import KMeans\n\n# customers: [महीने की visit, खर्चा (हज़ार)]\nX = np.array([[1, 2], [2, 1], [1, 1],\n              [8, 9], [9, 8], [8, 8]])\nkm = KMeans(n_clusters=2, n_init=10, random_state=0)\nlabels = km.fit_predict(X)\nprint(labels.tolist())\nprint(km.cluster_centers_.round(2).tolist())",
+     "[1, 1, 1, 0, 0, 0]\n[[8.33, 8.33], [1.33, 1.33]]"
+    ],
+    [
+     "p",
+     "Model ने खुद 2 group बना दिए: कम आने वाले छोटे ग्राहक और रोज़ आने वाले बड़े ग्राहक। Group का number (0 या 1) बस नाम है, उसका कोई मतलब नहीं। सही K चुनने के लिए **elbow method** (inertia vs K) या **silhouette score** देखते हैं।"
+    ]
+   ]
+  },
+  {
+   "title": "Overfitting, Cross-Validation और GridSearchCV",
+   "blocks": [
+    [
+     "p",
+     "Model बना लिया। अब सबसे बड़ा सवाल: क्या यह **नए data** पर भी चलेगा?"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Train बनाम Test score",
+      "head": [
+       "Train",
+       "Test",
+       "मतलब"
+      ],
+      "rows": [
+       [
+        "99%",
+        "70%",
+        "Overfitting"
+       ],
+       [
+        "55%",
+        "52%",
+        "Underfitting"
+       ],
+       [
+        "92%",
+        "90%",
+        "Good fit"
+       ]
+      ]
+     }
+    ],
+    [
+     "list",
+     [
+      "**Overfitting** = model ने **रट्टा** मार लिया। Training data perfect, नया data fail। जैसे student जिसने सिर्फ पिछले साल का paper याद किया।",
+      "**Underfitting** = model ने कुछ **सीखा ही नहीं**। दोनों जगह खराब। जैसे सीधी line से टेढ़ा pattern समझाना।",
+      "**Good fit** = दोनों score अच्छे और **पास-पास**।"
+     ]
+    ],
+    [
+     "code",
+     "python",
+     "from sklearn.datasets import load_breast_cancer\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.tree import DecisionTreeClassifier\n\nX, y = load_breast_cancer(return_X_y=True)\nX_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.3, random_state=1, stratify=y)\n\nfor depth in [1, 3, None]:\n    t = DecisionTreeClassifier(max_depth=depth, random_state=1).fit(X_train, y_train)\n    print(f\"depth={depth}: train={t.score(X_train, y_train):.3f} test={t.score(X_test, y_test):.3f}\")",
+     "depth=1: train=0.922 test=0.906\ndepth=3: train=0.970 test=0.953\ndepth=None: train=1.000 test=0.942"
+    ],
+    [
+     "p",
+     "`max_depth=None` (कोई limit नहीं) पर train score **1.000** = पूरा रट्टा, लेकिन test `depth=3` से कम। `depth=1` = इतना simple कि दोनों score नीचे (underfit की तरफ़)। `depth=3` = sweet spot। Depth limit करना = model को simple रखना = overfitting का इलाज।"
+    ],
+    [
+     "p",
+     "**Bias-Variance tradeoff:** **Bias** = model बहुत सीधा, गलत सोच (underfit)। **Variance** = model बहुत नखरेबाज़, data का हर noise पकड़ लेता है (overfit)। दोनों के बीच का sweet spot ढूँढना है।"
+    ],
+    [
+     "analogy",
+     "Darts: high bias = सारे तीर एक जगह लेकिन centre से दूर। High variance = तीर इधर-उधर बिखरे। अच्छा model = तीर centre के पास और एक साथ।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "इलाज",
+      "left": {
+       "title": "Overfit का इलाज",
+       "items": [
+        "ज़्यादा data",
+        "simple model",
+        "regularization",
+        "max_depth कम",
+        "कम features"
+       ]
+      },
+      "right": {
+       "title": "Underfit का इलाज",
+       "items": [
+        "complex model",
+        "नए features",
+        "regularization कम",
+        "ज़्यादा training"
+       ]
+      }
+     }
+    ],
+    [
+     "p",
+     "**Cross-Validation (CV):** एक ही split में **luck** का role होता है। 5-fold CV: data के 5 हिस्से करो, 5 बार train/test करो (हर बार अलग हिस्सा test), फिर average लो। ज़्यादा भरोसेमंद score।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "5-fold CV",
+      "head": [
+       "Round",
+       "Test fold",
+       "Train folds"
+      ],
+      "rows": [
+       [
+        "1",
+        "F1",
+        "F2-F5"
+       ],
+       [
+        "2",
+        "F2",
+        "F1,F3-F5"
+       ],
+       [
+        "3",
+        "F3",
+        "बाकी 4"
+       ],
+       [
+        "4",
+        "F4",
+        "बाकी 4"
+       ],
+       [
+        "5",
+        "F5",
+        "F1-F4"
+       ]
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "from sklearn.datasets import load_iris\nfrom sklearn.model_selection import cross_val_score\nfrom sklearn.ensemble import RandomForestClassifier\n\nX, y = load_iris(return_X_y=True)\nmodel = RandomForestClassifier(n_estimators=50, random_state=42)\nscores = cross_val_score(model, X, y, cv=5)\nprint(scores.round(3).tolist())\nprint(f\"mean={scores.mean():.3f} std={scores.std():.3f}\")",
+     "[0.967, 0.967, 0.933, 0.967, 1.0]\nmean=0.967 std=0.021"
+    ],
+    [
+     "p",
+     "**Hyperparameter** = वह setting जो **तुम** model को देते हो, model खुद नहीं सीखता: `max_depth`, `n_neighbors`, `n_estimators`। (Weights / coef_ = **parameters**, model सीखता है।)"
+    ],
+    [
+     "p",
+     "**GridSearchCV** = तुम्हारी दी हुई हर combination try करता है, हर एक का CV score निकालता है, और best बता देता है।"
+    ],
+    [
+     "code",
+     "python",
+     "from sklearn.datasets import load_iris\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import KNeighborsClassifier\n\nX, y = load_iris(return_X_y=True)\nparams = {\"n_neighbors\": [1, 3, 5, 7, 9], \"weights\": [\"uniform\", \"distance\"]}\ngrid = GridSearchCV(KNeighborsClassifier(), params, cv=5)\ngrid.fit(X, y)\nprint(\"best params:\", grid.best_params_)\nprint(\"best CV score:\", round(grid.best_score_, 3))",
+     "best params: {'n_neighbors': 7, 'weights': 'uniform'}\nbest CV score: 0.98"
+    ],
+    [
+     "tip",
+     "ध्यान से देखो: 5 x 2 = 10 combinations, हर एक 5-fold = **50 trainings**। Combinations बहुत ज़्यादा हों तो `RandomizedSearchCV` लो (random कुछ combos try करता है, fast)। `n_jobs=-1` = सारे CPU cores। `grid.best_estimator_` = best trained model, सीधा use करो।"
+    ],
+    [
+     "warn",
+     "आम गलती: GridSearch का best score देखकर उसी data पर final result report करना। सही तरीका: train पर GridSearch, फिर **अलग रखे test set** पर final एक बार check।"
+    ]
+   ]
+  }
+ ],
+ "teach": [
+  {
+   "say": "Normal programming में हम rules लिखते थे। Machine Learning में हम data और सही जवाब देते हैं, और model rules खुद ढूँढता है।",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Data + जवाब",
+     "Model सीखे",
+     "नए पर predict"
+    ],
+    "dir": "h"
+   },
+   "code": null
+  },
+  {
+   "say": "ML के तीन type। Supervised में answer key मिलती है, unsupervised में नहीं, और reinforcement में reward या सज़ा।",
+   "sketch": {
+    "k": "tree",
+    "root": {
+     "label": "ML",
+     "children": [
+      {
+       "label": "Supervised",
+       "children": []
+      },
+      {
+       "label": "Unsupervised",
+       "children": []
+      },
+      {
+       "label": "Reinforcement",
+       "children": []
+      }
+     ]
+    }
+   },
+   "code": null
+  },
+  {
+   "say": "Table के input columns features हैं, capital X। जो predict करना है वह label है, small y। फिर 80 percent से पढ़ाओ, 20 percent छुपाकर test करो।",
+   "sketch": {
+    "k": "table",
+    "head": [
+     "size (X)",
+     "price (y)"
+    ],
+    "rows": [
+     [
+      "500",
+      "25"
+     ],
+     [
+      "800",
+      "40"
+     ],
+     [
+      "1200",
+      "62"
+     ]
+    ]
+   },
+   "code": "X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)"
+  },
+  {
+   "say": "Number predict करना हो तो Linear Regression। Points के बीच से ऐसी सीधी line जो सबसे कम गलती करे।",
+   "sketch": {
+    "k": "chart",
+    "type": "scatter",
+    "points": [
+     [
+      5,
+      26
+     ],
+     [
+      8,
+      39
+     ],
+     [
+      10,
+      52
+     ],
+     [
+      12,
+      59
+     ],
+     [
+      15,
+      77
+     ]
+    ],
+    "line": [
+     [
+      4,
+      21
+     ],
+     [
+      16,
+      81
+     ]
+    ],
+    "xl": "size",
+    "yl": "price"
+   },
+   "code": "model = LinearRegression().fit(X, y)"
+  },
+  {
+   "say": "Category predict करनी हो तो classification। Logistic regression, KNN, decision tree, random forest। सबका code same: fit, predict, score।",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Model()",
+     "fit(X, y)",
+     "predict(X_new)",
+     "score()"
+    ],
+    "dir": "h"
+   },
+   "code": "model.fit(X_train, y_train)\nprint(model.score(X_test, y_test))"
+  },
+  {
+   "say": "Accuracy धोखा दे सकती है। इसलिए confusion matrix बनाओ: कहाँ सही, कहाँ false alarm, कहाँ miss।",
+   "sketch": {
+    "k": "table",
+    "head": [
+     "",
+     "Pred No",
+     "Pred Yes"
+    ],
+    "rows": [
+     [
+      "Actual No",
+      "TN",
+      "FP"
+     ],
+     [
+      "Actual Yes",
+      "FN",
+      "TP"
+     ]
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "Precision: जितनों को Yes बोला, उनमें सच कितने। Recall: असली Yes में से कितने पकड़े। F1 दोनों का balance।",
+   "sketch": {
+    "k": "compare",
+    "left": {
+     "title": "Precision",
+     "items": [
+      "TP / (TP+FP)",
+      "false alarm कम",
+      "spam filter"
+     ]
+    },
+    "right": {
+     "title": "Recall",
+     "items": [
+      "TP / (TP+FN)",
+      "miss कम",
+      "cancer, fraud"
+     ]
+    }
+   },
+   "code": null
+  },
+  {
+   "say": "Scaling fit सिर्फ train पर, test पर सिर्फ transform। Pipeline में डाल दो तो यह गलती हो ही नहीं सकती।",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Raw X",
+     "Scaler",
+     "Model",
+     "Prediction"
+    ],
+    "dir": "h"
+   },
+   "code": "pipe = Pipeline([(\"scale\", StandardScaler()), (\"knn\", KNeighborsClassifier())])"
+  },
+  {
+   "say": "Train 99 और test 70 मतलब रट्टा, यानी overfitting। दोनों कम मतलब underfitting। दोनों अच्छे और पास-पास, वही चाहिए।",
+   "sketch": {
+    "k": "table",
+    "head": [
+     "Train",
+     "Test",
+     "मतलब"
+    ],
+    "rows": [
+     [
+      "99%",
+      "70%",
+      "Overfit"
+     ],
+     [
+      "55%",
+      "52%",
+      "Underfit"
+     ],
+     [
+      "92%",
+      "90%",
+      "Good"
+     ]
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "आखिर में cross-validation से भरोसेमंद score, और GridSearchCV से best settings। अब practice करो!",
+   "sketch": {
+    "k": "cycle",
+    "steps": [
+     "Combo चुनो",
+     "5-fold CV",
+     "Score note करो",
+     "Best रखो"
+    ]
+   },
+   "code": "grid = GridSearchCV(model, params, cv=5).fit(X, y)\nprint(grid.best_params_)"
+  }
+ ],
+ "practice": [
+  {
+   "q": "बिना numpy/sklearn के, खुद **Linear Regression** का formula लगाओ।\nx = [1, 2, 3, 4, 5], y = [3, 5, 7, 9, 11]\nslope m = sum((x-mx)*(y-my)) / sum((x-mx)**2), intercept c = my - m*mx\nPrint करो:\nm = 2.0\nc = 1.0\nx=6 pe y = 13.0",
+   "starter": "x = [1, 2, 3, 4, 5]\ny = [3, 5, 7, 9, 11]\nmx = sum(x) / len(x)\nmy = sum(y) / len(y)\n# TODO: num = sum((xi-mx)*(yi-my)) और den = sum((xi-mx)**2)\n# TODO: m = num / den, c = my - m*mx\n# TODO: तीन lines print करो\n",
+   "expect": "m = 2.0\nc = 1.0\nx=6 pe y = 13.0",
+   "hint": "num = sum((xi - mx) * (yi - my) for xi, yi in zip(x, y))",
+   "solution": "x = [1, 2, 3, 4, 5]\ny = [3, 5, 7, 9, 11]\nmx = sum(x) / len(x)\nmy = sum(y) / len(y)\nnum = sum((xi - mx) * (yi - my) for xi, yi in zip(x, y))\nden = sum((xi - mx) ** 2 for xi in x)\nm = num / den\nc = my - m * mx\nprint(f\"m = {m}\")\nprint(f\"c = {c}\")\nprint(f\"x=6 pe y = {m * 6 + c}\")"
+  },
+  {
+   "q": "Confusion matrix के 4 हिस्से खुद गिनो और metrics निकालो।\ny_true = [1, 0, 1, 1, 0, 1, 0, 0, 1, 1]\ny_pred = [1, 0, 0, 1, 0, 1, 1, 0, 1, 0]\nPrint करो (2 decimal):\nTP=4 TN=3 FP=1 FN=2\nprecision=0.80\nrecall=0.67\nf1=0.73",
+   "starter": "y_true = [1, 0, 1, 1, 0, 1, 0, 0, 1, 1]\ny_pred = [1, 0, 0, 1, 0, 1, 1, 0, 1, 0]\ntp = tn = fp = fn = 0\nfor t, p in zip(y_true, y_pred):\n    # TODO: 4 cases check करके count बढ़ाओ\n    pass\n# TODO: precision, recall, f1 निकालो और print करो\n",
+   "expect": "TP=4 TN=3 FP=1 FN=2\nprecision=0.80\nrecall=0.67\nf1=0.73",
+   "hint": "precision = tp/(tp+fp), recall = tp/(tp+fn), f1 = 2*p*r/(p+r)। Format: f\"{precision:.2f}\"",
+   "solution": "y_true = [1, 0, 1, 1, 0, 1, 0, 0, 1, 1]\ny_pred = [1, 0, 0, 1, 0, 1, 1, 0, 1, 0]\ntp = tn = fp = fn = 0\nfor t, p in zip(y_true, y_pred):\n    if t == 1 and p == 1:\n        tp += 1\n    elif t == 0 and p == 0:\n        tn += 1\n    elif t == 0 and p == 1:\n        fp += 1\n    else:\n        fn += 1\nprecision = tp / (tp + fp)\nrecall = tp / (tp + fn)\nf1 = 2 * precision * recall / (precision + recall)\nprint(f\"TP={tp} TN={tn} FP={fp} FN={fn}\")\nprint(f\"precision={precision:.2f}\")\nprint(f\"recall={recall:.2f}\")\nprint(f\"f1={f1:.2f}\")"
+  },
+  {
+   "q": "खुद का **KNN classifier** बनाओ (K = 3)। हर training point: (x, y, label)। नए point (3, 3) के लिए हर point से distance निकालो (`math.dist`), 3 सबसे पास वाले लो, majority label print करो।\nDistance बराबर हो तो tuple sort label से tie तोड़ता है।\nExpected output:\nnearest: ['A', 'B', 'A']\nprediction: A",
+   "starter": "import math\nfrom collections import Counter\n\ndata = [(1, 1, \"A\"), (2, 2, \"A\"), (3, 4, \"A\"), (6, 6, \"B\"), (7, 7, \"B\"), (4, 3, \"B\")]\nnew = (3, 3)\n# TODO: हर point के लिए (distance, label) list बनाओ\n# TODO: distance से sort करो, पहले 3 के labels लो\n# TODO: Counter(...).most_common(1) से majority\n",
+   "expect": "nearest: ['A', 'B', 'A']\nprediction: A",
+   "hint": "dists = sorted((math.dist(new, (x, y)), lab) for x, y, lab in data)",
+   "solution": "import math\nfrom collections import Counter\n\ndata = [(1, 1, \"A\"), (2, 2, \"A\"), (3, 4, \"A\"), (6, 6, \"B\"), (7, 7, \"B\"), (4, 3, \"B\")]\nnew = (3, 3)\ndists = sorted((math.dist(new, (x, y)), lab) for x, y, lab in data)\nnearest = [lab for d, lab in dists[:3]]\nprint(\"nearest:\", nearest)\nprint(\"prediction:\", Counter(nearest).most_common(1)[0][0])"
+  }
+ ],
+ "quiz": [
+  {
+   "q": "घर का price (लाख में) predict करना कौन सा problem है?",
+   "o": [
+    "Classification",
+    "Regression",
+    "Clustering",
+    "Reinforcement"
+   ],
+   "a": 1,
+   "why": "Output एक continuous number है, इसलिए regression।"
+  },
+  {
+   "q": "बिना label के customers को groups में बाँटना कौन सी learning है?",
+   "o": [
+    "Supervised",
+    "Reinforcement",
+    "Unsupervised",
+    "Transfer"
+   ],
+   "a": 2,
+   "why": "Label नहीं दिया, model खुद groups ढूँढता है: unsupervised (जैसे k-means)।"
+  },
+  {
+   "q": "`train_test_split` का सही return order क्या है?",
+   "o": [
+    "X_train, X_test, y_train, y_test",
+    "X_train, y_train, X_test, y_test",
+    "X_test, X_train, y_test, y_train",
+    "y_train, y_test, X_train, X_test"
+   ],
+   "a": 0,
+   "why": "पहले दोनों X (train, test), फिर दोनों y (train, test)।"
+  },
+  {
+   "q": "StandardScaler को सही तरीके से कैसे use करते हैं?",
+   "o": [
+    "पूरे data पर fit, फिर split",
+    "Test पर fit_transform, train पर transform",
+    "Train पर fit_transform, test पर सिर्फ transform",
+    "दोनों पर अलग-अलग fit_transform"
+   ],
+   "a": 2,
+   "why": "Fit सिर्फ train पर; वरना test की जानकारी leak होती है (data leakage)।"
+  },
+  {
+   "q": "1000 में से 10 fraud हैं। Model सबको 'not fraud' बोलता है। Accuracy कितनी और क्या गलत है?",
+   "o": [
+    "50%, model random है",
+    "1%, model बेकार",
+    "100%, perfect",
+    "99%, लेकिन recall 0 है"
+   ],
+   "a": 3,
+   "why": "990/1000 सही = 99%, पर एक भी fraud नहीं पकड़ा; imbalance में accuracy धोखा है।"
+  },
+  {
+   "q": "Cancer detection में कोई भी patient miss न हो, कौन सा metric सबसे ज़रूरी?",
+   "o": [
+    "Precision",
+    "Recall",
+    "Accuracy",
+    "R²"
+   ],
+   "a": 1,
+   "why": "Recall = असली positive में से कितने पकड़े; FN (miss) कम करना है।"
+  },
+  {
+   "q": "Train accuracy 99%, test accuracy 68%। यह क्या है?",
+   "o": [
+    "Overfitting",
+    "Underfitting",
+    "Good fit",
+    "Data leakage fix"
+   ],
+   "a": 0,
+   "why": "Training पर रट्टा, नए data पर fail = overfitting।"
+  },
+  {
+   "q": "City column (Delhi, Jaipur, Bhiwadi) को model के लिए कैसे बदलें?",
+   "o": [
+    "Delhi=1, Jaipur=2, Bhiwadi=3",
+    "Column हटा दो",
+    "StandardScaler लगाओ",
+    "OneHotEncoder से अलग 0/1 columns"
+   ],
+   "a": 3,
+   "why": "Category का कोई order नहीं; OneHot हर city का अलग 0/1 column बनाता है।"
+  },
+  {
+   "q": "ROC-AUC = 0.5 का मतलब?",
+   "o": [
+    "Perfect model",
+    "Random guess जितना",
+    "बहुत अच्छा model",
+    "Overfitting"
+   ],
+   "a": 1,
+   "why": "0.5 = सिक्का उछालने जैसा; 1.0 perfect ranking।"
+  },
+  {
+   "q": "GridSearchCV क्या करता है?",
+   "o": [
+    "Data साफ़ करता है",
+    "Features scale करता है",
+    "हर hyperparameter combination को CV से test करके best चुनता है",
+    "Model के weights खुद लिखता है"
+   ],
+   "a": 2,
+   "why": "दिए गए param grid की हर combo का cross-validation score निकालकर best_params_ देता है।"
+  }
+ ],
+ "iq": [
+  {
+   "q": "Supervised और unsupervised learning में फ़र्क बताओ, example के साथ।",
+   "a": "Supervised में हर example के साथ label होता है, model input से output map करना सीखता है, जैसे email → spam/not spam या size → price। Unsupervised में label नहीं होता, model data का structure खुद ढूँढता है, जैसे k-means से customer segments। Reinforcement तीसरा type है जहाँ agent reward से सीखता है।"
+  },
+  {
+   "q": "Regression और classification में क्या फ़र्क है?",
+   "a": "Regression continuous number predict करता है (price, demand), metrics MAE/RMSE/R²। Classification category predict करता है (spam, churn), metrics accuracy/precision/recall/F1/AUC। Logistic regression नाम के बावजूद classification algorithm है।"
+  },
+  {
+   "q": "Overfitting क्या है, कैसे detect करोगे और कैसे ठीक करोगे?",
+   "a": "Model training data का noise भी याद कर लेता है, इसलिए train score बहुत high और test score काफ़ी कम होता है। Detect: train vs test (या CV) score compare। Fix: ज़्यादा data, simpler model (max_depth कम), regularization (L1/L2), feature selection, cross-validation, और ensembles जैसे random forest।"
+  },
+  {
+   "q": "Bias-variance tradeoff समझाओ।",
+   "a": "Bias = model के simplification से आने वाली गलती (underfit); variance = training data के छोटे बदलाव पर model कितना बदलता है (overfit)। Model complex करने से bias घटता है पर variance बढ़ता है। Goal दोनों का total error minimum करना है, जो CV से tune करते हैं।"
+  },
+  {
+   "q": "Precision और recall क्या हैं? कब कौन सा ज़्यादा important है?",
+   "a": "Precision = TP/(TP+FP), predicted positives में से सही कितने; recall = TP/(TP+FN), actual positives में से कितने पकड़े। Spam filter में precision (ज़रूरी email spam न बने), cancer/fraud detection में recall (कोई miss न हो)। दोनों चाहिए तो F1 देखते हैं।"
+  },
+  {
+   "q": "Accuracy कब misleading होती है?",
+   "a": "जब classes imbalanced हों। 99% normal और 1% fraud में 'सब normal' बोलने वाला model 99% accuracy देता है पर बेकार है। ऐसे में confusion matrix, precision, recall, F1, PR-AUC देखो, और stratify, class_weight='balanced' या resampling use करो।"
+  },
+  {
+   "q": "Data leakage क्या है? एक example दो।",
+   "a": "जब training के time model को ऐसी जानकारी मिल जाए जो prediction के time नहीं मिलेगी, या test data की info train में घुस जाए। Example: split से पहले पूरे data पर StandardScaler fit करना, या target से बना कोई feature। इससे score fake high आता है। Fix: पहले split, फिर Pipeline के अंदर preprocessing।"
+  },
+  {
+   "q": "Cross-validation क्यों करते हैं? k-fold कैसे काम करता है?",
+   "a": "एक train/test split में luck का role होता है। k-fold में data को k हिस्सों में बाँटते हैं, k बार train करते हैं और हर बार एक अलग fold पर test, फिर scores का mean और std लेते हैं। इससे model performance का भरोसेमंद estimate मिलता है। `cross_val_score(model, X, y, cv=5)`।"
+  },
+  {
+   "q": "Parameters और hyperparameters में फ़र्क? Tune कैसे करते हो?",
+   "a": "Parameters model training से खुद सीखता है (linear regression के coef_, NN के weights)। Hyperparameters हम पहले set करते हैं (max_depth, n_neighbors, learning rate)। Tune करने के लिए GridSearchCV (हर combo) या RandomizedSearchCV (random combos, fast), हमेशा cross-validation के साथ।"
+  },
+  {
+   "q": "Decision tree और random forest में क्या फ़र्क है?",
+   "a": "Decision tree एक ही tree है, समझने में आसान पर जल्दी overfit होता है। Random forest बहुत सारे trees का ensemble है, हर tree bootstrap sample और random features पर train होता है (bagging), और सब vote करते हैं। इससे variance कम होता है और accuracy stable रहती है, पर interpretability कम।"
+  },
+  {
+   "q": "Feature scaling कब ज़रूरी है और कब नहीं?",
+   "a": "Distance या gradient पर चलने वाले models को चाहिए: KNN, SVM, k-means, logistic/linear regression with regularization, neural networks। Tree-based models (decision tree, random forest, XGBoost) को ज़रूरत नहीं क्योंकि वे threshold पर split करते हैं। StandardScaler आम choice, MinMaxScaler 0-1 range के लिए।"
+  },
+  {
+   "q": "ROC-AUC क्या बताता है?",
+   "a": "ROC curve हर threshold पर True Positive Rate vs False Positive Rate दिखाता है। AUC उस curve के नीचे का area है: एक random positive को random negative से ज़्यादा score मिलने की probability। 1.0 perfect, 0.5 random। यह threshold-independent है, पर बहुत imbalanced data में PR-AUC ज़्यादा साफ़ तस्वीर देता है।"
+  }
+ ]
+}

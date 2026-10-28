@@ -1,0 +1,1329 @@
+{
+ "n": 14,
+ "id": "aiml-14",
+ "title": "Deploy, DSA, Portfolio & IQ Prep",
+ "goal": "Git/GitHub, Docker aur Streamlit se apna AI app duniya tak pahunchaoge, IQ ke DSA patterns (hashing, two pointers, stack, binary search, recursion) solve karoge, aur portfolio + STAR + resume ke saath job ke liye taiyaar ho jaoge.",
+ "lessons": [
+  {
+   "title": "Git & GitHub — code ka time machine",
+   "blocks": [
+    [
+     "p",
+     "**Git** = ek tool jo tumhare code ki **har badli hui version** yaad rakhta hai. **GitHub** = website jahan yeh Git wala code online rakha jaata hai, team ke saath share hota hai, aur recruiter tumhara kaam dekhta hai."
+    ],
+    [
+     "analogy",
+     "Git ek **diary** hai factory ke register jaisi: har din kya badla, kisne badla, kyun badla — sab likha. Galti hui toh purane page pe wapas ja sakte ho. GitHub = woh diary jo office ki almaari (cloud) mein rakhi hai, sab padh sakte hain."
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Git ke 4 ghar",
+      "steps": [
+       "Working dir",
+       "Staging (add)",
+       "Local repo (commit)",
+       "GitHub (push)"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "Dhyan se dekh: file pehle **working directory** mein badalti hai. `git add` se woh **staging** (taiyaari wala dibba) mein jaati hai. `git commit` se **photo** khinch jaati hai (local history). `git push` se woh photo **GitHub** pe chali jaati hai."
+    ],
+    [
+     "code",
+     "bash",
+     "# Pehli baar setup (sirf ek baar)\ngit config --global user.name \"Akash Kumar\"\ngit config --global user.email \"akash@example.com\"\n\n# Naya project shuru\ngit init                      # folder ko git repo banao\ngit status                    # kya badla? (sabse zyada use hone wala command)\ngit add app.py                # ek file staging mein\ngit add .                     # saari files staging mein\ngit commit -m \"Add FastAPI predict endpoint\"\ngit log --oneline             # history dekho",
+     ""
+    ],
+    [
+     "p",
+     "Ab GitHub se jodna. GitHub pe naya repo banao, phir:"
+    ],
+    [
+     "code",
+     "bash",
+     "git remote add origin https://github.com/akash/cable-ml-api.git\ngit branch -M main\ngit push -u origin main       # pehli baar -u, baad mein sirf git push\n\n# Kisi aur ka repo laana\ngit clone https://github.com/akash/cable-ml-api.git\ngit pull                      # GitHub se latest changes laao",
+     ""
+    ],
+    [
+     "tip",
+     "Achha commit message = **kya kiya** chhote present-tense mein: `Add login API`, `Fix null check in predict`. Bura: `changes`, `final`, `final2`. IQ mein GitHub dekhte hain, messages bhi padhte hain."
+    ],
+    [
+     "p",
+     "**Branch** = code ki ek alag line jahan tum bina main code toote naya feature bana sakte ho. `main` branch hamesha chalne wali (stable) honi chahiye."
+    ],
+    [
+     "sketch",
+     {
+      "k": "tree",
+      "title": "Branches",
+      "root": {
+       "label": "main",
+       "children": [
+        {
+         "label": "feature/rag-chat",
+         "children": []
+        },
+        {
+         "label": "fix/predict-bug",
+         "children": []
+        }
+       ]
+      }
+     }
+    ],
+    [
+     "code",
+     "bash",
+     "git branch                    # saari branches dekho\ngit checkout -b feature/rag-chat   # nayi branch banao + uspe jao\n# (naya command: git switch -c feature/rag-chat)\n# ... code likho ...\ngit add .\ngit commit -m \"Add RAG chat endpoint\"\ngit push -u origin feature/rag-chat\n\ngit checkout main             # wapas main pe\ngit merge feature/rag-chat    # feature ko main mein milao",
+     ""
+    ],
+    [
+     "p",
+     "**Pull Request (PR)** = GitHub pe request: \"meri branch ka code main mein mila do\". Team review karti hai, comments deti hai, tests (CI) chalte hain, phir **merge** hota hai. Company mein code hamesha PR se hi main mein jaata hai, direct push nahi."
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "PR workflow",
+      "steps": [
+       "Branch banao",
+       "Commit + push",
+       "PR kholo",
+       "Review + CI",
+       "Merge"
+      ],
+      "dir": "v"
+     }
+    ],
+    [
+     "p",
+     "**Merge conflict** = do logon ne same file ki same line alag-alag badli. Git confuse hai, tumse poochta hai. File mein aisa dikhta hai:"
+    ],
+    [
+     "code",
+     "text",
+     "<<<<<<< HEAD\nthreshold = 0.5\n=======\nthreshold = 0.7\n>>>>>>> feature/tune\n",
+     ""
+    ],
+    [
+     "p",
+     "Sahi line rakho, `<<<<<<<`, `=======`, `>>>>>>>` markers hatao, phir `git add` + `git commit`. Bas."
+    ],
+    [
+     "code",
+     "bash",
+     "# .gitignore file — yeh cheezein kabhi commit mat karo\n.env\n__pycache__/\nvenv/\n*.pkl\ndata/raw/\n.ipynb_checkpoints/",
+     ""
+    ],
+    [
+     "warn",
+     "Common galti: `.env` (API keys) commit kar dena. GitHub pe public ho gaya toh bots minute mein key chura lete hain. Galti ho gayi toh key turant **revoke** karo, sirf file delete karna kaafi nahi (history mein reh jaati hai)."
+    ],
+    [
+     "code",
+     "bash",
+     "# Galti sudharne ke commands\ngit restore app.py            # file ke unsaved changes hatao\ngit restore --staged app.py   # staging se nikaalo (changes rehte hain)\ngit commit --amend -m \"Better message\"  # last commit ka message badlo (push se pehle)\ngit revert <commit_id>        # purane commit ko ulta karne wala naya commit (safe)\ngit stash                     # adhoora kaam side mein rakho\ngit stash pop                 # wapas laao",
+     ""
+    ],
+    [
+     "tip",
+     "IQ favourite: `git merge` vs `git rebase`. Merge = dono history jodo, ek merge commit banta hai (safe, history sach dikhti hai). Rebase = apne commits ko latest main ke upar dobara lagao (history seedhi line). Shared branch pe rebase mat karo."
+    ]
+   ]
+  },
+  {
+   "title": "Docker — ML app ko tiffin box mein pack karo",
+   "blocks": [
+    [
+     "p",
+     "Problem: tumhare laptop pe model chal raha hai, server pe `ModuleNotFoundError` ya version mismatch. **\"Mere machine pe toh chal raha tha!\"** Docker yeh problem khatam karta hai."
+    ],
+    [
+     "analogy",
+     "**Docker = tiffin box.** Khaana (code) + chammach (libraries) + napkin (Python version, OS settings) sab ek dibbe mein packed. Kahin bhi le jao, khol ke khao — same swaad."
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "Image vs Container",
+      "left": {
+       "title": "Image",
+       "items": [
+        "Recipe + saaman",
+        "Read-only",
+        "Ek baar build",
+        "docker build"
+       ]
+      },
+      "right": {
+       "title": "Container",
+       "items": [
+        "Pakti hui dish",
+        "Running process",
+        "Kai bana sakte",
+        "docker run"
+       ]
+      }
+     }
+    ],
+    [
+     "list",
+     [
+      "**Dockerfile** = recipe (steps likhe hain).",
+      "**Image** = recipe se bana packed dibba (build ka result).",
+      "**Container** = image ka chalta hua roop. Ek image se 10 containers chala sakte ho.",
+      "**Registry (Docker Hub)** = images ki dukaan, jahan se `pull` / `push` karte ho."
+     ]
+    ],
+    [
+     "p",
+     "Ab ek FastAPI ML app pack karte hain. Project mein `main.py`, `model.pkl`, `requirements.txt` hain:"
+    ],
+    [
+     "code",
+     "python",
+     "# main.py  (Stage 7 ka FastAPI + Stage 10 ka model)\nfrom fastapi import FastAPI\nfrom pydantic import BaseModel\nimport joblib\n\napp = FastAPI()\nmodel = joblib.load(\"model.pkl\")   # server start pe EK baar load\n\nclass Cable(BaseModel):\n    length_m: float\n    sqmm: float\n\n@app.get(\"/health\")\ndef health():\n    return {\"status\": \"ok\"}\n\n@app.post(\"/predict\")\ndef predict(c: Cable):\n    price = model.predict([[c.length_m, c.sqmm]])[0]\n    return {\"price\": round(float(price), 2)}",
+     ""
+    ],
+    [
+     "p",
+     "Yeh server code hai, isliye yahan output nahi. Ab iska **Dockerfile** (file ka naam bilkul `Dockerfile`, koi extension nahi):"
+    ],
+    [
+     "code",
+     "text",
+     "FROM python:3.12-slim\n\nWORKDIR /app\n\nCOPY requirements.txt .\nRUN pip install --no-cache-dir -r requirements.txt\n\nCOPY . .\n\nEXPOSE 8000\n\nCMD [\"uvicorn\", \"main:app\", \"--host\", \"0.0.0.0\", \"--port\", \"8000\"]",
+     ""
+    ],
+    [
+     "sketch",
+     {
+      "k": "stack",
+      "title": "Image ki layers",
+      "items": [
+       "CMD uvicorn",
+       "COPY . .",
+       "RUN pip install",
+       "COPY requirements",
+       "WORKDIR /app",
+       "FROM python:3.12-slim"
+      ]
+     }
+    ],
+    [
+     "list",
+     [
+      "`FROM` = base image (Python wala chhota Linux).",
+      "`WORKDIR` = container ke andar kaam ka folder.",
+      "`COPY requirements.txt .` pehle, akele — **cache trick**: code badla par requirements nahi, toh pip install dobara nahi chalega, build fast.",
+      "`RUN` = build ke time command chalao.",
+      "`EXPOSE` = kaunsa port use hoga (documentation).",
+      "`CMD` = container start hone pe kya chale. `0.0.0.0` zaroori, warna bahar se request nahi aayegi."
+     ]
+    ],
+    [
+     "code",
+     "bash",
+     "docker build -t cable-ml-api .          # image banao, naam (tag) do\ndocker images                            # images dekho\ndocker run -d -p 8000:8000 cable-ml-api  # chalao: host port : container port\ndocker ps                                # chal rahe containers\ndocker logs <container_id>               # print/errors dekho\ndocker exec -it <container_id> bash      # container ke andar ghuso\ndocker stop <container_id>",
+     ""
+    ],
+    [
+     "p",
+     "Ab browser mein `http://localhost:8000/docs` kholo — FastAPI ka Swagger page dikhega, aur `/health` `{\"status\": \"ok\"}` dega."
+    ],
+    [
+     "warn",
+     "Common galti: `-p` bhool jaana. Container chal raha hai par bahar se band hai. `-p 8000:8000` = laptop ka 8000 → container ka 8000. Doosri galti: `.env` ya 2GB data image mein copy ho jaana — `.dockerignore` file banao (venv, .env, data/raw)."
+    ],
+    [
+     "p",
+     "**docker-compose** = jab ek se zyada services hon (API + Streamlit + database), sabko ek YAML file se ek command mein chalao."
+    ],
+    [
+     "code",
+     "text",
+     "# docker-compose.yml\nservices:\n  api:\n    build: .\n    ports:\n      - \"8000:8000\"\n    env_file: .env\n    depends_on:\n      - db\n  ui:\n    build: ./frontend\n    ports:\n      - \"8501:8501\"\n    environment:\n      - API_URL=http://api:8000\n    depends_on:\n      - api\n  db:\n    image: postgres:16\n    environment:\n      - POSTGRES_PASSWORD=secret\n    volumes:\n      - pgdata:/var/lib/postgresql/data\nvolumes:\n  pgdata:",
+     ""
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Compose network",
+      "steps": [
+       "ui :8501",
+       "api :8000",
+       "db :5432"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "tip",
+     "Dhyan se dekh: compose ke andar ek service doosri ko **service ke naam** se bulati hai: `http://api:8000`, `localhost` nahi. Kyunki har container ka apna localhost hota hai."
+    ],
+    [
+     "code",
+     "bash",
+     "docker compose up -d --build   # sab build + start\ndocker compose logs -f api     # api ke logs live\ndocker compose down            # sab band",
+     ""
+    ],
+    [
+     "p",
+     "**Volume** = container ke bahar data rakhne ki jagah. Container delete hua toh andar ka data gaya, lekin volume ka data bacha rehta hai (database ke liye zaroori)."
+    ]
+   ]
+  },
+  {
+   "title": "Streamlit front-end aur end-to-end AI app",
+   "blocks": [
+    [
+     "p",
+     "**Streamlit** = sirf Python likh ke web app ka UI. HTML/CSS/JS nahi chahiye. ML demo, chatbot, dashboard — 20 lines mein. Portfolio ke liye best, kyunki recruiter link khol ke turant try kar sakta hai."
+    ],
+    [
+     "analogy",
+     "FastAPI = dukaan ka **godown aur kaarigar** (kaam peeche hota hai). Streamlit = dukaan ka **counter** jahan customer aata hai, button dabata hai, jawab leta hai."
+    ],
+    [
+     "code",
+     "python",
+     "# app.py  — run: streamlit run app.py\nimport streamlit as st\nimport requests\n\nst.set_page_config(page_title=\"Cable Price AI\", page_icon=\"⚡\")\nst.title(\"Cable Price Predictor\")\n\nlength = st.number_input(\"Length (m)\", min_value=1.0, value=100.0)\nsqmm = st.selectbox(\"Size (sqmm)\", [1.5, 2.5, 4, 6, 10, 16])\n\nif st.button(\"Predict\"):\n    r = requests.post(\"http://localhost:8000/predict\",\n                      json={\"length_m\": length, \"sqmm\": sqmm}, timeout=10)\n    st.success(f\"Estimated price: Rs {r.json()['price']}\")",
+     ""
+    ],
+    [
+     "p",
+     "Yeh browser app hai, isliye output yahan nahi. Browser mein ek form khulega: length box, size dropdown, Predict button. Button dabate hi FastAPI ko request jaati hai aur hara (success) box mein price dikhta hai."
+    ],
+    [
+     "tip",
+     "Streamlit ka raaz: **har click pe poori script upar se neeche dobara chalti hai.** Isliye jo cheez yaad rakhni ho (chat history) woh `st.session_state` mein rakho, aur bhaari cheez (model load) `@st.cache_resource` se ek hi baar."
+    ],
+    [
+     "code",
+     "python",
+     "# Chatbot UI (LLM wala Stage 12 se)\nimport streamlit as st\n\nif \"messages\" not in st.session_state:\n    st.session_state.messages = []          # refresh pe bhi yaad\n\nfor m in st.session_state.messages:\n    with st.chat_message(m[\"role\"]):\n        st.write(m[\"content\"])\n\nif q := st.chat_input(\"Cable ke baare mein poocho...\"):\n    st.session_state.messages.append({\"role\": \"user\", \"content\": q})\n    answer = ask_rag_api(q)                 # tumhara FastAPI /chat\n    st.session_state.messages.append({\"role\": \"assistant\", \"content\": answer})\n    st.rerun()",
+     ""
+    ],
+    [
+     "p",
+     "Yeh ChatGPT jaisa chat screen deta hai: upar bubbles, neeche input box."
+    ],
+    [
+     "list",
+     [
+      "`st.sidebar` = left panel (settings, API key).",
+      "`st.file_uploader` = PDF upload (RAG ke liye).",
+      "`st.dataframe`, `st.line_chart` = data dikhana.",
+      "`st.spinner(\"Soch raha hoon...\")` = loading animation."
+     ]
+    ],
+    [
+     "p",
+     "Ab sab jodo. **End-to-end AI app** ke 4 layers:"
+    ],
+    [
+     "sketch",
+     {
+      "k": "stack",
+      "title": "End-to-end AI app",
+      "items": [
+       "User (browser)",
+       "Streamlit UI",
+       "FastAPI backend",
+       "AI engine (ML/RAG)",
+       "Data (DB + vectors)"
+      ]
+     }
+    ],
+    [
+     "code",
+     "text",
+     "cable-ai-app/\n  app/\n    main.py            # FastAPI entry\n    config.py          # settings, .env se\n    routers/chat.py    # /chat endpoint\n    services/rag.py    # retrieval + LLM call\n    models/schemas.py  # Pydantic\n  frontend/\n    streamlit_app.py\n  tests/test_api.py\n  data/\n  .env.example\n  .gitignore\n  requirements.txt\n  Dockerfile\n  docker-compose.yml\n  README.md",
+     ""
+    ],
+    [
+     "p",
+     "Ek request ka safar: user sawaal likhta hai → Streamlit `POST /chat` bhejta hai → FastAPI Pydantic se validate karta hai → RAG service relevant chunks dhoondhti hai → LLM jawab banata hai → JSON wapas → Streamlit bubble mein dikhata hai."
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Request ka safar",
+      "steps": [
+       "Sawaal",
+       "POST /chat",
+       "Retrieve",
+       "LLM",
+       "Jawab"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "Yeh flow Python ke function chain jaisa hai. Dekh ek offline mini version (sirf idea samajhne ke liye):"
+    ],
+    [
+     "code",
+     "python",
+     "docs = {\"d1\": \"XLPE cable 90 degree tak chalti hai\",\n        \"d2\": \"PVC cable 70 degree tak chalti hai\"}\n\ndef retrieve(q):\n    qw = set(q.lower().split())\n    return max(docs.values(), key=lambda d: len(qw & set(d.lower().split())))\n\ndef llm(q, ctx):\n    return f\"Context ke hisaab se: {ctx}\"\n\ndef chat_api(q):\n    if not q.strip():\n        return {\"error\": \"empty question\"}\n    return {\"answer\": llm(q, retrieve(q))}\n\nprint(chat_api(\"XLPE kitne degree tak?\"))\nprint(chat_api(\"  \"))",
+     "{'answer': 'Context ke hisaab se: XLPE cable 90 degree tak chalti hai'}\n{'error': 'empty question'}"
+    ],
+    [
+     "p",
+     "**Production checklist** (deploy se pehle):"
+    ],
+    [
+     "list",
+     [
+      "Error handling: har LLM/API call `try/except` mein, timeout ke saath.",
+      "API keys `.env` mein, code/GitHub mein kabhi nahi.",
+      "Input validation: Pydantic.",
+      "Logging: har request, latency, tokens.",
+      "`/health` endpoint (Docker/load balancer check karte hain).",
+      "Caching: same sawaal = cached jawab (paisa bachta hai).",
+      "Rate limit + cost tracking.",
+      "Tests: `pytest` se kam se kam API ke basic tests."
+     ]
+    ],
+    [
+     "p",
+     "**Deploy kahan?** Streamlit Community Cloud (free, GitHub repo se seedha), Hugging Face Spaces (free demo), Render/Railway (Docker app), AWS/GCP/Azure (company level). Portfolio ke liye free option se **live link** zaroor banao."
+    ],
+    [
+     "warn",
+     "Common galti: model ko har request pe `joblib.load` karna. Bahut slow. Server start pe ek baar load karo (global ya startup event)."
+    ]
+   ]
+  },
+  {
+   "title": "DSA part 1 — Big-O, arrays, hashing, two pointers, sliding window",
+   "blocks": [
+    [
+     "p",
+     "AI/ML IQ mein bhi **coding round** hota hai. Woh dekhte hain tum problem ko tod ke soch sakte ho ya nahi. Achhi baat: zyada tar sawaal **8-10 patterns** se hi aate hain. Pattern pehchano, sawaal solve.\n\n**Big-O** = input badhne pe code kitna slow hota hai. Exact seconds nahi, **growth** naapte hain."
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Big-O cheat sheet",
+      "head": [
+       "Big-O",
+       "Naam",
+       "Example"
+      ],
+      "rows": [
+       [
+        "O(1)",
+        "Constant",
+        "dict lookup"
+       ],
+       [
+        "O(log n)",
+        "Log",
+        "binary search"
+       ],
+       [
+        "O(n)",
+        "Linear",
+        "ek loop"
+       ],
+       [
+        "O(n log n)",
+        "Linearithmic",
+        "sorted()"
+       ],
+       [
+        "O(n²)",
+        "Quadratic",
+        "nested loops"
+       ]
+      ]
+     }
+    ],
+    [
+     "analogy",
+     "1000 cable drums mein se ek dhoondhna: register ka index dekho = O(1). Har drum ek-ek check karo = O(n). Har drum ko har drum se compare karo = O(n²) — poora din lag jaayega."
+    ],
+    [
+     "sketch",
+     {
+      "k": "chart",
+      "title": "Growth",
+      "type": "line",
+      "points": [
+       [
+        1,
+        1
+       ],
+       [
+        2,
+        4
+       ],
+       [
+        3,
+        9
+       ],
+       [
+        4,
+        16
+       ],
+       [
+        5,
+        25
+       ]
+      ],
+      "line": [
+       [
+        0,
+        0
+       ],
+       [
+        5,
+        5
+       ]
+      ],
+      "xl": "n",
+      "yl": "steps"
+     }
+    ],
+    [
+     "code",
+     "python",
+     "n = 1000\nprint(\"O(1):\", 1)\nprint(\"O(log n):\", n.bit_length())\nprint(\"O(n):\", n)\nprint(\"O(n^2):\", n * n)",
+     "O(1): 1\nO(log n): 10\nO(n): 1000\nO(n^2): 1000000"
+    ],
+    [
+     "tip",
+     "Space complexity bhi poochte hain: extra memory kitni li. Ek dict banaya jo n items rakhta hai = O(n) space. Sirf 2 variables = O(1) space."
+    ],
+    [
+     "list",
+     [
+      "**Python ke mehenge/saste operations:** `list[i]`, `append` = O(1). `x in list` = O(n) (ek-ek dekhta hai).",
+      "`x in set` / `x in dict` = O(1) average (hashing).",
+      "`list.insert(0, x)` / `pop(0)` = O(n) (sab khisakte hain) → queue ke liye `deque`.",
+      "`sorted()` = O(n log n). String jodna loop mein `+=` = slow, `\"\".join()` fast."
+     ]
+    ],
+    [
+     "p",
+     "**Pattern 1: Hashing (dict/set).** Jab bhi \"pehle dekha hai kya?\" ya \"kitni baar aaya?\" sawaal ho — dict socho. **Two Sum** sabse famous IQ sawaal:"
+    ],
+    [
+     "code",
+     "python",
+     "def two_sum(nums, target):\n    seen = {}                      # value -> index\n    for i, x in enumerate(nums):\n        need = target - x\n        if need in seen:           # O(1) check\n            return [seen[need], i]\n        seen[x] = i\n    return []\n\nprint(two_sum([2, 7, 11, 15], 9))\nprint(two_sum([3, 2, 4], 6))\nprint(two_sum([1, 2], 10))",
+     "[0, 1]\n[1, 2]\n[]"
+    ],
+    [
+     "p",
+     "Brute force = do loop, har pair check = O(n²). Dict wala = ek loop = **O(n) time, O(n) space**. IQ mein dono batao: pehle brute, phir optimize."
+    ],
+    [
+     "sketch",
+     {
+      "k": "boxes",
+      "title": "seen dict (target 9)",
+      "items": [
+       {
+        "label": "2",
+        "value": "index 0"
+       },
+       {
+        "label": "need at i=1",
+        "value": "9-7 = 2 ✓"
+       }
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "from collections import Counter\n\ndef is_anagram(a, b):\n    return Counter(a) == Counter(b)\n\ndef group_anagrams(words):\n    groups = {}\n    for w in words:\n        key = \"\".join(sorted(w))\n        groups.setdefault(key, []).append(w)\n    return list(groups.values())\n\nprint(is_anagram(\"listen\", \"silent\"))\nprint(group_anagrams([\"eat\", \"tea\", \"tan\", \"ate\", \"nat\"]))",
+     "True\n[['eat', 'tea', 'ate'], ['tan', 'nat']]"
+    ],
+    [
+     "p",
+     "**Pattern 2: Two pointers.** Do ungli: ek shuru mein, ek aakhir mein, beech ki taraf chalo. Sorted array ya palindrome mein kaam aata hai. O(n) time, O(1) space."
+    ],
+    [
+     "sketch",
+     {
+      "k": "array",
+      "title": "Two pointers",
+      "items": [
+       "L→",
+       "a",
+       "b",
+       "b",
+       "a",
+       "←R"
+      ],
+      "index": false
+     }
+    ],
+    [
+     "code",
+     "python",
+     "def is_palindrome(s):\n    s = [c.lower() for c in s if c.isalnum()]\n    l, r = 0, len(s) - 1\n    while l < r:\n        if s[l] != s[r]:\n            return False\n        l += 1\n        r -= 1\n    return True\n\ndef pair_sum_sorted(nums, target):\n    l, r = 0, len(nums) - 1\n    while l < r:\n        s = nums[l] + nums[r]\n        if s == target:\n            return (nums[l], nums[r])\n        if s < target:\n            l += 1          # chhota hai, bada lo\n        else:\n            r -= 1          # bada hai, chhota lo\n    return None\n\nprint(is_palindrome(\"A man, a plan, a canal: Panama\"))\nprint(pair_sum_sorted([1, 3, 4, 6, 8, 11], 10))",
+     "True\n(4, 6)"
+    ],
+    [
+     "p",
+     "**Pattern 3: Sliding window.** Lagaataar (continuous) hisse ka sawaal: \"k din ka max total\", \"bina repeat wala sabse lamba substring\". Window aage khiskao, poora dobara mat jodo."
+    ],
+    [
+     "analogy",
+     "Train ki khidki: train aage badhti hai, ek naya khamba khidki mein aata hai, ek purana nikal jaata hai. Poora nazara dobara nahi ginte."
+    ],
+    [
+     "code",
+     "python",
+     "def max_sum_k(nums, k):\n    window = sum(nums[:k])\n    best = window\n    for i in range(k, len(nums)):\n        window += nums[i] - nums[i - k]   # naya aaya, purana gaya\n        best = max(best, window)\n    return best\n\ndef longest_unique(s):\n    last = {}\n    start = best = 0\n    for i, c in enumerate(s):\n        if c in last and last[c] >= start:\n            start = last[c] + 1\n        last[c] = i\n        best = max(best, i - start + 1)\n    return best\n\nprint(max_sum_k([2, 1, 5, 1, 3, 2], 3))\nprint(longest_unique(\"abcabcbb\"))\n\ndef max_profit(prices):\n    low = prices[0]\n    best = 0\n    for p in prices:\n        low = min(low, p)          # ab tak ka sasta din\n        best = max(best, p - low)  # aaj bechu toh?\n    return best\n\nprint(max_profit([7, 1, 5, 3, 6, 4]))",
+     "9\n3\n5"
+    ],
+    [
+     "warn",
+     "Common galti: IQ mein seedha code likhna shuru kar dena. Pehle sawaal clear karo (empty list? negative numbers? duplicates?), example pe zor se socho, phir code. Interviewer ko tumhari **soch** sunni hai."
+    ]
+   ]
+  },
+  {
+   "title": "DSA part 2 — stack, queue, binary search, sorting, recursion",
+   "blocks": [
+    [
+     "p",
+     "**Stack** = LIFO (Last In First Out). Jo aakhir mein aaya, woh pehle niklega. Python mein list hi stack hai: `append` = push, `pop` = pop, dono O(1). Kaam: undo button, browser back, function call stack, brackets check."
+    ],
+    [
+     "analogy",
+     "Stack = plates ka dher: upar rakho, upar se uthao. **Queue** = chai ki line: jo pehle aaya, use pehle chai (FIFO)."
+    ],
+    [
+     "sketch",
+     {
+      "k": "stack",
+      "title": "Stack: \"([{\"",
+      "items": [
+       "{  ← top",
+       "[",
+       "("
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "def valid_parentheses(s):\n    pairs = {\")\": \"(\", \"]\": \"[\", \"}\": \"{\"}\n    stack = []\n    for ch in s:\n        if ch in \"([{\":\n            stack.append(ch)\n        elif ch in pairs:\n            if not stack or stack.pop() != pairs[ch]:\n                return False\n    return not stack\n\nfor t in [\"()[]{}\", \"([)]\", \"{[]}\", \"((\"]:\n    print(t, valid_parentheses(t))",
+     "()[]{} True\n([)] False\n{[]} True\n(( False"
+    ],
+    [
+     "tip",
+     "Dhyan se dekh: aakhir mein `return not stack` — agar koi bracket khula reh gaya (\"((\") toh stack khaali nahi, matlab False. Yeh edge case log bhool jaate hain."
+    ],
+    [
+     "code",
+     "python",
+     "from collections import deque\n\nq = deque()\nq.append(\"order1\")\nq.append(\"order2\")\nq.append(\"order3\")\nprint(q.popleft())     # FIFO: pehla aaya pehle gaya\nprint(list(q))\n\n# Last 3 sensor readings ka moving window\nlast3 = deque(maxlen=3)\nfor r in [10, 20, 30, 40]:\n    last3.append(r)\nprint(list(last3), sum(last3) / len(last3))",
+     "order1\n['order2', 'order3']\n[20, 30, 40] 30.0"
+    ],
+    [
+     "warn",
+     "Common galti: queue ke liye `list.pop(0)` use karna. Yeh O(n) hai (saare items khisakte hain). `deque.popleft()` O(1) hai."
+    ],
+    [
+     "p",
+     "**Binary search** = **sorted** list mein beech mein dekho; target chhota hai toh left aadha, bada hai toh right aadha. Har step mein aadha kaam khatam = **O(log n)**. 10 lakh items mein sirf ~20 steps."
+    ],
+    [
+     "analogy",
+     "Dictionary (shabdkosh) mein \"Python\" dhoondhna: beech mein kholo, P se pehle hai ya baad? Aadha phenk do. Page by page koi nahi dhoondhta."
+    ],
+    [
+     "sketch",
+     {
+      "k": "array",
+      "title": "Binary search: 23",
+      "items": [
+       "2",
+       "5",
+       "8",
+       "12",
+       "16",
+       "23",
+       "38"
+      ],
+      "index": true
+     }
+    ],
+    [
+     "code",
+     "python",
+     "def binary_search(arr, target):\n    lo, hi = 0, len(arr) - 1\n    steps = 0\n    while lo <= hi:\n        steps += 1\n        mid = (lo + hi) // 2\n        if arr[mid] == target:\n            return mid, steps\n        if arr[mid] < target:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return -1, steps\n\narr = [2, 5, 8, 12, 16, 23, 38]\nprint(binary_search(arr, 23))\nprint(binary_search(arr, 7))\nprint(binary_search(list(range(1_000_000)), 999_999))\n\nimport bisect   # ready-made binary search\nprint(bisect.bisect_left([40, 55, 70, 85, 90], 72))",
+     "(5, 2)\n(-1, 3)\n(999999, 20)\n3"
+    ],
+    [
+     "tip",
+     "ML connection: decision tree split dhoondhna, threshold tune karna, sorted embeddings mein range — sab mein binary search wali soch aati hai. `while lo <= hi` aur `mid ± 1` — off-by-one galti se bacho."
+    ],
+    [
+     "p",
+     "**Sorting.** Python ka `sorted()` / `.sort()` = **Timsort**, O(n log n), stable (barabar values ka order nahi badalta). IQ mein `key=` bahut poochte hain. Kabhi khud sort likhne ko bolte hain — tab **merge sort** (divide and conquer) likho, neeche hai."
+    ],
+    [
+     "code",
+     "python",
+     "models = [(\"svm\", 0.86), (\"rf\", 0.91), (\"lr\", 0.84), (\"xgb\", 0.91)]\nprint(sorted(models, key=lambda m: m[1], reverse=True))\nprint(sorted(models, key=lambda m: (-m[1], m[0])))",
+     "[('rf', 0.91), ('xgb', 0.91), ('svm', 0.86), ('lr', 0.84)]\n[('rf', 0.91), ('xgb', 0.91), ('svm', 0.86), ('lr', 0.84)]"
+    ],
+    [
+     "sketch",
+     {
+      "k": "tree",
+      "title": "Merge sort",
+      "root": {
+       "label": "[5,2,4,1]",
+       "children": [
+        {
+         "label": "[5,2]",
+         "children": [
+          {
+           "label": "[5]",
+           "children": []
+          },
+          {
+           "label": "[2]",
+           "children": []
+          }
+         ]
+        },
+        {
+         "label": "[4,1]",
+         "children": [
+          {
+           "label": "[4]",
+           "children": []
+          },
+          {
+           "label": "[1]",
+           "children": []
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ],
+    [
+     "code",
+     "python",
+     "def merge_sort(a):\n    if len(a) <= 1:             # base case\n        return a\n    mid = len(a) // 2\n    left = merge_sort(a[:mid])  # recursion\n    right = merge_sort(a[mid:])\n    out, i, j = [], 0, 0\n    while i < len(left) and j < len(right):\n        if left[i] <= right[j]:\n            out.append(left[i]); i += 1\n        else:\n            out.append(right[j]); j += 1\n    return out + left[i:] + right[j:]\n\nprint(merge_sort([5, 2, 4, 1, 9, 3]))",
+     "[1, 2, 3, 4, 5, 9]"
+    ],
+    [
+     "p",
+     "**Recursion** = function khud ko chhote input ke saath bulata hai. Do cheezein zaroori: **base case** (kab rukna hai) aur **chhota step** (har baar problem chhoti ho)."
+    ],
+    [
+     "code",
+     "python",
+     "def factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n - 1)\n\nfrom functools import lru_cache\n\n@lru_cache(maxsize=None)\ndef fib(n):\n    if n < 2:\n        return n\n    return fib(n - 1) + fib(n - 2)\n\ndef climb_stairs(n):           # 1 ya 2 step: kitne tareeke?\n    a, b = 1, 1\n    for _ in range(n):\n        a, b = b, a + b\n    return a\n\nprint(factorial(5), fib(30), climb_stairs(5))",
+     "120 832040 8"
+    ],
+    [
+     "warn",
+     "Common galti: base case bhool jaana → `RecursionError: maximum recursion depth exceeded`. Aur bina cache ke `fib(40)` bahut slow (O(2^n)). `lru_cache` (memoization) se O(n). Yahi **dynamic programming** ka beej hai."
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "IQ coding: 6 steps",
+      "steps": [
+       "Clarify",
+       "Brute force",
+       "Optimize",
+       "Code",
+       "Dry run",
+       "Big-O batao"
+      ],
+      "dir": "v"
+     }
+    ]
+   ]
+  },
+  {
+   "title": "Portfolio, IQ rounds, STAR aur career roadmap",
+   "blocks": [
+    [
+     "p",
+     "Resume pe \"Python, ML, LLM\" likhna aasaan hai. **Dikhana** mushkil hai. Recruiter pehle GitHub aur live demo dekhta hai. 3-5 **achhe, poore** projects = 30 adhoore notebooks se zyada kaam ke. Neeche woh projects jo hire karwaate hain, aur har ek mein kya dikhana hai:"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Portfolio projects",
+      "head": [
+       "Project",
+       "Stack",
+       "Kya dikhao"
+      ],
+      "rows": [
+       [
+        "RAG doc chatbot",
+        "LangChain+FAISS+FastAPI",
+        "Sources, eval"
+       ],
+       [
+        "ML pipeline + API",
+        "sklearn+FastAPI+Docker",
+        "EDA, 3+ models"
+       ],
+       [
+        "Factory defect CV",
+        "CNN/YOLO+Streamlit",
+        "Before/after"
+       ],
+       [
+        "AI agent tool",
+        "LLM+tools+memory",
+        "Tool calls log"
+       ],
+       [
+        "Prod AI app",
+        "Compose+tests+CI",
+        "Live link"
+       ]
+      ]
+     }
+    ],
+    [
+     "list",
+     [
+      "**1. RAG Document Chatbot** (cable TDS/IS standards ke PDFs pe): PDF upload, chunking, embeddings, source citation. Dikhao: chunk size ka experiment, 20 sawaalon ka eval set, \"jawab nahi mila\" handle karna.",
+      "**2. ML pipeline + API** (cable price / order delay prediction): EDA, feature engineering, 3-5 models compare, cross-validation, best model FastAPI + Docker mein. Dikhao: metrics table aur kyun yeh model chuna.",
+      "**3. Computer vision** (cable surface defect ya drum label OCR): data collect, augmentation, accuracy/confusion matrix, Streamlit demo. Dikhao: galat predictions ka analysis.",
+      "**4. AI agent** (ERP se stock/order poochne wala agent): tools (SQL query, calculator), memory, guardrails. Dikhao: agent ke steps ka log, failure cases.",
+      "**5. Production AI app**: upar wala kisi ek ko Streamlit + FastAPI + docker-compose + tests + GitHub Actions CI ke saath. Yeh **centerpiece** hai."
+     ]
+    ],
+    [
+     "tip",
+     "Tera unique advantage: tu ek real factory (GEEP, cable manufacturing) mein kaam karta hai. Real business problem + real data (anonymised) wala project = 95% candidates se alag. \"Maine Kaggle Titanic kiya\" sab bolte hain."
+    ],
+    [
+     "p",
+     "**Har project ke README mein:** problem (business language mein), demo GIF/screenshot + live link, architecture diagram, tech stack, setup steps (`git clone`, `docker compose up`), results (numbers!), aage kya improve karoge. Repo mein `.gitignore`, `requirements.txt` (pinned), `.env.example`, `Dockerfile`, `tests/`."
+    ],
+    [
+     "p",
+     "**AI/ML IQ rounds kaise hote hain:**"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "IQ rounds",
+      "steps": [
+       "HR screening",
+       "Coding (DSA)",
+       "ML/LLM theory",
+       "Project deep-dive",
+       "System design",
+       "HR/offer"
+      ],
+      "dir": "v"
+     }
+    ],
+    [
+     "list",
+     [
+      "**Screening (20-30 min):** \"Tell me about yourself\", kyun yeh role, notice period, salary. 2-minute intro taiyaar rakho.",
+      "**Coding (45-60 min):** 1-2 DSA sawaal (Lesson 4-5 ke patterns) + kabhi pandas/SQL.",
+      "**ML/LLM theory:** bias-variance, overfitting, metrics, gradient descent, transformers, RAG, embeddings.",
+      "**Project deep-dive:** tumhara resume ka project — har line pe \"kyun?\" poochenge.",
+      "**System design (mid level):** \"design a support chatbot\" — clarify, architecture, data, scale, monitoring.",
+      "**HR/managerial:** teamwork, conflict, failure se kya seekha."
+     ]
+    ],
+    [
+     "sketch",
+     {
+      "k": "boxes",
+      "title": "Project explain: STAR",
+      "items": [
+       {
+        "label": "S - Situation",
+        "value": "kya haalat thi"
+       },
+       {
+        "label": "T - Task",
+        "value": "mera kaam kya"
+       },
+       {
+        "label": "A - Action",
+        "value": "maine kya kiya"
+       },
+       {
+        "label": "R - Result",
+        "value": "number mein fayda"
+       }
+      ]
+     }
+    ],
+    [
+     "code",
+     "text",
+     "S: GEEP mein sales team ko har cable quote ke liye TDS aur IS standard\n   PDFs mein haath se dhoondhna padta tha, ek quote mein ~20 min.\nT: Mujhe aisa tool banana tha jo sawaal ka jawab source ke saath de.\nA: Maine 300 PDFs ko chunk kiya (500 tokens, 50 overlap), embeddings\n   FAISS mein rakhi, FastAPI /chat endpoint banaya, Streamlit UI,\n   Docker se server pe deploy kiya. 40 sawaalon ka eval set banaya.\nR: Search time 20 min se ~2 min, eval pe 85% sahi jawab.\n   Galat jawab kam karne ke liye re-ranking add kiya (72% -> 85%).",
+     ""
+    ],
+    [
+     "tip",
+     "Dhyan se dekh: Action mein \"**maine**\" bolo, \"humne\" nahi — interviewer tumhara kaam jaanna chahta hai. Result mein **number** do. Aur ek **challenge + trade-off** zaroor batao (\"chunk chhote kiye toh context toota, isliye overlap rakha\")."
+    ],
+    [
+     "p",
+     "**Sabse zyada pooche jaane wale theory sawaal** (inke jawab IQ section mein hain, aur pichhle stages mein detail mein):"
+    ],
+    [
+     "list",
+     [
+      "Overfitting kya hai, kaise rokein? Bias-variance trade-off.",
+      "Precision vs recall vs F1 — kab kaunsa? Imbalanced data mein accuracy kyun dhokha deti hai.",
+      "Train/validation/test split aur cross-validation kyun.",
+      "Gradient descent, learning rate, L1 vs L2 regularization.",
+      "Random forest vs gradient boosting.",
+      "Transformer / attention simple shabdon mein. Tokens, context window, temperature.",
+      "RAG kya hai, kab fine-tuning? Hallucination kaise kam karein.",
+      "Embeddings aur cosine similarity. Vector DB kyun.",
+      "Model ko production mein kaise monitor karein (data drift)."
+     ]
+    ],
+    [
+     "p",
+     "**Career roadmap** (tumhare liye practical):"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Roadmap",
+      "head": [
+       "Samay",
+       "Focus",
+       "Output"
+      ],
+      "rows": [
+       [
+        "Mahina 1-2",
+        "DSA roz 1-2 sawaal",
+        "60 problems"
+       ],
+       [
+        "Mahina 2-3",
+        "Project 1-2 + Docker",
+        "GitHub + demo"
+       ],
+       [
+        "Mahina 3-4",
+        "Project 3-5, README",
+        "Live links"
+       ],
+       [
+        "Mahina 4+",
+        "Apply + mock IQ",
+        "Calls"
+       ]
+      ]
+     }
+    ],
+    [
+     "p",
+     "**Resume tips:**"
+    ],
+    [
+     "list",
+     [
+      "**1 page.** Upar: naam, phone, email, GitHub, LinkedIn, portfolio link.",
+      "Headline: \"AI/ML Engineer | Python | ML | LLM/RAG | FastAPI | Docker\".",
+      "Projects section education ke upar (fresher/switcher ke liye).",
+      "Har line = action verb + kya + kaise + **number**: \"Built RAG chatbot over 300 TDS PDFs; cut search time 90%\".",
+      "Current job ko AI angle se likho: automation, data, ERP integration — jo bhi real kiya.",
+      "Generic objective, rating bars (Python 4/5), photo — mat daalo. Skills wahi likho jin pe sawaal jhel sako.",
+      "ATS ke liye job description ke keywords (jo sach hain) use karo."
+     ]
+    ],
+    [
+     "warn",
+     "Common galti: resume pe woh likhna jo aata nahi (\"Kubernetes expert\"). Interviewer wahi poochta hai aur trust toot jaata hai. Imaandaari + \"main yeh seekh raha hoon\" zyada achha lagta hai."
+    ],
+    [
+     "p",
+     "**Job kahan dhoondhein:** LinkedIn, Naukri, Instahyre, Wellfound (startups), company career pages. Sabse asardaar = **referral**: LinkedIn pe log se juddo, apna project post karo, phir politely referral maango. Mock IQ dosto ke saath ya khud ko record karke practice karo."
+    ]
+   ]
+  }
+ ],
+ "teach": [
+  {
+   "say": "Last stage! Ab tak model banana seekha. Ab seekhenge use duniya tak pahunchana, aur job pakadna.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Code",
+     "Git",
+     "Docker",
+     "Deploy",
+     "Job"
+    ],
+    "dir": "h"
+   },
+   "code": null
+  },
+  {
+   "say": "Git ek diary hai. add se staging, commit se photo, push se GitHub pe.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Edit",
+     "git add",
+     "git commit",
+     "git push"
+    ],
+    "dir": "h"
+   },
+   "code": "git add .\ngit commit -m \"Add predict API\"\ngit push"
+  },
+  {
+   "say": "Naya feature hamesha nayi branch pe. Kaam ho gaya toh Pull Request kholo, review ke baad merge.",
+   "sketch": {
+    "k": "tree",
+    "root": {
+     "label": "main",
+     "children": [
+      {
+       "label": "feature/x",
+       "children": []
+      },
+      {
+       "label": "fix/y",
+       "children": []
+      }
+     ]
+    }
+   },
+   "code": "git checkout -b feature/x"
+  },
+  {
+   "say": "Docker tiffin box hai. Dockerfile recipe, image packed dibba, container khula hua chalta khaana.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Dockerfile",
+     "docker build",
+     "Image",
+     "docker run",
+     "Container"
+    ],
+    "dir": "h"
+   },
+   "code": "docker build -t ml-api .\ndocker run -p 8000:8000 ml-api"
+  },
+  {
+   "say": "Teen services ek saath? docker-compose. Ek YAML, ek command, sab chalu.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Streamlit",
+     "FastAPI",
+     "Postgres"
+    ],
+    "dir": "h"
+   },
+   "code": "docker compose up -d"
+  },
+  {
+   "say": "Streamlit counter hai, FastAPI godown. User counter pe button dabata hai, godown mein model kaam karta hai.",
+   "sketch": {
+    "k": "stack",
+    "items": [
+     "User",
+     "Streamlit UI",
+     "FastAPI",
+     "Model / RAG",
+     "Data"
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "Big-O matlab input badhe toh kaam kitna badhe. Dict lookup O(1), ek loop O(n), nested loop O(n²).",
+   "sketch": {
+    "k": "chart",
+    "type": "bar",
+    "points": [
+     [
+      "O(1)",
+      1
+     ],
+     [
+      "O(log n)",
+      3
+     ],
+     [
+      "O(n)",
+      8
+     ],
+     [
+      "O(n²)",
+      20
+     ]
+    ],
+    "xl": "",
+    "yl": "steps"
+   },
+   "code": null
+  },
+  {
+   "say": "Two Sum: har number pe poocho, mera jodidaar pehle dekha hai kya? Dict mein dekho. Ek hi loop.",
+   "sketch": {
+    "k": "boxes",
+    "items": [
+     {
+      "label": "seen",
+      "value": "{2: 0}"
+     },
+     {
+      "label": "x = 7",
+      "value": "need 2 ✓"
+     }
+    ]
+   },
+   "code": "need = target - x\nif need in seen: return [seen[need], i]"
+  },
+  {
+   "say": "Brackets check karne ke liye stack. Khula bracket upar rakho, band bracket aaye toh upar wala match karo.",
+   "sketch": {
+    "k": "stack",
+    "items": [
+     "[  ← top",
+     "(",
+     "{"
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "IQ mein project STAR se batao: Situation, Task, Action, Result. Result mein number zaroor.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Situation",
+     "Task",
+     "Action",
+     "Result"
+    ],
+    "dir": "h"
+   },
+   "code": null
+  }
+ ],
+ "practice": [
+  {
+   "q": "**Two Sum (dict se)** — `two_sum(nums, target)` likho jo un do numbers ke index list mein return kare jinka jod target ho (nahi mile toh `[]`). Sirf ek loop aur dict use karo. Phir yeh 3 print karo:\n`two_sum([2, 7, 11, 15], 9)`\n`two_sum([3, 2, 4], 6)`\n`two_sum([1, 5, 3], 100)`",
+   "starter": "def two_sum(nums, target):\n    seen = {}  # value -> index\n    for i, x in enumerate(nums):\n        # TODO: need = target - x\n        # TODO: agar need seen mein hai toh [seen[need], i] return karo\n        # TODO: seen[x] = i\n        pass\n    return []\n\nprint(two_sum([2, 7, 11, 15], 9))\nprint(two_sum([3, 2, 4], 6))\nprint(two_sum([1, 5, 3], 100))\n",
+   "expect": "[0, 1]\n[1, 2]\n[]",
+   "hint": "Pehle check karo, phir dict mein daalo. Ulta karoge toh [3,2,4] mein 3 khud se jud jayega (3+3=6).",
+   "solution": "def two_sum(nums, target):\n    seen = {}\n    for i, x in enumerate(nums):\n        need = target - x\n        if need in seen:\n            return [seen[need], i]\n        seen[x] = i\n    return []\n\nprint(two_sum([2, 7, 11, 15], 9))\nprint(two_sum([3, 2, 4], 6))\nprint(two_sum([1, 5, 3], 100))\n"
+  },
+  {
+   "q": "**Valid Parentheses (stack se)** — `is_valid(s)` likho jo True/False de: har khula bracket `( [ {` sahi order mein band hua ya nahi. Phir in strings ke liye `string -> result` print karo: `\"()[]{}\"`, `\"([)]\"`, `\"{[()]}\"`, `\"(((\"`, `\"\"`.",
+   "starter": "def is_valid(s):\n    pairs = {')': '(', ']': '[', '}': '{'}\n    stack = []\n    for ch in s:\n        if ch in '([{':\n            pass  # TODO: push karo\n        else:\n            pass  # TODO: stack khaali ya upar wala match nahi -> False\n    return False  # TODO: sahi condition (stack khaali?)\n\nfor t in [\"()[]{}\", \"([)]\", \"{[()]}\", \"(((\", \"\"]:\n    print(repr(t), '->', is_valid(t))\n",
+   "expect": "'()[]{}' -> True\n'([)]' -> False\n'{[()]}' -> True\n'(((' -> False\n'' -> True",
+   "hint": "Closing bracket pe: `if not stack or stack.pop() != pairs[ch]: return False`. Aakhir mein `return not stack`.",
+   "solution": "def is_valid(s):\n    pairs = {')': '(', ']': '[', '}': '{'}\n    stack = []\n    for ch in s:\n        if ch in '([{':\n            stack.append(ch)\n        else:\n            if not stack or stack.pop() != pairs[ch]:\n                return False\n    return not stack\n\nfor t in [\"()[]{}\", \"([)]\", \"{[()]}\", \"(((\", \"\"]:\n    print(repr(t), '->', is_valid(t))\n"
+  },
+  {
+   "q": "**Binary search + steps** — sorted cable sizes `[1.5, 2.5, 4, 6, 10, 16, 25, 35, 50]` mein `binary_search(arr, target)` likho jo `(index, steps)` return kare (nahi mila toh index `-1`). steps = loop kitni baar chala. `16`, `1.5` aur `20` ke liye print karo, format: `16 -> (index, steps)`.",
+   "starter": "def binary_search(arr, target):\n    lo, hi = 0, len(arr) - 1\n    steps = 0\n    while lo <= hi:\n        steps += 1\n        mid = (lo + hi) // 2\n        # TODO: mila -> (mid, steps)\n        # TODO: arr[mid] < target -> lo = mid + 1, warna hi = mid - 1\n        break\n    return (-1, steps)\n\nsizes = [1.5, 2.5, 4, 6, 10, 16, 25, 35, 50]\nfor t in [16, 1.5, 20]:\n    print(t, '->', binary_search(sizes, t))\n",
+   "expect": "16 -> (5, 3)\n1.5 -> (0, 3)\n20 -> (-1, 3)",
+   "hint": "Pehla mid = (0+8)//2 = 4 (value 10). 16 bada hai toh right side. `break` hata dena.",
+   "solution": "def binary_search(arr, target):\n    lo, hi = 0, len(arr) - 1\n    steps = 0\n    while lo <= hi:\n        steps += 1\n        mid = (lo + hi) // 2\n        if arr[mid] == target:\n            return (mid, steps)\n        if arr[mid] < target:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return (-1, steps)\n\nsizes = [1.5, 2.5, 4, 6, 10, 16, 25, 35, 50]\nfor t in [16, 1.5, 20]:\n    print(t, '->', binary_search(sizes, t))\n"
+  }
+ ],
+ "quiz": [
+  {
+   "q": "Kaunsa command file ko staging area mein bhejta hai?",
+   "o": [
+    "git commit",
+    "git add",
+    "git push",
+    "git init"
+   ],
+   "a": 1,
+   "why": "`git add` staging mein rakhta hai; `commit` uski photo leta hai; `push` GitHub bhejta hai."
+  },
+  {
+   "q": "Pull Request (PR) ka main kaam kya hai?",
+   "o": [
+    "Branch ka code review ke baad main mein merge karwana",
+    "GitHub se code download karna",
+    "Purana commit delete karna",
+    "Docker image banana"
+   ],
+   "a": 0,
+   "why": "PR = \"meri branch main mein milao\" — review aur CI ke baad merge hota hai."
+  },
+  {
+   "q": "Docker image aur container mein sahi farak?",
+   "o": [
+    "Dono same cheez hain",
+    "Container recipe hai, image chalta process",
+    "Image packed template hai, container uska chalta hua instance",
+    "Image sirf Windows pe chalti hai"
+   ],
+   "a": 2,
+   "why": "Image read-only template (dibba); container usse chala hua process. Ek image se kai containers."
+  },
+  {
+   "q": "Dockerfile mein `COPY requirements.txt .` ko `COPY . .` se pehle alag kyun likhte hain?",
+   "o": [
+    "Security ke liye",
+    "Image chhoti karne ke liye",
+    "Yeh zaroori syntax hai",
+    "Layer cache: code badle toh bhi pip install dobara na chale"
+   ],
+   "a": 3,
+   "why": "Requirements wali layer cache ho jaati hai; sirf code badalne pe build fast rehta hai."
+  },
+  {
+   "q": "docker-compose mein `ui` service `api` service ko kis URL se bulayegi?",
+   "o": [
+    "http://localhost:8000",
+    "http://api:8000",
+    "http://127.0.0.1:8501",
+    "http://docker:8000"
+   ],
+   "a": 1,
+   "why": "Compose network mein service ka naam hi hostname hai. Har container ka localhost alag hota hai."
+  },
+  {
+   "q": "Streamlit mein chat history refresh/click pe kyun mit jaati hai agar normal list mein rakho?",
+   "o": [
+    "Har interaction pe poori script dobara chalti hai",
+    "Streamlit list support nahi karta",
+    "Browser cache clear hota hai",
+    "Python memory leak"
+   ],
+   "a": 0,
+   "why": "Streamlit har click pe script upar se chalata hai; yaad rakhne ke liye `st.session_state` use karo."
+  },
+  {
+   "q": "Two Sum ka dict wala solution kitna time leta hai?",
+   "o": [
+    "O(n²)",
+    "O(log n)",
+    "O(n)",
+    "O(1)"
+   ],
+   "a": 2,
+   "why": "Ek loop (n) aur har step pe dict lookup O(1) → O(n) time, O(n) space."
+  },
+  {
+   "q": "Sorted list of 10 lakh items mein binary search lagbhag kitne steps leta hai?",
+   "o": [
+    "10 lakh",
+    "1000",
+    "500",
+    "20"
+   ],
+   "a": 3,
+   "why": "Har step aadha karta hai: log2(10,00,000) ≈ 20."
+  },
+  {
+   "q": "Queue (FIFO) ke liye Python mein best choice?",
+   "o": [
+    "list.pop(0)",
+    "collections.deque.popleft()",
+    "set.pop()",
+    "dict.popitem()"
+   ],
+   "a": 1,
+   "why": "`deque.popleft()` O(1) hai; `list.pop(0)` O(n) kyunki saare items khisakte hain."
+  },
+  {
+   "q": "STAR method mein 'R' mein sabse achha kya bolna chahiye?",
+   "o": [
+    "Measurable result, jaise \"search time 20 min se 2 min\"",
+    "Team ne kya kiya",
+    "Kaunsi language use ki",
+    "Project ka naam"
+   ],
+   "a": 0,
+   "why": "Result = number mein fayda. Isse impact saaf dikhta hai."
+  }
+ ],
+ "iq": [
+  {
+   "q": "Tell me about yourself (AI/ML role ke liye 2-minute jawab kaisa ho?)",
+   "a": "Present → past → future format: \"Main abhi GEEP Polymers (cable manufacturing) mein software developer hoon, jahan main ERP automation aur data tools pe kaam karta hoon. Pichhle mahino mein maine ML aur LLM pe focus kiya — ek RAG chatbot banaya jo TDS PDFs se source ke saath jawab deta hai, aur ek price prediction API FastAPI + Docker pe. Ab main ek AI/ML engineer role chahta hoon jahan real business problems pe models production mein le jaaun.\" 2 minute se kam, projects aur numbers ke saath."
+  },
+  {
+   "q": "Apna best project explain karo. (Project deep-dive)",
+   "a": "STAR use karo: Situation (business dard), Task (tumhara role), Action (architecture, data, model choice aur KYUN, ek trade-off), Result (number). Phir khud bata do kya improve karoge (eval set bada, re-ranking, monitoring). Interviewer har choice pe \"kyun\" poochega, jaise \"FAISS kyun, Postgres pgvector kyun nahi?\" — isliye har decision ka reason taiyaar rakho."
+  },
+  {
+   "q": "Two Sum solve karo aur complexity batao.",
+   "a": "Brute force: har pair check, O(n²). Optimized: ek dict mein value→index rakho; har number x pe `target - x` dict mein dhoondho. Mila toh dono index return. O(n) time, O(n) space.\n`need = target - x; if need in seen: return [seen[need], i]; seen[x] = i`\nPehle check, phir insert — taaki element khud se na jude."
+  },
+  {
+   "q": "Time complexity aur space complexity mein kya farak hai? Python list vs set mein `in` ki complexity?",
+   "a": "Time complexity = input badhne pe steps kaise badhte hain; space = extra memory kitni badhti hai. `x in list` O(n) hai kyunki ek-ek element dekhta hai; `x in set` average O(1) kyunki hashing se seedha bucket pe jaata hai. Isliye baar-baar membership check karna ho toh pehle set bana lo."
+  },
+  {
+   "q": "Overfitting kya hai aur kaise rokte ho?",
+   "a": "Model training data ratt leta hai — train pe accuracy bahut achhi, test/new data pe kharab (high variance). Rokne ke tareeke: zyada data / augmentation, simple model, regularization (L1/L2, dropout), early stopping, cross-validation se tune karna, tree mein max_depth limit. Pehchaan: train vs validation score ka bada gap."
+  },
+  {
+   "q": "Precision, recall, F1 — kab kya use karoge?",
+   "a": "Precision = jo positive bole unme kitne sach (false alarm kam karna ho, jaise spam filter). Recall = asli positives mein se kitne pakde (miss mehenga ho, jaise cable defect ya cancer detection). F1 = dono ka harmonic mean, imbalanced data pe. Imbalanced data (99% normal) mein accuracy dhokha deti hai — sab ko normal bolke bhi 99%."
+  },
+  {
+   "q": "RAG kya hai aur fine-tuning se kab behtar hai?",
+   "a": "RAG = sawaal ke hisaab se apne documents se relevant chunks retrieve karo (embeddings + vector search), aur LLM ko context ke saath do, taaki jawab grounded ho aur source dikhe. Jab knowledge baar-baar badalti hai, citations chahiye, ya data private hai — RAG behtar aur sasta. Fine-tuning tab jab model ka style/format/behaviour badalna ho, naya knowledge daalne ke liye nahi. Aksar dono saath bhi use hote hain."
+  },
+  {
+   "q": "Transformer mein attention simple shabdon mein samjhao.",
+   "a": "Har token baaki sab tokens ko dekh ke decide karta hai ki kiska kitna dhyan rakhe. Har token ka Query, Key, Value vector banta hai; Query·Key se score, softmax se weights, aur Values ka weighted sum naya representation. Isse \"bank\" ka matlab context (river ya money) se samajh aata hai, aur RNN ki tarah ek-ek step nahi, sab parallel chalta hai — isliye fast training."
+  },
+  {
+   "q": "Docker kyun use karte ho ML deployment mein? Image vs container?",
+   "a": "Docker code, libraries, Python version aur OS settings ek image mein pack karta hai, toh laptop, test server aur cloud pe same chalta hai — \"works on my machine\" khatam, aur scaling/rollback aasaan. Image = read-only template (Dockerfile se build), container = us image ka chalta hua instance. Compose se API + UI + DB ek command mein."
+  },
+  {
+   "q": "git merge aur git rebase mein farak? Merge conflict kaise solve karte ho?",
+   "a": "Merge do branches ki history jodta hai aur ek merge commit banata hai — safe, asli history dikhti hai. Rebase apne commits ko latest main ke upar dobara lagata hai — seedhi history, par shared/pushed branch pe rebase nahi karte kyunki history badal jaati hai. Conflict: file kholo, `<<<<<<<`/`=======`/`>>>>>>>` ke beech sahi code rakho, markers hatao, test chalao, `git add` + `git commit`."
+  },
+  {
+   "q": "Ek trained model ko production mein kaise le jaoge? (Mini system design)",
+   "a": "Model ko joblib/ONNX mein save, FastAPI service mein startup pe ek baar load, Pydantic se input validation, `/predict` aur `/health` endpoints. Docker image, CI (tests) ke baad deploy. Logging (latency, inputs, predictions), monitoring for data drift aur accuracy, model versioning (MLflow), aur rollback plan. LLM app ho toh caching, rate limit aur token cost tracking bhi."
+  },
+  {
+   "q": "Aapki weakness kya hai? / Aapke paas CS degree ya ML experience nahi, toh aapko kyun lein?",
+   "a": "Imaandaar aur sudhaar wala jawab: \"Mera formal ML industry experience kam hai, isliye maine 5 end-to-end projects banaye, jinme se do mere factory ke real problems pe hain, aur roz DSA practice karta hoon.\" Phir strength jodo: real business samajh, production data ke saath kaam, jaldi seekhna. Kabhi fake weakness (\"main zyada mehnat karta hoon\") mat bolo."
+  }
+ ]
+}

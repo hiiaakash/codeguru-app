@@ -1,0 +1,1302 @@
+{
+ "n": 12,
+ "id": "aiml-12",
+ "title": "LLMs, Prompting, LangChain & RAG",
+ "goal": "You will understand how an LLM works, build apps with the OpenAI/Claude API, write good prompts and get JSON output, write LangChain chains, and build a RAG chatbot (embeddings + vector DB) on your own documents and evaluate it.",
+ "lessons": [
+  {
+   "title": "What is an LLM — tokens, context window, temperature",
+   "blocks": [
+    [
+     "p",
+     "**LLM = Large Language Model.** A very big model trained on **huge text** like books, websites and code from the internet. It has only one job: **predict the next token** (the next piece of a word)."
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "LLM picks the next word",
+      "steps": [
+       "The capital of India is",
+       "New",
+       "Delhi",
+       "."
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "analogy",
+     "Have you seen your mobile keyboard's autocomplete? Type \"Good\" and it suggests \"morning\". An LLM is the same thing, just 1000 times bigger and smarter. ChatGPT, Claude, Gemini, Llama are all LLMs."
+    ],
+    [
+     "p",
+     "This tells us two important things:\n1. An LLM does not check the truth, it picks the **most likely word from patterns**.\n2. So sometimes it says something **confidently wrong**. This is called **hallucination** (details in Lesson 3)."
+    ],
+    [
+     "p",
+     "**Token** = a small piece of text. An LLM reads tokens, not words. In English roughly **1 token ≈ ¾ word** (100 words ≈ 130 tokens). Hindi/Hinglish needs more tokens to say the same thing."
+    ],
+    [
+     "sketch",
+     {
+      "k": "array",
+      "title": "\"Cable costing\" = 3 tokens",
+      "items": [
+       "Cable",
+       " cost",
+       "ing"
+      ],
+      "index": true
+     }
+    ],
+    [
+     "p",
+     "The real tokenizer (like `tiktoken`) comes with the model. But we can make a rough guess ourselves:"
+    ],
+    [
+     "code",
+     "python",
+     "text = \"Cable costing ka hisaab Python se karo\"\nwords = text.split()\nprint(\"Words:\", len(words))\nprint(\"Approx tokens:\", round(len(words) / 0.75))",
+     "Words: 7\nApprox tokens: 9"
+    ],
+    [
+     "analogy",
+     "Like a taxi meter: you pay by the kilometer (tokens). You are billed for **input tokens + output tokens** both, and the model's limit is also in tokens."
+    ],
+    [
+     "p",
+     "**Context window** = how many tokens the model can read at once: system prompt + full history + your documents + the answer, all together. Small models ~8K tokens, big models 100K to 1M+ tokens. Cross the limit and you get an error, or the old part gets cut off."
+    ],
+    [
+     "analogy",
+     "Like a student's desk: they can read only as many pages at once as fit on the desk (context window). The whole library cannot fit on the desk. The fix for this problem is **RAG** (Lesson 6)."
+    ],
+    [
+     "p",
+     "**Temperature** = the randomness knob. The model gives a score to every possible next word. Temperature decides whether to pick only the top word or give other words a chance too. Look carefully, this is a simulation in pure Python:"
+    ],
+    [
+     "code",
+     "python",
+     "import math\n\nscores = {\"Delhi\": 4.0, \"Mumbai\": 2.0, \"Patna\": 1.0}\n\ndef probs(t):\n    exps = {w: math.exp(s / t) for w, s in scores.items()}\n    total = sum(exps.values())\n    return {w: round(e / total, 2) for w, e in exps.items()}\n\nprint(\"t=0.5\", probs(0.5))\nprint(\"t=1.0\", probs(1.0))\nprint(\"t=2.0\", probs(2.0))",
+     "t=0.5 {'Delhi': 0.98, 'Mumbai': 0.02, 'Patna': 0.0}\nt=1.0 {'Delhi': 0.84, 'Mumbai': 0.11, 'Patna': 0.04}\nt=2.0 {'Delhi': 0.63, 'Mumbai': 0.23, 'Patna': 0.14}"
+    ],
+    [
+     "p",
+     "Low temperature (0.5) → \"Delhi\" has a 98% chance, the answer is the same every time. High temperature (2.0) → other words get a chance too, the answer is creative but unpredictable. Temperature 0 = always the top word."
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "How much temperature, when",
+      "head": [
+       "Temp",
+       "Answer",
+       "When"
+      ],
+      "rows": [
+       [
+        "0",
+        "same every time",
+        "extraction, facts"
+       ],
+       [
+        "0.7",
+        "a bit creative",
+        "chat, writing"
+       ],
+       [
+        "1+",
+        "very random",
+        "poems, ideas"
+       ]
+      ]
+     }
+    ],
+    [
+     "tip",
+     "Look carefully: getting the cable size from a tender, telling a document's category, building JSON → **temperature 0**. There you need the same, reliable answer every time."
+    ],
+    [
+     "p",
+     "**The 3 roles of messages** — this is the base of every API:"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "3 roles",
+      "head": [
+       "Role",
+       "What it is"
+      ],
+      "rows": [
+       [
+        "system",
+        "AI's role + rules"
+       ],
+       [
+        "user",
+        "the human's question"
+       ],
+       [
+        "assistant",
+        "AI's previous answer"
+       ]
+      ]
+     }
+    ],
+    [
+     "analogy",
+     "A new employee: system prompt = the rulebook given at joining (\"You are GEEP's assistant, only Hinglish\"). User = the customer's question. Assistant = what the employee said earlier."
+    ],
+    [
+     "warn",
+     "Common mistake: thinking the LLM remembers the last conversation. **Every API call is completely separate, the model has no memory.** ChatGPT \"remembers\" because it sends the full history again every time. Like the movie Ghajini — you have to show the diary every time."
+    ]
+   ]
+  },
+  {
+   "title": "OpenAI and Claude API — talking to AI from code",
+   "blocks": [
+    [
+     "p",
+     "When you type a message in ChatGPT or Claude, an **API call** goes out behind the scenes: your message goes in a POST request, and the AI's answer comes back in a JSON response. We will do the same thing from Python. (Remember HTTP/API from Stage 7? Same thing.)"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "The journey of an API call",
+      "steps": [
+       "Your code",
+       "POST + key",
+       "LLM server",
+       "JSON answer"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "Every AI API needs **3 things**:\n1. **API key** — your identity (you get it after signup, your bill is made on it)\n2. **Model name** — which brain (gpt-4o-mini, claude-sonnet...)\n3. **Messages** — system + user (+ old history)"
+    ],
+    [
+     "warn",
+     "Common mistake: writing the API key directly in code and pushing it to GitHub. Bots steal the key within minutes and your bill runs into thousands. Always keep the key in an **environment variable** or a `.env` file (and put `.env` in `.gitignore`)."
+    ],
+    [
+     "code",
+     "bash",
+     "# Terminal mein (Linux/Mac). Windows: setx OPENAI_API_KEY \"...\"\nexport OPENAI_API_KEY=\"sk-...apni-key...\"\nexport ANTHROPIC_API_KEY=\"sk-ant-...apni-key...\"\npip install openai anthropic",
+     ""
+    ],
+    [
+     "p",
+     "**OpenAI (GPT) API:**"
+    ],
+    [
+     "code",
+     "python",
+     "import os\nfrom openai import OpenAI\n\nclient = OpenAI(api_key=os.getenv(\"OPENAI_API_KEY\"))\n\nresponse = client.chat.completions.create(\n    model=\"gpt-4o-mini\",\n    messages=[\n        {\"role\": \"system\", \"content\": \"Tum ek Python teacher ho. Hinglish mein jawab do.\"},\n        {\"role\": \"user\", \"content\": \"List comprehension kya hai?\"},\n    ],\n    temperature=0.7,\n    max_tokens=300,\n)\n\nprint(response.choices[0].message.content)\nprint(\"Tokens used:\", response.usage.total_tokens)",
+     ""
+    ],
+    [
+     "p",
+     "When you run this, the AI's Hinglish answer is printed, then how many tokens were used (like `Tokens used: 182`). `max_tokens` limits the length of the answer (and the cost)."
+    ],
+    [
+     "p",
+     "**Anthropic (Claude) API:**"
+    ],
+    [
+     "code",
+     "python",
+     "import os\nimport anthropic\n\nclient = anthropic.Anthropic(api_key=os.getenv(\"ANTHROPIC_API_KEY\"))\n\nresponse = client.messages.create(\n    model=\"claude-sonnet-4-5\",          # model naam docs se check karo, badalte rehte hain\n    max_tokens=500,                     # Claude mein zaroori hai\n    system=\"Tum GEEP Polymers ke AI assistant ho. Hinglish mein jawab do.\",\n    messages=[\n        {\"role\": \"user\", \"content\": \"XLPE cable PVC se behtar kyun hai?\"},\n    ],\n)\n\nprint(response.content[0].text)\nprint(\"Tokens:\", response.usage.input_tokens + response.usage.output_tokens)",
+     ""
+    ],
+    [
+     "p",
+     "The output shows Claude's answer and the total tokens. The pattern is exactly the same: create a client → send model + messages → take out the answer."
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "OpenAI vs Claude",
+      "head": [
+       "Thing",
+       "OpenAI",
+       "Claude"
+      ],
+      "rows": [
+       [
+        "System",
+        "inside messages",
+        "separate system="
+       ],
+       [
+        "Answer",
+        "choices[0].message",
+        "content[0].text"
+       ],
+       [
+        "max_tokens",
+        "optional",
+        "required"
+       ],
+       [
+        "Tokens",
+        "total_tokens",
+        "input + output"
+       ]
+      ]
+     }
+    ],
+    [
+     "p",
+     "**Streaming** = don't wait for the full answer to arrive at once, show it word-by-word (like ChatGPT appears to type). The user feels the app is fast."
+    ],
+    [
+     "code",
+     "python",
+     "with client.messages.stream(\n    model=\"claude-sonnet-4-5\",\n    max_tokens=500,\n    messages=[{\"role\": \"user\", \"content\": \"Python kya hai? 3 lines.\"}],\n) as stream:\n    for text in stream.text_stream:\n        print(text, end=\"\", flush=True)   # end=\"\" = nayi line nahi, flush = turant dikhao\nprint()",
+     ""
+    ],
+    [
+     "p",
+     "Here the answer appears on screen in pieces. In OpenAI you pass `stream=True` and read `chunk.choices[0].delta.content`."
+    ],
+    [
+     "p",
+     "**Conversation history (memory):** the model has no memory, so we keep all messages in a list and send the **full list** every time."
+    ],
+    [
+     "code",
+     "python",
+     "history = []\nquestions = [\"Mera naam Akash hai.\", \"Mera naam kya hai?\"]\n\nfor q in questions:\n    history.append({\"role\": \"user\", \"content\": q})\n    response = client.messages.create(\n        model=\"claude-sonnet-4-5\", max_tokens=300,\n        system=\"Tum ek helpful assistant ho.\",\n        messages=history,                 # POORI history\n    )\n    answer = response.content[0].text\n    history.append({\"role\": \"assistant\", \"content\": answer})\n    print(\"AI:\", answer)",
+     ""
+    ],
+    [
+     "p",
+     "On the second question the AI will say \"Tumhara naam Akash hai\" (your name is Akash), because the first message also went in the history. Longer history = more tokens = more money. So in production we **trim** or **summarize** old messages:"
+    ],
+    [
+     "code",
+     "python",
+     "history = [{\"role\": \"user\" if i % 2 else \"assistant\", \"content\": f\"msg {i}\"} for i in range(1, 11)]\nMAX_MESSAGES = 4\n\ntrimmed = history[-MAX_MESSAGES:]\nprint(\"Pehle:\", len(history), \"Ab:\", len(trimmed))\nprint([m[\"content\"] for m in trimmed])\nprint(\"Pehla role:\", trimmed[0][\"role\"])",
+     "Pehle: 10 Ab: 4\n['msg 7', 'msg 8', 'msg 9', 'msg 10']\nPehla role: user"
+    ],
+    [
+     "tip",
+     "Look carefully: in Claude the first message of the history must be `user` and roles must take turns (user, assistant, user...). So always trim in **pairs**."
+    ],
+    [
+     "p",
+     "3 more production rules: set a **timeout**, if it fails **retry with exponential backoff** (double the wait each time), and if one provider fails use another (**fallback**). Backoff wait times:"
+    ],
+    [
+     "code",
+     "python",
+     "waits = [2 ** attempt for attempt in range(5)]\nprint(\"Wait seconds:\", waits)\nprint(\"Total wait:\", sum(waits))",
+     "Wait seconds: [1, 2, 4, 8, 16]\nTotal wait: 31"
+    ],
+    [
+     "analogy",
+     "If a shop is closed, you don't knock on the door 100 times right away. Wait 1 minute, then 2, then 4. Let the server breathe too (do this when you get rate limit error 429)."
+    ]
+   ]
+  },
+  {
+   "title": "Prompt engineering and hallucination",
+   "blocks": [
+    [
+     "p",
+     "**Prompt** = the instruction you give the LLM. Same model, good prompt = good answer, bad prompt = bad answer. Garbage in, garbage out."
+    ],
+    [
+     "analogy",
+     "Tell a new helper \"bring something\" and they will bring anything. Say \"2 kg potatoes from the market, up to 50 rupees, with a receipt\" and the job gets done right. Be just as clear in a prompt."
+    ],
+    [
+     "p",
+     "**7 parts of a good prompt** (say the names and an example in an IQ):"
+    ],
+    [
+     "list",
+     [
+      "**Role** — for example \"You are an assistant for a cable manufacturer.\"",
+      "**Clear task** — for example \"Summarise in 5 bullet points.\"",
+      "**Rules** — for example \"Use only the given text. If not found, say you don't know.\"",
+      "**Output format** — for example \"Return JSON with keys: cable_type, size.\"",
+      "**Delimiters** — wrap the data in `<<< >>>` or `<doc></doc>`",
+      "**Examples (few-shot)** — 2-3 sample inputs → outputs",
+      "**Step by step** — for example \"Think step by step, then give the final answer.\""
+     ]
+    ],
+    [
+     "sketch",
+     {
+      "k": "stack",
+      "title": "Building a prompt",
+      "items": [
+       "Role",
+       "Task",
+       "Rules",
+       "Format",
+       "Examples",
+       "Data <<< >>>"
+      ]
+     }
+    ],
+    [
+     "p",
+     "A prompt is just a string, so you can make a template in Python with an f-string:"
+    ],
+    [
+     "code",
+     "python",
+     "def build_prompt(tender_text):\n    return f\"\"\"You are an assistant for a cable company.\nTask: extract cable type and size.\nRules: use only the text. If missing, use null.\nFormat: JSON with keys cable_type, size_sqmm.\nText:\n<<<\n{tender_text}\n>>>\"\"\"\n\np = build_prompt(\"Supply of 2C x 16 sqmm XLPE armoured cable, 500 m\")\nprint(p.splitlines()[0])\nprint(p.splitlines()[-2])\nprint(\"Lines:\", len(p.splitlines()))",
+     "You are an assistant for a cable company.\nSupply of 2C x 16 sqmm XLPE armoured cable, 500 m\nLines: 8"
+    ],
+    [
+     "p",
+     "**Zero-shot vs Few-shot:** zero-shot = ask directly without examples. Few-shot = show 2-3 examples first, then ask. The model sees the pattern of the answer you want."
+    ],
+    [
+     "code",
+     "text",
+     "Classify the document category. Answer with one word.\n\n\"Invoice No 123, Amount Rs 5000\"            -> Invoice\n\"4 core cable, voltage test passed\"         -> QualityReport\n\"Please quote for 500 m copper cable\"       -> Enquiry\n\n\"Purchase order for 2C x 16 sqmm cable\"     ->",
+     ""
+    ],
+    [
+     "p",
+     "Here the model will give one word like `PurchaseOrder`, because the examples taught it the format."
+    ],
+    [
+     "p",
+     "**Chain-of-thought (CoT):** on a hard question say \"think step by step\". The model writes the in-between steps, so it makes fewer mistakes, like doing rough work in an exam. But tokens (and latency) go up, so use it only for reasoning tasks."
+    ],
+    [
+     "p",
+     "**Structured JSON output:** the app needs **data**, not text. Ask for JSON in the prompt (and turn on JSON mode / structured output in the API), then check it in code with `json.loads`:"
+    ],
+    [
+     "code",
+     "python",
+     "import json\n\nreply = '{\"cable_type\": \"XLPE\", \"size_sqmm\": 16, \"cores\": 2, \"quantity_m\": null}'\ndata = json.loads(reply)\n\nrequired = [\"cable_type\", \"size_sqmm\", \"cores\", \"quantity_m\"]\nmissing = [k for k in required if k not in data]\nprint(data[\"cable_type\"], data[\"size_sqmm\"])\nprint(\"Missing keys:\", missing)\nprint(\"Quantity:\", data[\"quantity_m\"])",
+     "XLPE 16\nMissing keys: []\nQuantity: None"
+    ],
+    [
+     "p",
+     "Sometimes the model adds extra text along with the JSON. Then `json.loads` fails, and we catch it and send it for **human review**, not to the database:"
+    ],
+    [
+     "code",
+     "python",
+     "import json\n\nreply = \"Sure! Here is the data: {cable_type: XLPE}\"\ntry:\n    data = json.loads(reply)\n    print(\"OK\", data)\nexcept json.JSONDecodeError:\n    print(\"Invalid JSON -> human review\")",
+     "Invalid JSON -> human review"
+    ],
+    [
+     "tip",
+     "Look carefully: writing \"Use null if missing. Do not guess.\" in the prompt is a very useful line. Otherwise the model will make up a quantity on its own. In production we also validate types with a Pydantic model."
+    ],
+    [
+     "p",
+     "**Hallucination** = a confidently wrong or made-up answer from the LLM. Example: \"What does clause 12.3 of IS 694 say?\" → the model will say \"Clause 12.3 states...\" while maybe no such clause even exists. Why? Its job is to give the likely word, not to check the truth."
+    ],
+    [
+     "sketch",
+     {
+      "k": "tree",
+      "title": "Protection from hallucination",
+      "root": {
+       "label": "Reduce it",
+       "children": [
+        {
+         "label": "RAG grounding",
+         "children": []
+        },
+        {
+         "label": "Don't know = say so",
+         "children": []
+        },
+        {
+         "label": "Temp 0 + JSON",
+         "children": []
+        },
+        {
+         "label": "Human verifies",
+         "children": []
+        }
+       ]
+      }
+     }
+    ],
+    [
+     "list",
+     [
+      "RAG — answer from your own documents, show sources",
+      "Prompt rule: \"If not in context, say you don't know\"",
+      "Temperature 0, plus structured output + validation",
+      "Limit the choices — \"choose only from these 10 categories\"",
+      "A human approves important decisions"
+     ]
+    ],
+    [
+     "warn",
+     "Common mistake: making the LLM do money calculations (costing, GST, copper weight). **Exact calculation always in Python code**, the LLM only for understanding, extracting and writing."
+    ]
+   ]
+  },
+  {
+   "title": "LangChain — models, prompts, chains and output parsers",
+   "blocks": [
+    [
+     "p",
+     "So far, OpenAI has its own code and Claude has its own. **LangChain** is a framework that gives you the common pieces of LLM apps ready-made: **models, prompt templates, output parsers, document loaders, text splitters, vector store connectors, agents**."
+    ],
+    [
+     "analogy",
+     "Every phone brand has its own charger = every AI has its own SDK. LangChain = a universal charger. To change the model, just change one line."
+    ],
+    [
+     "code",
+     "bash",
+     "pip install langchain langchain-openai langchain-anthropic",
+     ""
+    ],
+    [
+     "p",
+     "The 4 basic pieces of LangChain:"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "LangChain blocks",
+      "head": [
+       "Piece",
+       "Job"
+      ],
+      "rows": [
+       [
+        "Model",
+        "ChatOpenAI / ChatAnthropic"
+       ],
+       [
+        "Prompt",
+        "template with {vars}"
+       ],
+       [
+        "Chain",
+        "prompt | llm | parser"
+       ],
+       [
+        "Parser",
+        "answer → str / JSON"
+       ]
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "from langchain_openai import ChatOpenAI\nfrom langchain_core.prompts import ChatPromptTemplate\nfrom langchain_core.output_parsers import StrOutputParser\n\nllm = ChatOpenAI(model=\"gpt-4o-mini\", temperature=0)\n\nprompt = ChatPromptTemplate.from_messages([\n    (\"system\", \"Tum ek {role} ho. {language} mein jawab do.\"),\n    (\"human\", \"{question}\"),\n])\n\nchain = prompt | llm | StrOutputParser()\n\nresult = chain.invoke({\n    \"role\": \"Python teacher\",\n    \"language\": \"Hinglish\",\n    \"question\": \"Decorator kya hai?\",\n})\nprint(result)",
+     ""
+    ],
+    [
+     "p",
+     "Here `result` will be a simple string (the AI's Hinglish answer). `|` (pipe) means: **the output of one is the input of the next**. First the prompt is filled, then it goes to the LLM, then the parser takes only the text out of the message object."
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Chain = pipe",
+      "steps": [
+       "{variables}",
+       "Prompt",
+       "LLM",
+       "Parser",
+       "result"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "How does this pipe work inside? Build a small version in pure Python and see (the `__or__` magic method handles `|`, remember OOP from Stage 5):"
+    ],
+    [
+     "code",
+     "python",
+     "class Step:\n    def __init__(self, fn):\n        self.fn = fn\n    def __or__(self, other):                 # a | b\n        return Step(lambda x: other.fn(self.fn(x)))\n    def invoke(self, x):\n        return self.fn(x)\n\nprompt = Step(lambda d: f\"Explain {d['topic']} in 1 line.\")\nfake_llm = Step(lambda p: {\"content\": \"Reply for: \" + p})\nparser = Step(lambda msg: msg[\"content\"].upper())\n\nchain = prompt | fake_llm | parser\nprint(chain.invoke({\"topic\": \"RAG\"}))",
+     "REPLY FOR: EXPLAIN RAG IN 1 LINE."
+    ],
+    [
+     "p",
+     "**Model switch — just 1 line:**"
+    ],
+    [
+     "code",
+     "python",
+     "from langchain_anthropic import ChatAnthropic\n\nllm = ChatAnthropic(model=\"claude-sonnet-4-5\", temperature=0)\nchain = prompt | llm | StrOutputParser()     # baaki sab SAME",
+     ""
+    ],
+    [
+     "p",
+     "**JSON output parser** — the answer comes straight back as a Python dict/list:"
+    ],
+    [
+     "code",
+     "python",
+     "from langchain_core.output_parsers import JsonOutputParser\n\nprompt = ChatPromptTemplate.from_template(\n    \"Top 3 {topic} batao. Sirf JSON: [{{\\\"name\\\": \\\"...\\\", \\\"reason\\\": \\\"...\\\"}}]\"\n)\nchain = prompt | llm | JsonOutputParser()\n\nitems = chain.invoke({\"topic\": \"Python libraries for AI\"})\nfor item in items:\n    print(item[\"name\"], \"-\", item[\"reason\"])",
+     ""
+    ],
+    [
+     "p",
+     "Here `items` will be a Python list, like `numpy - fast arrays`, `pandas - tables`, `scikit-learn - ML models`. Note: in the template the JSON `{ }` is written as `{{ }}`, otherwise LangChain will think it is a variable."
+    ],
+    [
+     "tip",
+     "Pros: quick to build, easy to switch provider, RAG loaders/splitters ready. Cons: one extra layer, versions change fast, debugging is a bit harder. IQ line: \"Plain SDK for a simple feature, LangChain for a RAG pipeline.\""
+    ],
+    [
+     "warn",
+     "Common mistake: copying `from langchain.llms import OpenAI` or `LLMChain` from old tutorials. The new style is `langchain_openai`, `langchain_core` and the `|` pipe (LCEL)."
+    ]
+   ]
+  },
+  {
+   "title": "Embeddings, cosine similarity and vector databases",
+   "blocks": [
+    [
+     "p",
+     "**Embedding** = turning text into a list of numbers (a **vector**) so that the **meaning** is captured in the numbers. Texts with similar meaning have vectors close to each other, even if the words are different."
+    ],
+    [
+     "analogy",
+     "Think of neighbourhoods in a city: \"cable price\", \"wire rate\", \"copper ka bhaav\" live in one neighbourhood. \"cricket\", \"match\", \"score\" in another. Search = \"who lives closest to my question's house?\""
+    ],
+    [
+     "sketch",
+     {
+      "k": "chart",
+      "title": "Meaning space (2D)",
+      "type": "scatter",
+      "points": [
+       [
+        1,
+        8
+       ],
+       [
+        1.5,
+        7.5
+       ],
+       [
+        2,
+        8.5
+       ],
+       [
+        7,
+        2
+       ],
+       [
+        7.5,
+        2.8
+       ],
+       [
+        8,
+        1.5
+       ]
+      ],
+      "xl": "dimension 1",
+      "yl": "dimension 2"
+     }
+    ],
+    [
+     "p",
+     "A real embedding model (like OpenAI `text-embedding-3-small`) gives ~1536 numbers for each text. To understand, we take small vectors of 3 numbers."
+    ],
+    [
+     "p",
+     "**Cosine similarity** = the angle between two vectors. Formula: `dot(a, b) / (|a| * |b|)`. **1 = same direction (same meaning), 0 = no relation, -1 = opposite.**"
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\nprice   = np.array([0.9, 0.1, 0.2])\nrate    = np.array([0.8, 0.2, 0.1])\ncricket = np.array([0.1, 0.9, 0.3])\n\ndef cosine(a, b):\n    return float(np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)))\n\nprint(\"price vs rate   :\", round(cosine(price, rate), 3))\nprint(\"price vs cricket:\", round(cosine(price, cricket), 3))",
+     "price vs rate   : 0.987\nprice vs cricket: 0.271"
+    ],
+    [
+     "p",
+     "\"price\" and \"rate\" score 0.987 (almost the same meaning), \"cricket\" only 0.271. The phone has no numpy, so here is the same in pure Python (this will come in practice):"
+    ],
+    [
+     "code",
+     "python",
+     "import math\n\ndef cosine(a, b):\n    dot = sum(x * y for x, y in zip(a, b))\n    na = math.sqrt(sum(x * x for x in a))\n    nb = math.sqrt(sum(y * y for y in b))\n    return dot / (na * nb)\n\nprint(round(cosine([1, 0], [1, 0]), 2))\nprint(round(cosine([1, 0], [0, 1]), 2))\nprint(round(cosine([1, 0], [-1, 0]), 2))",
+     "1.0\n0.0\n-1.0"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "What the cosine score means",
+      "head": [
+       "Score",
+       "Meaning"
+      ],
+      "rows": [
+       [
+        "1",
+        "same direction"
+       ],
+       [
+        "0",
+        "no relation"
+       ],
+       [
+        "-1",
+        "fully opposite"
+       ]
+      ]
+     }
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "Keyword vs Semantic search",
+      "left": {
+       "title": "Keyword",
+       "items": [
+        "words match",
+        "\"rate\" won't find \"price\"",
+        "good for exact \"IS 694\"",
+        "SQL LIKE, BM25"
+       ]
+      },
+      "right": {
+       "title": "Semantic",
+       "items": [
+        "meaning match",
+        "\"rate\" finds \"price\"",
+        "weak on exact codes",
+        "embeddings + cosine"
+       ]
+      }
+     }
+    ],
+    [
+     "tip",
+     "Look carefully: in production **hybrid search** is best = keyword + semantic both. Like `final = 0.7 * vector_score + 0.3 * keyword_score`. Keyword is needed for cable codes and IS numbers."
+    ],
+    [
+     "p",
+     "Now try top-k search yourself. Each document's vector is a row of a matrix; find the cosine of all of them with the query and pick the ones with the highest score:"
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\ndocs = [\"warranty policy\", \"payment terms\", \"copper price\", \"delivery time\"]\nvecs = np.array([[0.9, 0.1, 0.0], [0.1, 0.9, 0.1], [0.0, 0.3, 0.9], [0.3, 0.2, 0.2]])\nquery = np.array([0.8, 0.2, 0.1])           # \"guarantee kitne din?\"\n\nscores = vecs @ query / (np.linalg.norm(vecs, axis=1) * np.linalg.norm(query))\ntop = np.argsort(scores)[::-1][:2]\nprint([docs[i] for i in top])\nprint(np.round(scores[top], 2).tolist())",
+     "['warranty policy', 'delivery time']\n[0.98, 0.88]"
+    ],
+    [
+     "p",
+     "**Vector database** = a database built to store embeddings and find the closest ones **fast** among lakhs (inside is an ANN index like HNSW, which does not compare with every vector)."
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Which vector DB",
+      "head": [
+       "DB",
+       "When"
+      ],
+      "rows": [
+       [
+        "FAISS",
+        "local, prototype, fast"
+       ],
+       [
+        "Chroma",
+        "simple, Python, small prod"
+       ],
+       [
+        "pgvector",
+        "already have Postgres"
+       ],
+       [
+        "Pinecone/Qdrant",
+        "big scale, managed"
+       ]
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "import chromadb\n\nclient = chromadb.PersistentClient(path=\"./vectordb\")\ncol = client.get_or_create_collection(\"docs\")\n\ncol.add(\n    ids=[\"1\", \"2\"],\n    documents=[\"Warranty is 12 months from dispatch.\", \"Payment terms are 30 days.\"],\n    metadatas=[{\"source\": \"terms.pdf\", \"page\": 1}, {\"source\": \"terms.pdf\", \"page\": 2}],\n)\n\nres = col.query(query_texts=[\"how long is the guarantee?\"], n_results=1)\nprint(res[\"documents\"])",
+     ""
+    ],
+    [
+     "p",
+     "Its output will be `[['Warranty is 12 months from dispatch.']]`. We wrote \"guarantee\" and found \"Warranty\" — it matched by meaning. Chroma runs its own default embedding model (downloads it the first time)."
+    ],
+    [
+     "p",
+     "**pgvector** — a vector column right inside Postgres (the SQL from Stage 6 will help):"
+    ],
+    [
+     "code",
+     "sql",
+     "CREATE EXTENSION IF NOT EXISTS vector;\n\nCREATE TABLE chunks (\n    id SERIAL PRIMARY KEY,\n    content TEXT,\n    source TEXT,\n    embedding VECTOR(1536)\n);\n\n-- <=> = cosine distance (chhota = zyada similar)\nSELECT content, source\nFROM chunks\nORDER BY embedding <=> '[0.12, 0.05, ...]'\nLIMIT 3;",
+     ""
+    ],
+    [
+     "warn",
+     "Common mistake: storing documents with one embedding model and embedding the query with another model. **The same embedding model for both** is required, otherwise the numbers mean different things."
+    ]
+   ]
+  },
+  {
+   "title": "RAG pipeline — chunking, retrieval and evaluation",
+   "blocks": [
+    [
+     "p",
+     "**Problem:** \"What is our company's warranty policy?\" The LLM doesn't know your documents, so it will make something up (hallucination). Put all 500 documents in the prompt? They won't fit in the context window, and it is very expensive."
+    ],
+    [
+     "p",
+     "**RAG = Retrieval Augmented Generation.** Before answering, **find relevant pieces from your documents (Retrieval)**, **add them to the prompt (Augmented)**, then have the LLM **write the answer (Generation)**."
+    ],
+    [
+     "analogy",
+     "Open-book exam: the student (LLM) hasn't memorised the whole library. A question comes → open the right page of the right book (retrieve) → write the answer from that page (generate)."
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "The 6 steps of RAG",
+      "steps": [
+       "Load",
+       "Split",
+       "Embed",
+       "Store",
+       "Retrieve",
+       "Generate"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "2 phases",
+      "left": {
+       "title": "Indexing (once)",
+       "items": [
+        "Load: PDF/Excel text",
+        "Split: chunks",
+        "Embed: vectors",
+        "Store: vector DB"
+       ]
+      },
+      "right": {
+       "title": "Query (every question)",
+       "items": [
+        "Embed the question",
+        "Retrieve top-k",
+        "Prompt + context",
+        "Generate answer"
+       ]
+      }
+     }
+    ],
+    [
+     "p",
+     "**Why chunking?** A whole 50-page document in one embedding = warranty, payment, delivery all mixed up, search is useless. Small chunks (~300-800 tokens) = you find the right paragraph. **Why overlap?** Something cut at the boundary of two chunks stays complete thanks to the overlap."
+    ],
+    [
+     "code",
+     "python",
+     "def chunk_text(text, size, overlap):\n    chunks = []\n    step = size - overlap\n    for start in range(0, len(text), step):\n        chunks.append(text[start:start + size])\n        if start + size >= len(text):\n            break\n    return chunks\n\ntext = \"ABCDEFGHIJKLMNOPQRST\"\nfor c in chunk_text(text, size=8, overlap=3):\n    print(c)",
+     "ABCDEFGH\nFGHIJKLM\nKLMNOPQR\nPQRST"
+    ],
+    [
+     "p",
+     "Look carefully: the last 3 letters of each chunk appear again at the start of the next chunk (FGH, KLM, PQR). That is the overlap."
+    ],
+    [
+     "list",
+     [
+      "**Fixed size** — cut every 500 characters/tokens (simple, sometimes cuts a sentence in the middle)",
+      "**Sentence / paragraph** — cut at `.` or a blank line (meaning stays clear)",
+      "**Recursive** — try to split first by paragraph, then line, then sentence (LangChain `RecursiveCharacterTextSplitter`, the most common)",
+      "**Heading / structure based** — by PDF headings, Excel rows, code functions",
+      "Rule of thumb: 300-800 tokens, 10-20% overlap, and **metadata** (file, page) with every chunk"
+     ]
+    ],
+    [
+     "p",
+     "Now a **mini RAG retriever** without any library — score by word overlap, top-k, and a **score gate** (\"not found\" on a weak match):"
+    ],
+    [
+     "code",
+     "python",
+     "STOP = {\"what\", \"is\", \"the\", \"of\", \"for\", \"a\", \"on\", \"in\", \"how\"}\n\nchunks = [\n    \"Warranty for armoured cables is 12 months from dispatch.\",\n    \"Payment terms are 30 days from invoice.\",\n    \"Delivery within Delhi NCR takes 3 to 5 days.\",\n]\n\ndef words(text):\n    return {w.strip(\".,?\").lower() for w in text.split()} - STOP\n\ndef retrieve(question, k=1, min_score=0.2):\n    q = words(question)\n    scored = []\n    for c in chunks:\n        cw = words(c)\n        score = len(q & cw) / len(q | cw)          # Jaccard overlap\n        scored.append((round(score, 2), c))\n    scored.sort(reverse=True)\n    return [x for x in scored[:k] if x[0] >= min_score]\n\nprint(retrieve(\"What is the warranty for armoured cables?\"))\nprint(retrieve(\"What is the capital of France?\"))",
+     "[(0.43, 'Warranty for armoured cables is 12 months from dispatch.')]\n[]"
+    ],
+    [
+     "p",
+     "For the first question the warranty chunk was found. For the second, an empty list `[]` — this is the **score gate**: with weak context don't even ask the LLM, just say \"not found in the documents\". In real RAG it is the cosine of embeddings instead of word overlap, but the idea is the same."
+    ],
+    [
+     "p",
+     "**Generate step** — put the retrieved chunks + the question into one grounded prompt:"
+    ],
+    [
+     "code",
+     "python",
+     "def make_rag_prompt(question, hits):\n    context = \"\\n\".join(f\"- {c}\" for _, c in hits)\n    return (\n        \"Answer using ONLY the context. If not found, say 'Nahi mila'.\\n\"\n        f\"Context:\\n{context}\\n\"\n        f\"Question: {question}\"\n    )\n\nhits = [(0.5, \"Warranty for armoured cables is 12 months from dispatch.\")]\nprint(make_rag_prompt(\"Warranty kitni hai?\", hits))",
+     "Answer using ONLY the context. If not found, say 'Nahi mila'.\nContext:\n- Warranty for armoured cables is 12 months from dispatch.\nQuestion: Warranty kitni hai?"
+    ],
+    [
+     "p",
+     "**Full RAG in LangChain** (code from the book, worth remembering):"
+    ],
+    [
+     "code",
+     "python",
+     "from langchain_openai import ChatOpenAI, OpenAIEmbeddings\nfrom langchain_community.document_loaders import PyPDFLoader\nfrom langchain_text_splitters import RecursiveCharacterTextSplitter\nfrom langchain_community.vectorstores import FAISS\nfrom langchain_core.prompts import ChatPromptTemplate\nfrom langchain_core.output_parsers import StrOutputParser\nfrom langchain_core.runnables import RunnablePassthrough\n\ndocs = PyPDFLoader(\"company_manual.pdf\").load()                       # 1 LOAD\nsplitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)\nchunks = splitter.split_documents(docs)                              # 2 SPLIT\nvectorstore = FAISS.from_documents(chunks, OpenAIEmbeddings())       # 3 EMBED + 4 STORE\nretriever = vectorstore.as_retriever(search_kwargs={\"k\": 3})         # 5 RETRIEVE\n\nprompt = ChatPromptTemplate.from_template(\n    \"Context:\\n{context}\\n\\nQuestion: {question}\\n\"\n    \"Sirf context se jawab do. Nahi mila to bolo 'Nahi mila'.\"\n)\n\ndef format_docs(docs):\n    return \"\\n\\n\".join(d.page_content for d in docs)\n\nrag_chain = (\n    {\"context\": retriever | format_docs, \"question\": RunnablePassthrough()}\n    | prompt | ChatOpenAI(model=\"gpt-4o-mini\", temperature=0) | StrOutputParser()\n)\nprint(rag_chain.invoke(\"Company ki leave policy kya hai?\"))          # 6 GENERATE",
+     ""
+    ],
+    [
+     "p",
+     "This will give the leave policy answer from the PDF, only from the manual's content. If it's not in the manual, \"Nahi mila\" (not found)."
+    ],
+    [
+     "p",
+     "**Evaluating RAG** — \"I liked it\" is not enough. Make a **test set** of 30-50 real questions + correct answers (also out-of-scope questions, whose answer should be \"NOT_FOUND\"). Run the full set after every change (chunk size, model, prompt). **Check retrieval and answer separately:**"
+    ],
+    [
+     "code",
+     "python",
+     "tests = [\n    {\"q\": \"warranty?\", \"expected_chunk\": 0, \"retrieved\": [0, 2]},\n    {\"q\": \"payment terms?\", \"expected_chunk\": 1, \"retrieved\": [1, 0]},\n    {\"q\": \"delivery time?\", \"expected_chunk\": 2, \"retrieved\": [0, 1]},\n    {\"q\": \"GST number?\", \"expected_chunk\": 1, \"retrieved\": [1, 2]},\n]\n\nhits = sum(1 for t in tests if t[\"expected_chunk\"] in t[\"retrieved\"])\nprint(f\"Hit rate @2: {hits}/{len(tests)} = {hits / len(tests):.0%}\")\nfails = [t[\"q\"] for t in tests if t[\"expected_chunk\"] not in t[\"retrieved\"]]\nprint(\"Fix these:\", fails)",
+     "Hit rate @2: 3/4 = 75%\nFix these: ['delivery time?']"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "RAG metrics",
+      "head": [
+       "Metric",
+       "Question"
+      ],
+      "rows": [
+       [
+        "Hit rate / Recall@k",
+        "right chunk found?"
+       ],
+       [
+        "Context precision",
+        "how much junk came?"
+       ],
+       [
+        "Faithfulness",
+        "answer from context?"
+       ],
+       [
+        "Answer relevance",
+        "answers the question?"
+       ]
+      ]
+     }
+    ],
+    [
+     "tip",
+     "Look carefully: libraries like RAGAS compute these metrics with LLM-as-judge. In production, the user's 👍/👎, how often \"not found\" came up, and logging wrong answers and adding them to the test set — this is the real improvement loop."
+    ],
+    [
+     "list",
+     [
+      "Senior points for better RAG: good chunking (by headings)",
+      "Show metadata + sources (file, page)",
+      "Hybrid search (keyword + semantic together)",
+      "Re-ranking: fetch 20 first, pick the best 4 with a cross-encoder",
+      "Score gate, OCR for scanned PDFs, re-index when a document changes"
+     ]
+    ],
+    [
+     "warn",
+     "Common mistake: only changing the prompt again and again without testing retrieval. 80% of RAG problems are in **retrieval** (wrong chunk came), not in the LLM."
+    ]
+   ]
+  }
+ ],
+ "teach": [
+  {
+   "say": "An LLM has only one job: guess the next token. A very big autocomplete. That's why it sometimes says things confidently wrong.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "The capital of India is",
+     "New",
+     "Delhi"
+    ],
+    "dir": "h"
+   },
+   "code": null
+  },
+  {
+   "say": "A token means a piece of text. Money and limits are both in tokens. Context window means the size of the desk — how much it can read at once.",
+   "sketch": {
+    "k": "array",
+    "items": [
+     "Cable",
+     " cost",
+     "ing"
+    ],
+    "index": true
+   },
+   "code": null
+  },
+  {
+   "say": "Temperature is the randomness knob. At zero the answer is the same every time, higher means creative. For extracting data, use zero.",
+   "sketch": {
+    "k": "table",
+    "head": [
+     "Temp",
+     "When"
+    ],
+    "rows": [
+     [
+      "0",
+      "extraction"
+     ],
+     [
+      "0.7",
+      "chat"
+     ],
+     [
+      "1+",
+      "poem"
+     ]
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "Remember three roles: system gives the rules, user asks the question, assistant is the previous answer. The model has no memory, send the history every time.",
+   "sketch": {
+    "k": "stack",
+    "items": [
+     "system: rules",
+     "user: question",
+     "assistant: answer",
+     "user: new question"
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "The API call pattern is the same at every company: take the key from the environment, send model and messages, take out the answer.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Client + key",
+     "model + messages",
+     "response"
+    ],
+    "dir": "h"
+   },
+   "code": "client = anthropic.Anthropic()\nr = client.messages.create(model=MODEL, max_tokens=300,\n    messages=[{\"role\": \"user\", \"content\": \"Hi\"}])\nprint(r.content[0].text)"
+  },
+  {
+   "say": "A good prompt is like a building: role, task, rules, format, examples, and data wrapped in delimiters. Few-shot means show examples first.",
+   "sketch": {
+    "k": "stack",
+    "items": [
+     "Role",
+     "Task",
+     "Rules",
+     "Format",
+     "Examples",
+     "<<< Data >>>"
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "In LangChain we use a pipe: prompt, then LLM, then parser. The output of one is the input of the next. Change the model, everything else stays the same.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Prompt",
+     "LLM",
+     "Parser"
+    ],
+    "dir": "h"
+   },
+   "code": "chain = prompt | llm | StrOutputParser()\nchain.invoke({\"topic\": \"RAG\"})"
+  },
+  {
+   "say": "An embedding turns text into numbers. Same meaning stays close together. How close, cosine similarity tells: 1 same, 0 no relation.",
+   "sketch": {
+    "k": "chart",
+    "type": "scatter",
+    "points": [
+     [
+      1,
+      8
+     ],
+     [
+      1.5,
+      7.5
+     ],
+     [
+      7,
+      2
+     ],
+     [
+      7.5,
+      2.5
+     ]
+    ],
+    "xl": "dim 1",
+    "yl": "dim 2"
+   },
+   "code": "dot / (norm(a) * norm(b))"
+  },
+  {
+   "say": "Learn the 6 RAG steps by heart: Load, Split, Embed, Store — these once. Retrieve, Generate — on every question.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Load",
+     "Split",
+     "Embed",
+     "Store",
+     "Retrieve",
+     "Generate"
+    ],
+    "dir": "h"
+   },
+   "code": null
+  },
+  {
+   "say": "Last point: keep overlap in chunks, put a score gate on weak matches, and check retrieval and answer separately with a test set. Now practice!",
+   "sketch": {
+    "k": "compare",
+    "left": {
+     "title": "Retrieval check",
+     "items": [
+      "right chunk found?",
+      "hit rate @k"
+     ]
+    },
+    "right": {
+     "title": "Answer check",
+     "items": [
+      "from context?",
+      "correct answer?"
+     ]
+    }
+   },
+   "code": null
+  }
+ ],
+ "practice": [
+  {
+   "q": "Build a simple **tokenizer**: lowercase the text, remove `.,?!`, split into words. Then print the word count and approx tokens (words / 0.75, round), and find the cost if 1 token = Rs 0.002 (from approx tokens, 3 decimals). Expected:\n['xlpe', 'cable', 'ka', 'rate', 'kya', 'hai', 'aaj']\nWords: 7\nTokens: 9\nCost: Rs 0.018",
+   "starter": "text = \"XLPE cable ka rate kya hai, aaj?\"\n\ndef tokenize(t):\n    # TODO: lowercase, .,?! hatao, split\n    pass\n\nwords = tokenize(text)\nprint(words)\n# TODO: Words, Tokens, Cost print karo\n",
+   "hint": "for ch in \".,?!\": t = t.replace(ch, \"\")  then t.lower().split(). Cost = tokens * 0.002, f\"{cost:.3f}\".",
+   "solution": "text = \"XLPE cable ka rate kya hai, aaj?\"\n\ndef tokenize(t):\n    for ch in \".,?!\":\n        t = t.replace(ch, \"\")\n    return t.lower().split()\n\nwords = tokenize(text)\nprint(words)\ntokens = round(len(words) / 0.75)\nprint(\"Words:\", len(words))\nprint(\"Tokens:\", tokens)\nprint(f\"Cost: Rs {tokens * 0.002:.3f}\")",
+   "expect": "['xlpe', 'cable', 'ka', 'rate', 'kya', 'hai', 'aaj']\nWords: 7\nTokens: 9\nCost: Rs 0.018"
+  },
+  {
+   "q": "Build a `cosine(a, b)` function (only `math`, no numpy) and print the score (2 decimals) of all three documents against the query vector, then the most similar document. Expected:\nwarranty 0.98\npayment 0.38\ndelivery 0.67\nBest: warranty",
+   "starter": "import math\n\ndocs = {\n    \"warranty\": [0.9, 0.1, 0.1],\n    \"payment\": [0.1, 0.9, 0.2],\n    \"delivery\": [0.4, 0.3, 0.8],\n}\nquery = [0.8, 0.2, 0.2]\n\ndef cosine(a, b):\n    # TODO: dot / (norm a * norm b)\n    pass\n\n# TODO: har doc ka score print karo, phir Best\n",
+   "hint": "dot = sum(x*y for x, y in zip(a, b)); norm = math.sqrt(sum(x*x for x in a)). For Best use max(docs, key=...).",
+   "solution": "import math\n\ndocs = {\n    \"warranty\": [0.9, 0.1, 0.1],\n    \"payment\": [0.1, 0.9, 0.2],\n    \"delivery\": [0.4, 0.3, 0.8],\n}\nquery = [0.8, 0.2, 0.2]\n\ndef cosine(a, b):\n    dot = sum(x * y for x, y in zip(a, b))\n    na = math.sqrt(sum(x * x for x in a))\n    nb = math.sqrt(sum(y * y for y in b))\n    return dot / (na * nb)\n\nscores = {name: cosine(vec, query) for name, vec in docs.items()}\nfor name, s in scores.items():\n    print(name, round(s, 2))\nprint(\"Best:\", max(scores, key=scores.get))",
+   "expect": "warranty 0.98\npayment 0.38\ndelivery 0.67\nBest: warranty"
+  },
+  {
+   "q": "Build a **mini RAG retriever**. Each chunk's score = how many words of the question (after removing stop words) are in the chunk. Take the chunk with the highest score; if the score is 0, return `Nahi mila` (score gate). Print the answer for all three questions. Expected:\nwarranty kitni hai? -> Warranty is 12 months from dispatch.\npayment kab tak? -> Payment within 30 days of invoice.\ncricket score? -> Nahi mila",
+   "starter": "STOP = {\"kitni\", \"hai\", \"kab\", \"tak\", \"is\", \"of\", \"from\"}\nchunks = [\n    \"Warranty is 12 months from dispatch.\",\n    \"Payment within 30 days of invoice.\",\n    \"Delivery in 5 days.\",\n]\n\ndef words(t):\n    # TODO: lowercase, '.' aur '?' hatao, split, set banao, STOP hatao\n    pass\n\ndef answer(q):\n    # TODO: best chunk dhoondo, score 0 -> \"Nahi mila\"\n    pass\n\nfor q in [\"warranty kitni hai?\", \"payment kab tak?\", \"cricket score?\"]:\n    print(q, \"->\", answer(q))\n",
+   "hint": "score = len(words(q) & words(c)). best = max(chunks, key=...). First check that best's score is > 0.",
+   "solution": "STOP = {\"kitni\", \"hai\", \"kab\", \"tak\", \"is\", \"of\", \"from\"}\nchunks = [\n    \"Warranty is 12 months from dispatch.\",\n    \"Payment within 30 days of invoice.\",\n    \"Delivery in 5 days.\",\n]\n\ndef words(t):\n    t = t.lower().replace(\".\", \"\").replace(\"?\", \"\")\n    return set(t.split()) - STOP\n\ndef answer(q):\n    qw = words(q)\n    best = max(chunks, key=lambda c: len(qw & words(c)))\n    if len(qw & words(best)) == 0:\n        return \"Nahi mila\"\n    return best\n\nfor q in [\"warranty kitni hai?\", \"payment kab tak?\", \"cricket score?\"]:\n    print(q, \"->\", answer(q))",
+   "expect": "warranty kitni hai? -> Warranty is 12 months from dispatch.\npayment kab tak? -> Payment within 30 days of invoice.\ncricket score? -> Nahi mila"
+  }
+ ],
+ "quiz": [
+  {
+   "q": "What does an LLM actually do?",
+   "o": [
+    "Live search on the internet",
+    "Predicts the next token",
+    "Runs a database query",
+    "Checks the truth and then answers"
+   ],
+   "a": 1,
+   "why": "An LLM picks the most likely next token from training patterns; that's why hallucination can happen."
+  },
+  {
+   "q": "You need to extract the cable size from a tender PDF into JSON. What temperature will you use?",
+   "o": [
+    "0",
+    "0.9",
+    "1.5",
+    "2"
+   ],
+   "a": 0,
+   "why": "Extraction needs the same, consistent answer every time, so temperature 0."
+  },
+  {
+   "q": "How will Claude remember the earlier conversation in the second API call?",
+   "o": [
+    "The model remembers by itself",
+    "Increase temperature",
+    "Send the full history again in the messages list",
+    "Increase max_tokens"
+   ],
+   "a": 2,
+   "why": "The model is stateless; you have to send the old user/assistant messages in every call."
+  },
+  {
+   "q": "Where does the system prompt go in the Anthropic Claude API?",
+   "o": [
+    "In a separate `system=` parameter",
+    "Inside the messages list with role system",
+    "In the headers",
+    "In max_tokens"
+   ],
+   "a": 0,
+   "why": "In Claude, system is a separate parameter; in OpenAI it goes inside messages."
+  },
+  {
+   "q": "The right way to keep an API key?",
+   "o": [
+    "As a string in code",
+    "In the GitHub README",
+    "In frontend JavaScript",
+    "Environment variable / .env (in gitignore)"
+   ],
+   "a": 3,
+   "why": "If the key is in code or the repo it leaks; read it from an env variable."
+  },
+  {
+   "q": "What is it called when you give 2-3 input→output examples first in a prompt?",
+   "o": [
+    "Zero-shot",
+    "Fine-tuning",
+    "Few-shot",
+    "Streaming"
+   ],
+   "a": 2,
+   "why": "Few-shot prompting shows the model the format/pattern through examples."
+  },
+  {
+   "q": "In LangChain, what does the `|` in `prompt | llm | StrOutputParser()` do?",
+   "o": [
+    "Makes the output of one the input of the next",
+    "OR condition",
+    "Parallel run",
+    "Handles errors"
+   ],
+   "a": 0,
+   "why": "The LCEL pipe joins steps: the prompt is filled, goes to the LLM, the parser takes out the text."
+  },
+  {
+   "q": "What does cosine similarity 1 mean?",
+   "o": [
+    "Completely opposite meaning",
+    "No relation",
+    "The vector is empty",
+    "Same direction, almost the same meaning"
+   ],
+   "a": 3,
+   "why": "1 = same direction, 0 = unrelated, -1 = opposite."
+  },
+  {
+   "q": "The correct order of RAG steps?",
+   "o": [
+    "Embed → Load → Store → Split → Generate → Retrieve",
+    "Load → Split → Embed → Store → Retrieve → Generate",
+    "Retrieve → Load → Embed → Generate",
+    "Split → Generate → Load → Store"
+   ],
+   "a": 1,
+   "why": "Indexing: Load, Split, Embed, Store. Query: Retrieve, Generate."
+  },
+  {
+   "q": "Why do we keep overlap in chunks?",
+   "o": [
+    "To save tokens",
+    "To make embedding fast",
+    "So text cut at the boundary stays complete in both chunks",
+    "The vector DB requires it"
+   ],
+   "a": 2,
+   "why": "A sentence that would get cut between two chunks stays complete in at least one chunk thanks to overlap."
+  }
+ ],
+ "iq": [
+  {
+   "q": "What is an LLM? Explain in simple words.",
+   "a": "An LLM is a large transformer model trained on huge text that predicts the next token. That's how it can write, summarize, code and answer questions. Because it picks the likely word by probability and doesn't check the truth, it sometimes says things confidently wrong (hallucination)."
+  },
+  {
+   "q": "What are tokens and the context window, and why do they matter?",
+   "a": "A token is a small piece of text (~¾ word in English). The context window is the max tokens the model can read in one call — prompt, history, documents and answer all together. Cost and limits are both in tokens, so we trim history, keep prompts short and use RAG."
+  },
+  {
+   "q": "What is temperature? When 0 and when higher?",
+   "a": "Temperature controls the randomness of the output. At 0 the model always picks the top token, the answer is consistent — for extraction, classification, JSON. At 0.7-1 for creative writing or brainstorming. For production data tasks I keep it at 0."
+  },
+  {
+   "q": "Difference between system, user and assistant messages? Does the model have memory?",
+   "a": "System = role and rules, user = the human's input, assistant = the model's previous answers. The model is stateless, so for multi-turn chat we send the full history in every call. If the history gets long, we trim or summarize old messages to keep cost and the context limit under control."
+  },
+  {
+   "q": "How will you make an LLM API call reliable in production?",
+   "a": "API key in an env variable, a timeout on every call, retry with exponential backoff on 429/5xx, and a fallback model if one provider fails. I limit cost with max_tokens, log token usage and latency, and use streaming for long answers so the user sees something right away."
+  },
+  {
+   "q": "Name the main techniques of prompt engineering.",
+   "a": "Clear role, specific task, rules (\"only from the given text, if not found say so\"), a fixed output format like JSON, delimiters around the data, few-shot examples, and step-by-step (chain-of-thought) for complex reasoning. I test prompts on a test set too, just like code."
+  },
+  {
+   "q": "What is hallucination and how will you reduce it?",
+   "a": "A confidently wrong or made-up answer from the model. To reduce it: grounding with RAG, a \"say if you don't know\" rule, temperature 0, a score gate, structured output + validation, limiting choices to a fixed list, showing sources, and human review on important decisions. Money calculations always in code, never by the LLM."
+  },
+  {
+   "q": "How will you get reliable JSON from an LLM?",
+   "a": "Write the exact keys and \"null if missing\" in the prompt, use the API's JSON mode / structured output, keep temperature 0. Then validate with `json.loads` and Pydantic; if it fails, retry or human review, never straight into the database.\n`data = Model.model_validate_json(reply)`"
+  },
+  {
+   "q": "What are embeddings and cosine similarity?",
+   "a": "An embedding is a dense vector of text that encodes meaning, so texts with similar meaning are close even if the words differ. Cosine similarity is the cosine of the angle between two vectors: dot(a,b)/(|a||b|), 1 = same direction, 0 = unrelated. Semantic search works with this."
+  },
+  {
+   "q": "What is a vector database? When to use FAISS, Chroma, pgvector?",
+   "a": "A vector DB stores embeddings and quickly finds nearest neighbours with an ANN index (like HNSW), with metadata filters. FAISS = local library, for prototypes and speed. Chroma = simple Python DB, small production apps. pgvector = if you already have Postgres, no separate DB needed. For big managed scale, Pinecone/Qdrant."
+  },
+  {
+   "q": "Explain the RAG pipeline end-to-end. Why chunking and overlap?",
+   "a": "Indexing: Load (text from PDF/Excel), Split (chunks), Embed, Store (vector DB + metadata). Query: embed the question and Retrieve the top-k chunks, then Generate with an \"answer only from this context\" prompt. Chunking makes search precise and fits in the context window; overlap keeps text cut at a boundary complete. Typically 300-800 tokens, 10-20% overlap."
+  },
+  {
+   "q": "How will you evaluate a RAG system?",
+   "a": "A fixed test set of real questions and expected answers, including out-of-scope questions. Check retrieval separately (hit rate / recall@k, context precision) and the answer separately (faithfulness, correctness, relevance) — with RAGAS or LLM-as-judge. I rerun the set after every change, and in production I monitor user feedback and the \"not found\" rate and add failures to the test set."
+  }
+ ]
+}

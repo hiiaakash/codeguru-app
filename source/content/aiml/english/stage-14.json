@@ -1,0 +1,1329 @@
+{
+ "n": 14,
+ "id": "aiml-14",
+ "title": "Deploy, DSA, Portfolio and IQ Preparation",
+ "goal": "You will take your AI app to the world with Git/GitHub, Docker and Streamlit, solve the DSA patterns asked in IQ (hashing, two pointers, stack, binary search, recursion), and get job-ready with a portfolio, STAR and a strong resume.",
+ "lessons": [
+  {
+   "title": "Git & GitHub — a time machine for your code",
+   "blocks": [
+    [
+     "p",
+     "**Git** = a tool that remembers **every changed version** of your code. **GitHub** = a website where this Git code is kept online, shared with your team, and where recruiters look at your work."
+    ],
+    [
+     "analogy",
+     "Git is a **diary**, like a factory register: what changed each day, who changed it, why — everything is written down. Made a mistake? You can go back to an old page. GitHub = that diary kept in the office cupboard (the cloud), where everyone can read it."
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Git's 4 homes",
+      "steps": [
+       "Working dir",
+       "Staging (add)",
+       "Local repo (commit)",
+       "GitHub (push)"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "Look carefully: a file first changes in the **working directory**. `git add` moves it to **staging** (the getting-ready box). `git commit` takes a **photo** (local history). `git push` sends that photo to **GitHub**."
+    ],
+    [
+     "code",
+     "bash",
+     "# Pehli baar setup (sirf ek baar)\ngit config --global user.name \"Akash Kumar\"\ngit config --global user.email \"akash@example.com\"\n\n# Naya project shuru\ngit init                      # folder ko git repo banao\ngit status                    # kya badla? (sabse zyada use hone wala command)\ngit add app.py                # ek file staging mein\ngit add .                     # saari files staging mein\ngit commit -m \"Add FastAPI predict endpoint\"\ngit log --oneline             # history dekho",
+     ""
+    ],
+    [
+     "p",
+     "Now connect to GitHub. Create a new repo on GitHub, then:"
+    ],
+    [
+     "code",
+     "bash",
+     "git remote add origin https://github.com/akash/cable-ml-api.git\ngit branch -M main\ngit push -u origin main       # pehli baar -u, baad mein sirf git push\n\n# Kisi aur ka repo laana\ngit clone https://github.com/akash/cable-ml-api.git\ngit pull                      # GitHub se latest changes laao",
+     ""
+    ],
+    [
+     "tip",
+     "A good commit message = **what you did**, short and in present tense: `Add login API`, `Fix null check in predict`. Bad: `changes`, `final`, `final2`. In an IQ they look at your GitHub, and they read your messages too."
+    ],
+    [
+     "p",
+     "**Branch** = a separate line of code where you can build a new feature without breaking the main code. The `main` branch should always be working (stable)."
+    ],
+    [
+     "sketch",
+     {
+      "k": "tree",
+      "title": "Branches",
+      "root": {
+       "label": "main",
+       "children": [
+        {
+         "label": "feature/rag-chat",
+         "children": []
+        },
+        {
+         "label": "fix/predict-bug",
+         "children": []
+        }
+       ]
+      }
+     }
+    ],
+    [
+     "code",
+     "bash",
+     "git branch                    # saari branches dekho\ngit checkout -b feature/rag-chat   # nayi branch banao + uspe jao\n# (naya command: git switch -c feature/rag-chat)\n# ... code likho ...\ngit add .\ngit commit -m \"Add RAG chat endpoint\"\ngit push -u origin feature/rag-chat\n\ngit checkout main             # wapas main pe\ngit merge feature/rag-chat    # feature ko main mein milao",
+     ""
+    ],
+    [
+     "p",
+     "**Pull Request (PR)** = a request on GitHub: \"please merge my branch's code into main\". The team reviews it, leaves comments, tests (CI) run, then it gets **merged**. In a company, code always reaches main through a PR, never by direct push."
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "PR workflow",
+      "steps": [
+       "Create branch",
+       "Commit + push",
+       "Open PR",
+       "Review + CI",
+       "Merge"
+      ],
+      "dir": "v"
+     }
+    ],
+    [
+     "p",
+     "**Merge conflict** = two people changed the same line of the same file in different ways. Git is confused, so it asks you. In the file it looks like this:"
+    ],
+    [
+     "code",
+     "text",
+     "<<<<<<< HEAD\nthreshold = 0.5\n=======\nthreshold = 0.7\n>>>>>>> feature/tune\n",
+     ""
+    ],
+    [
+     "p",
+     "Keep the correct line, remove the `<<<<<<<`, `=======`, `>>>>>>>` markers, then `git add` + `git commit`. That's it."
+    ],
+    [
+     "code",
+     "bash",
+     "# .gitignore file — yeh cheezein kabhi commit mat karo\n.env\n__pycache__/\nvenv/\n*.pkl\ndata/raw/\n.ipynb_checkpoints/",
+     ""
+    ],
+    [
+     "warn",
+     "Common mistake: committing `.env` (API keys). Once it is public on GitHub, bots steal the key within minutes. If it happens, **revoke** the key right away — just deleting the file is not enough (it stays in the history)."
+    ],
+    [
+     "code",
+     "bash",
+     "# Galti sudharne ke commands\ngit restore app.py            # file ke unsaved changes hatao\ngit restore --staged app.py   # staging se nikaalo (changes rehte hain)\ngit commit --amend -m \"Better message\"  # last commit ka message badlo (push se pehle)\ngit revert <commit_id>        # purane commit ko ulta karne wala naya commit (safe)\ngit stash                     # adhoora kaam side mein rakho\ngit stash pop                 # wapas laao",
+     ""
+    ],
+    [
+     "tip",
+     "IQ favourite: `git merge` vs `git rebase`. Merge = joins both histories and creates a merge commit (safe, shows the true history). Rebase = replays your commits on top of the latest main (history becomes a straight line). Don't rebase a shared branch."
+    ]
+   ]
+  },
+  {
+   "title": "Docker — pack your ML app in a tiffin box",
+   "blocks": [
+    [
+     "p",
+     "Problem: the model runs on your laptop, but on the server you get `ModuleNotFoundError` or a version mismatch. **\"But it worked on my machine!\"** Docker ends this problem."
+    ],
+    [
+     "analogy",
+     "**Docker = a tiffin box.** Food (code) + spoon (libraries) + napkin (Python version, OS settings), all packed in one box. Take it anywhere, open it and eat — same taste."
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "Image vs Container",
+      "left": {
+       "title": "Image",
+       "items": [
+        "Recipe + ingredients",
+        "Read-only",
+        "Built once",
+        "docker build"
+       ]
+      },
+      "right": {
+       "title": "Container",
+       "items": [
+        "Dish being cooked",
+        "Running process",
+        "Can make many",
+        "docker run"
+       ]
+      }
+     }
+    ],
+    [
+     "list",
+     [
+      "**Dockerfile** = the recipe (steps are written down).",
+      "**Image** = the packed box made from the recipe (the result of build).",
+      "**Container** = the running form of an image. You can run 10 containers from one image.",
+      "**Registry (Docker Hub)** = a shop of images, where you `pull` / `push` from."
+     ]
+    ],
+    [
+     "p",
+     "Now let's pack a FastAPI ML app. The project has `main.py`, `model.pkl`, `requirements.txt`:"
+    ],
+    [
+     "code",
+     "python",
+     "# main.py  (Stage 7 ka FastAPI + Stage 10 ka model)\nfrom fastapi import FastAPI\nfrom pydantic import BaseModel\nimport joblib\n\napp = FastAPI()\nmodel = joblib.load(\"model.pkl\")   # server start pe EK baar load\n\nclass Cable(BaseModel):\n    length_m: float\n    sqmm: float\n\n@app.get(\"/health\")\ndef health():\n    return {\"status\": \"ok\"}\n\n@app.post(\"/predict\")\ndef predict(c: Cable):\n    price = model.predict([[c.length_m, c.sqmm]])[0]\n    return {\"price\": round(float(price), 2)}",
+     ""
+    ],
+    [
+     "p",
+     "This is server code, so there is no output here. Now its **Dockerfile** (the file name is exactly `Dockerfile`, no extension):"
+    ],
+    [
+     "code",
+     "text",
+     "FROM python:3.12-slim\n\nWORKDIR /app\n\nCOPY requirements.txt .\nRUN pip install --no-cache-dir -r requirements.txt\n\nCOPY . .\n\nEXPOSE 8000\n\nCMD [\"uvicorn\", \"main:app\", \"--host\", \"0.0.0.0\", \"--port\", \"8000\"]",
+     ""
+    ],
+    [
+     "sketch",
+     {
+      "k": "stack",
+      "title": "Image layers",
+      "items": [
+       "CMD uvicorn",
+       "COPY . .",
+       "RUN pip install",
+       "COPY requirements",
+       "WORKDIR /app",
+       "FROM python:3.12-slim"
+      ]
+     }
+    ],
+    [
+     "list",
+     [
+      "`FROM` = base image (a small Linux with Python).",
+      "`WORKDIR` = the working folder inside the container.",
+      "`COPY requirements.txt .` first, on its own — the **cache trick**: if code changed but requirements didn't, pip install won't run again, so the build is fast.",
+      "`RUN` = run a command at build time.",
+      "`EXPOSE` = which port will be used (documentation).",
+      "`CMD` = what runs when the container starts. `0.0.0.0` is required, otherwise requests from outside won't come in."
+     ]
+    ],
+    [
+     "code",
+     "bash",
+     "docker build -t cable-ml-api .          # image banao, naam (tag) do\ndocker images                            # images dekho\ndocker run -d -p 8000:8000 cable-ml-api  # chalao: host port : container port\ndocker ps                                # chal rahe containers\ndocker logs <container_id>               # print/errors dekho\ndocker exec -it <container_id> bash      # container ke andar ghuso\ndocker stop <container_id>",
+     ""
+    ],
+    [
+     "p",
+     "Now open `http://localhost:8000/docs` in the browser — you will see FastAPI's Swagger page, and `/health` will return `{\"status\": \"ok\"}`."
+    ],
+    [
+     "warn",
+     "Common mistake: forgetting `-p`. The container is running but closed to the outside. `-p 8000:8000` = laptop's 8000 → container's 8000. Second mistake: `.env` or 2GB of data getting copied into the image — create a `.dockerignore` file (venv, .env, data/raw)."
+    ],
+    [
+     "p",
+     "**docker-compose** = when you have more than one service (API + Streamlit + database), run them all from one YAML file with one command."
+    ],
+    [
+     "code",
+     "text",
+     "# docker-compose.yml\nservices:\n  api:\n    build: .\n    ports:\n      - \"8000:8000\"\n    env_file: .env\n    depends_on:\n      - db\n  ui:\n    build: ./frontend\n    ports:\n      - \"8501:8501\"\n    environment:\n      - API_URL=http://api:8000\n    depends_on:\n      - api\n  db:\n    image: postgres:16\n    environment:\n      - POSTGRES_PASSWORD=secret\n    volumes:\n      - pgdata:/var/lib/postgresql/data\nvolumes:\n  pgdata:",
+     ""
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Compose network",
+      "steps": [
+       "ui :8501",
+       "api :8000",
+       "db :5432"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "tip",
+     "Look carefully: inside compose, one service calls another by its **service name**: `http://api:8000`, not `localhost`. Because every container has its own localhost."
+    ],
+    [
+     "code",
+     "bash",
+     "docker compose up -d --build   # sab build + start\ndocker compose logs -f api     # api ke logs live\ndocker compose down            # sab band",
+     ""
+    ],
+    [
+     "p",
+     "**Volume** = a place to keep data outside the container. If the container is deleted, the data inside is gone, but data in the volume survives (important for databases)."
+    ]
+   ]
+  },
+  {
+   "title": "Streamlit front-end and an end-to-end AI app",
+   "blocks": [
+    [
+     "p",
+     "**Streamlit** = a web app UI by writing only Python. No HTML/CSS/JS needed. ML demo, chatbot, dashboard — in 20 lines. Best for a portfolio, because a recruiter can open the link and try it right away."
+    ],
+    [
+     "analogy",
+     "FastAPI = the shop's **warehouse and workers** (work happens at the back). Streamlit = the shop's **counter** where the customer comes, presses a button and gets an answer."
+    ],
+    [
+     "code",
+     "python",
+     "# app.py  — run: streamlit run app.py\nimport streamlit as st\nimport requests\n\nst.set_page_config(page_title=\"Cable Price AI\", page_icon=\"⚡\")\nst.title(\"Cable Price Predictor\")\n\nlength = st.number_input(\"Length (m)\", min_value=1.0, value=100.0)\nsqmm = st.selectbox(\"Size (sqmm)\", [1.5, 2.5, 4, 6, 10, 16])\n\nif st.button(\"Predict\"):\n    r = requests.post(\"http://localhost:8000/predict\",\n                      json={\"length_m\": length, \"sqmm\": sqmm}, timeout=10)\n    st.success(f\"Estimated price: Rs {r.json()['price']}\")",
+     ""
+    ],
+    [
+     "p",
+     "This is a browser app, so the output is not shown here. A form opens in the browser: a length box, a size dropdown, a Predict button. As soon as you press the button, a request goes to FastAPI and the price appears in a green (success) box."
+    ],
+    [
+     "tip",
+     "Streamlit's secret: **on every click, the whole script runs again from top to bottom.** So anything you need to remember (chat history) goes in `st.session_state`, and heavy things (model loading) run only once with `@st.cache_resource`."
+    ],
+    [
+     "code",
+     "python",
+     "# Chatbot UI (LLM wala Stage 12 se)\nimport streamlit as st\n\nif \"messages\" not in st.session_state:\n    st.session_state.messages = []          # refresh pe bhi yaad\n\nfor m in st.session_state.messages:\n    with st.chat_message(m[\"role\"]):\n        st.write(m[\"content\"])\n\nif q := st.chat_input(\"Cable ke baare mein poocho...\"):\n    st.session_state.messages.append({\"role\": \"user\", \"content\": q})\n    answer = ask_rag_api(q)                 # tumhara FastAPI /chat\n    st.session_state.messages.append({\"role\": \"assistant\", \"content\": answer})\n    st.rerun()",
+     ""
+    ],
+    [
+     "p",
+     "This gives a ChatGPT-like chat screen: bubbles on top, input box at the bottom."
+    ],
+    [
+     "list",
+     [
+      "`st.sidebar` = the left side panel (settings, API key).",
+      "`st.file_uploader` = PDF upload (for RAG).",
+      "`st.dataframe`, `st.line_chart` = to show data.",
+      "`st.spinner(\"Soch raha hoon...\")` = a loading animation."
+     ]
+    ],
+    [
+     "p",
+     "Now put it all together. The 4 layers of an **end-to-end AI app**:"
+    ],
+    [
+     "sketch",
+     {
+      "k": "stack",
+      "title": "End-to-end AI app",
+      "items": [
+       "User (browser)",
+       "Streamlit UI",
+       "FastAPI backend",
+       "AI engine (ML/RAG)",
+       "Data (DB + vectors)"
+      ]
+     }
+    ],
+    [
+     "code",
+     "text",
+     "cable-ai-app/\n  app/\n    main.py            # FastAPI entry\n    config.py          # settings, .env se\n    routers/chat.py    # /chat endpoint\n    services/rag.py    # retrieval + LLM call\n    models/schemas.py  # Pydantic\n  frontend/\n    streamlit_app.py\n  tests/test_api.py\n  data/\n  .env.example\n  .gitignore\n  requirements.txt\n  Dockerfile\n  docker-compose.yml\n  README.md",
+     ""
+    ],
+    [
+     "p",
+     "The journey of one request: the user types a question → Streamlit sends `POST /chat` → FastAPI validates it with Pydantic → the RAG service finds relevant chunks → the LLM writes the answer → JSON comes back → Streamlit shows it in a bubble."
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Journey of a request",
+      "steps": [
+       "Question",
+       "POST /chat",
+       "Retrieve",
+       "LLM",
+       "Answer"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "This flow is like a chain of Python functions. Here is an offline mini version (just to understand the idea):"
+    ],
+    [
+     "code",
+     "python",
+     "docs = {\"d1\": \"XLPE cable 90 degree tak chalti hai\",\n        \"d2\": \"PVC cable 70 degree tak chalti hai\"}\n\ndef retrieve(q):\n    qw = set(q.lower().split())\n    return max(docs.values(), key=lambda d: len(qw & set(d.lower().split())))\n\ndef llm(q, ctx):\n    return f\"Context ke hisaab se: {ctx}\"\n\ndef chat_api(q):\n    if not q.strip():\n        return {\"error\": \"empty question\"}\n    return {\"answer\": llm(q, retrieve(q))}\n\nprint(chat_api(\"XLPE kitne degree tak?\"))\nprint(chat_api(\"  \"))",
+     "{'answer': 'Context ke hisaab se: XLPE cable 90 degree tak chalti hai'}\n{'error': 'empty question'}"
+    ],
+    [
+     "p",
+     "**Production checklist** (before deploying):"
+    ],
+    [
+     "list",
+     [
+      "Error handling: every LLM/API call inside `try/except`, with a timeout.",
+      "API keys in `.env`, never in code or on GitHub.",
+      "Input validation: with Pydantic.",
+      "Logging: every request, latency, tokens.",
+      "A `/health` endpoint (Docker/load balancers check it).",
+      "Caching: same question = cached answer (saves money).",
+      "Rate limiting + cost tracking.",
+      "Tests: at least basic API tests with `pytest`."
+     ]
+    ],
+    [
+     "p",
+     "**Where to deploy?** Streamlit Community Cloud (free, straight from a GitHub repo), Hugging Face Spaces (free demo), Render/Railway (Docker apps), AWS/GCP/Azure (company level). For your portfolio, make sure to create a **live link** with a free option."
+    ],
+    [
+     "warn",
+     "Common mistake: calling `joblib.load` for the model on every request. Very slow. Load it once when the server starts (global or a startup event)."
+    ]
+   ]
+  },
+  {
+   "title": "DSA part 1 — Big-O, arrays, hashing, two pointers and sliding window",
+   "blocks": [
+    [
+     "p",
+     "AI/ML IQs also have a **coding round**. They check whether you can break a problem down and think it through. Good news: most questions come from just **8-10 patterns**. Spot the pattern, solve the question.\n\n**Big-O** = how much slower the code gets as the input grows. We don't measure exact seconds, we measure **growth**."
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Big-O cheat sheet",
+      "head": [
+       "Big-O",
+       "Name",
+       "Example"
+      ],
+      "rows": [
+       [
+        "O(1)",
+        "Constant",
+        "dict lookup"
+       ],
+       [
+        "O(log n)",
+        "Log",
+        "binary search"
+       ],
+       [
+        "O(n)",
+        "Linear",
+        "one loop"
+       ],
+       [
+        "O(n log n)",
+        "Linearithmic",
+        "sorted()"
+       ],
+       [
+        "O(n²)",
+        "Quadratic",
+        "nested loops"
+       ]
+      ]
+     }
+    ],
+    [
+     "analogy",
+     "Finding one out of 1000 cable drums: look up the register's index = O(1). Check each drum one by one = O(n). Compare every drum with every other drum = O(n²) — it will take the whole day."
+    ],
+    [
+     "sketch",
+     {
+      "k": "chart",
+      "title": "Growth",
+      "type": "line",
+      "points": [
+       [
+        1,
+        1
+       ],
+       [
+        2,
+        4
+       ],
+       [
+        3,
+        9
+       ],
+       [
+        4,
+        16
+       ],
+       [
+        5,
+        25
+       ]
+      ],
+      "line": [
+       [
+        0,
+        0
+       ],
+       [
+        5,
+        5
+       ]
+      ],
+      "xl": "n",
+      "yl": "steps"
+     }
+    ],
+    [
+     "code",
+     "python",
+     "n = 1000\nprint(\"O(1):\", 1)\nprint(\"O(log n):\", n.bit_length())\nprint(\"O(n):\", n)\nprint(\"O(n^2):\", n * n)",
+     "O(1): 1\nO(log n): 10\nO(n): 1000\nO(n^2): 1000000"
+    ],
+    [
+     "tip",
+     "They also ask about space complexity: how much extra memory you used. A dict holding n items = O(n) space. Only 2 variables = O(1) space."
+    ],
+    [
+     "list",
+     [
+      "**Expensive/cheap operations in Python:** `list[i]`, `append` = O(1). `x in list` = O(n) (checks one by one).",
+      "`x in set` / `x in dict` = O(1) on average (hashing).",
+      "`list.insert(0, x)` / `pop(0)` = O(n) (everything shifts) → use `deque` for a queue.",
+      "`sorted()` = O(n log n). Joining strings with `+=` in a loop = slow, `\"\".join()` = fast."
+     ]
+    ],
+    [
+     "p",
+     "**Pattern 1: Hashing (dict/set).** Whenever the question is \"have I seen this before?\" or \"how many times did it appear?\" — think dict. **Two Sum** is the most famous IQ question:"
+    ],
+    [
+     "code",
+     "python",
+     "def two_sum(nums, target):\n    seen = {}                      # value -> index\n    for i, x in enumerate(nums):\n        need = target - x\n        if need in seen:           # O(1) check\n            return [seen[need], i]\n        seen[x] = i\n    return []\n\nprint(two_sum([2, 7, 11, 15], 9))\nprint(two_sum([3, 2, 4], 6))\nprint(two_sum([1, 2], 10))",
+     "[0, 1]\n[1, 2]\n[]"
+    ],
+    [
+     "p",
+     "Brute force = two loops, check every pair = O(n²). The dict way = one loop = **O(n) time, O(n) space**. In an IQ, explain both: brute force first, then optimize."
+    ],
+    [
+     "sketch",
+     {
+      "k": "boxes",
+      "title": "seen dict (target 9)",
+      "items": [
+       {
+        "label": "2",
+        "value": "index 0"
+       },
+       {
+        "label": "need at i=1",
+        "value": "9-7 = 2 ✓"
+       }
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "from collections import Counter\n\ndef is_anagram(a, b):\n    return Counter(a) == Counter(b)\n\ndef group_anagrams(words):\n    groups = {}\n    for w in words:\n        key = \"\".join(sorted(w))\n        groups.setdefault(key, []).append(w)\n    return list(groups.values())\n\nprint(is_anagram(\"listen\", \"silent\"))\nprint(group_anagrams([\"eat\", \"tea\", \"tan\", \"ate\", \"nat\"]))",
+     "True\n[['eat', 'tea', 'ate'], ['tan', 'nat']]"
+    ],
+    [
+     "p",
+     "**Pattern 2: Two pointers.** Two fingers: one at the start, one at the end, move towards the middle. Useful for sorted arrays or palindromes. O(n) time, O(1) space."
+    ],
+    [
+     "sketch",
+     {
+      "k": "array",
+      "title": "Two pointers",
+      "items": [
+       "L→",
+       "a",
+       "b",
+       "b",
+       "a",
+       "←R"
+      ],
+      "index": false
+     }
+    ],
+    [
+     "code",
+     "python",
+     "def is_palindrome(s):\n    s = [c.lower() for c in s if c.isalnum()]\n    l, r = 0, len(s) - 1\n    while l < r:\n        if s[l] != s[r]:\n            return False\n        l += 1\n        r -= 1\n    return True\n\ndef pair_sum_sorted(nums, target):\n    l, r = 0, len(nums) - 1\n    while l < r:\n        s = nums[l] + nums[r]\n        if s == target:\n            return (nums[l], nums[r])\n        if s < target:\n            l += 1          # chhota hai, bada lo\n        else:\n            r -= 1          # bada hai, chhota lo\n    return None\n\nprint(is_palindrome(\"A man, a plan, a canal: Panama\"))\nprint(pair_sum_sorted([1, 3, 4, 6, 8, 11], 10))",
+     "True\n(4, 6)"
+    ],
+    [
+     "p",
+     "**Pattern 3: Sliding window.** Questions about a continuous part: \"max total over k days\", \"longest substring without repeats\". Slide the window forward, don't add everything up again."
+    ],
+    [
+     "analogy",
+     "A train window: the train moves forward, a new pole comes into the window, an old one leaves. You don't recount the whole view."
+    ],
+    [
+     "code",
+     "python",
+     "def max_sum_k(nums, k):\n    window = sum(nums[:k])\n    best = window\n    for i in range(k, len(nums)):\n        window += nums[i] - nums[i - k]   # naya aaya, purana gaya\n        best = max(best, window)\n    return best\n\ndef longest_unique(s):\n    last = {}\n    start = best = 0\n    for i, c in enumerate(s):\n        if c in last and last[c] >= start:\n            start = last[c] + 1\n        last[c] = i\n        best = max(best, i - start + 1)\n    return best\n\nprint(max_sum_k([2, 1, 5, 1, 3, 2], 3))\nprint(longest_unique(\"abcabcbb\"))\n\ndef max_profit(prices):\n    low = prices[0]\n    best = 0\n    for p in prices:\n        low = min(low, p)          # ab tak ka sasta din\n        best = max(best, p - low)  # aaj bechu toh?\n    return best\n\nprint(max_profit([7, 1, 5, 3, 6, 4]))",
+     "9\n3\n5"
+    ],
+    [
+     "warn",
+     "Common mistake: jumping straight into writing code in an IQ. First clarify the question (empty list? negative numbers? duplicates?), think out loud on an example, then code. The interviewer wants to hear your **thinking**."
+    ]
+   ]
+  },
+  {
+   "title": "DSA part 2 — stack, queue, binary search, sorting and recursion",
+   "blocks": [
+    [
+     "p",
+     "**Stack** = LIFO (Last In First Out). What came in last goes out first. In Python a list is a stack: `append` = push, `pop` = pop, both O(1). Uses: undo button, browser back, function call stack, bracket checking."
+    ],
+    [
+     "analogy",
+     "Stack = a pile of plates: put on top, take from the top. **Queue** = a tea line: whoever came first gets tea first (FIFO)."
+    ],
+    [
+     "sketch",
+     {
+      "k": "stack",
+      "title": "Stack: \"([{\"",
+      "items": [
+       "{  ← top",
+       "[",
+       "("
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "def valid_parentheses(s):\n    pairs = {\")\": \"(\", \"]\": \"[\", \"}\": \"{\"}\n    stack = []\n    for ch in s:\n        if ch in \"([{\":\n            stack.append(ch)\n        elif ch in pairs:\n            if not stack or stack.pop() != pairs[ch]:\n                return False\n    return not stack\n\nfor t in [\"()[]{}\", \"([)]\", \"{[]}\", \"((\"]:\n    print(t, valid_parentheses(t))",
+     "()[]{} True\n([)] False\n{[]} True\n(( False"
+    ],
+    [
+     "tip",
+     "Look carefully: at the end, `return not stack` — if some bracket is left open (\"((\") the stack is not empty, so the answer is False. People forget this edge case."
+    ],
+    [
+     "code",
+     "python",
+     "from collections import deque\n\nq = deque()\nq.append(\"order1\")\nq.append(\"order2\")\nq.append(\"order3\")\nprint(q.popleft())     # FIFO: pehla aaya pehle gaya\nprint(list(q))\n\n# Last 3 sensor readings ka moving window\nlast3 = deque(maxlen=3)\nfor r in [10, 20, 30, 40]:\n    last3.append(r)\nprint(list(last3), sum(last3) / len(last3))",
+     "order1\n['order2', 'order3']\n[20, 30, 40] 30.0"
+    ],
+    [
+     "warn",
+     "Common mistake: using `list.pop(0)` for a queue. It is O(n) (all items shift). `deque.popleft()` is O(1)."
+    ],
+    [
+     "p",
+     "**Binary search** = look in the middle of a **sorted** list; if the target is smaller, keep the left half, if bigger, the right half. Each step removes half the work = **O(log n)**. Only ~20 steps for 1 million items."
+    ],
+    [
+     "analogy",
+     "Looking up \"Python\" in a dictionary: open it in the middle — is P before or after? Throw away half. Nobody searches page by page."
+    ],
+    [
+     "sketch",
+     {
+      "k": "array",
+      "title": "Binary search: 23",
+      "items": [
+       "2",
+       "5",
+       "8",
+       "12",
+       "16",
+       "23",
+       "38"
+      ],
+      "index": true
+     }
+    ],
+    [
+     "code",
+     "python",
+     "def binary_search(arr, target):\n    lo, hi = 0, len(arr) - 1\n    steps = 0\n    while lo <= hi:\n        steps += 1\n        mid = (lo + hi) // 2\n        if arr[mid] == target:\n            return mid, steps\n        if arr[mid] < target:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return -1, steps\n\narr = [2, 5, 8, 12, 16, 23, 38]\nprint(binary_search(arr, 23))\nprint(binary_search(arr, 7))\nprint(binary_search(list(range(1_000_000)), 999_999))\n\nimport bisect   # ready-made binary search\nprint(bisect.bisect_left([40, 55, 70, 85, 90], 72))",
+     "(5, 2)\n(-1, 3)\n(999999, 20)\n3"
+    ],
+    [
+     "tip",
+     "ML connection: finding a decision tree split, tuning a threshold, a range in sorted embeddings — all use binary-search thinking. `while lo <= hi` and `mid ± 1` — avoid off-by-one mistakes."
+    ],
+    [
+     "p",
+     "**Sorting.** Python's `sorted()` / `.sort()` = **Timsort**, O(n log n), stable (equal values keep their order). IQs often ask about `key=`. Sometimes they ask you to write a sort yourself — then write **merge sort** (divide and conquer), shown below."
+    ],
+    [
+     "code",
+     "python",
+     "models = [(\"svm\", 0.86), (\"rf\", 0.91), (\"lr\", 0.84), (\"xgb\", 0.91)]\nprint(sorted(models, key=lambda m: m[1], reverse=True))\nprint(sorted(models, key=lambda m: (-m[1], m[0])))",
+     "[('rf', 0.91), ('xgb', 0.91), ('svm', 0.86), ('lr', 0.84)]\n[('rf', 0.91), ('xgb', 0.91), ('svm', 0.86), ('lr', 0.84)]"
+    ],
+    [
+     "sketch",
+     {
+      "k": "tree",
+      "title": "Merge sort",
+      "root": {
+       "label": "[5,2,4,1]",
+       "children": [
+        {
+         "label": "[5,2]",
+         "children": [
+          {
+           "label": "[5]",
+           "children": []
+          },
+          {
+           "label": "[2]",
+           "children": []
+          }
+         ]
+        },
+        {
+         "label": "[4,1]",
+         "children": [
+          {
+           "label": "[4]",
+           "children": []
+          },
+          {
+           "label": "[1]",
+           "children": []
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ],
+    [
+     "code",
+     "python",
+     "def merge_sort(a):\n    if len(a) <= 1:             # base case\n        return a\n    mid = len(a) // 2\n    left = merge_sort(a[:mid])  # recursion\n    right = merge_sort(a[mid:])\n    out, i, j = [], 0, 0\n    while i < len(left) and j < len(right):\n        if left[i] <= right[j]:\n            out.append(left[i]); i += 1\n        else:\n            out.append(right[j]); j += 1\n    return out + left[i:] + right[j:]\n\nprint(merge_sort([5, 2, 4, 1, 9, 3]))",
+     "[1, 2, 3, 4, 5, 9]"
+    ],
+    [
+     "p",
+     "**Recursion** = a function calls itself with a smaller input. Two things are required: a **base case** (when to stop) and a **smaller step** (the problem gets smaller each time)."
+    ],
+    [
+     "code",
+     "python",
+     "def factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n - 1)\n\nfrom functools import lru_cache\n\n@lru_cache(maxsize=None)\ndef fib(n):\n    if n < 2:\n        return n\n    return fib(n - 1) + fib(n - 2)\n\ndef climb_stairs(n):           # 1 ya 2 step: kitne tareeke?\n    a, b = 1, 1\n    for _ in range(n):\n        a, b = b, a + b\n    return a\n\nprint(factorial(5), fib(30), climb_stairs(5))",
+     "120 832040 8"
+    ],
+    [
+     "warn",
+     "Common mistake: forgetting the base case → `RecursionError: maximum recursion depth exceeded`. And `fib(40)` without a cache is very slow (O(2^n)). With `lru_cache` (memoization) it becomes O(n). This is the seed of **dynamic programming**."
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "IQ coding: 6 steps",
+      "steps": [
+       "Clarify",
+       "Brute force",
+       "Optimize",
+       "Code",
+       "Dry run",
+       "State Big-O"
+      ],
+      "dir": "v"
+     }
+    ]
+   ]
+  },
+  {
+   "title": "Portfolio, IQ rounds, STAR and career roadmap",
+   "blocks": [
+    [
+     "p",
+     "Writing \"Python, ML, LLM\" on a resume is easy. **Showing** it is hard. Recruiters look at your GitHub and live demo first. 3-5 **good, complete** projects are worth more than 30 half-done notebooks. Below are the projects that get people hired, and what to show in each:"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Portfolio projects",
+      "head": [
+       "Project",
+       "Stack",
+       "What to show"
+      ],
+      "rows": [
+       [
+        "RAG doc chatbot",
+        "LangChain+FAISS+FastAPI",
+        "Sources, eval"
+       ],
+       [
+        "ML pipeline + API",
+        "sklearn+FastAPI+Docker",
+        "EDA, 3+ models"
+       ],
+       [
+        "Factory defect CV",
+        "CNN/YOLO+Streamlit",
+        "Before/after"
+       ],
+       [
+        "AI agent tool",
+        "LLM+tools+memory",
+        "Tool calls log"
+       ],
+       [
+        "Prod AI app",
+        "Compose+tests+CI",
+        "Live link"
+       ]
+      ]
+     }
+    ],
+    [
+     "list",
+     [
+      "**1. RAG Document Chatbot** (on PDFs of cable TDS/IS standards): PDF upload, chunking, embeddings, source citation. Show: a chunk size experiment, an eval set of 20 questions, handling \"no answer found\".",
+      "**2. ML pipeline + API** (cable price / order delay prediction): EDA, feature engineering, compare 3-5 models, cross-validation, best model in FastAPI + Docker. Show: a metrics table and why you chose this model.",
+      "**3. Computer vision** (cable surface defects or drum label OCR): data collection, augmentation, accuracy/confusion matrix, Streamlit demo. Show: an analysis of wrong predictions.",
+      "**4. AI agent** (an agent that asks the ERP about stock/orders): tools (SQL query, calculator), memory, guardrails. Show: a log of the agent's steps, failure cases.",
+      "**5. Production AI app**: take one of the above with Streamlit + FastAPI + docker-compose + tests + GitHub Actions CI. This is the **centerpiece**."
+     ]
+    ],
+    [
+     "tip",
+     "Your unique advantage: you work in a real factory (GEEP, cable manufacturing). A project with a real business problem + real (anonymised) data = different from 95% of candidates. Everyone says \"I did Kaggle Titanic\"."
+    ],
+    [
+     "p",
+     "**In every project's README:** the problem (in business language), demo GIF/screenshot + live link, architecture diagram, tech stack, setup steps (`git clone`, `docker compose up`), results (numbers!), what you would improve next. In the repo: `.gitignore`, `requirements.txt` (pinned), `.env.example`, `Dockerfile`, `tests/`."
+    ],
+    [
+     "p",
+     "**What AI/ML IQ rounds look like:**"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "IQ rounds",
+      "steps": [
+       "HR screening",
+       "Coding (DSA)",
+       "ML/LLM theory",
+       "Project deep-dive",
+       "System design",
+       "HR/offer"
+      ],
+      "dir": "v"
+     }
+    ],
+    [
+     "list",
+     [
+      "**Screening (20-30 min):** \"Tell me about yourself\", why this role, notice period, salary. Keep a 2-minute intro ready.",
+      "**Coding (45-60 min):** 1-2 DSA questions (patterns from Lessons 4-5) + sometimes pandas/SQL.",
+      "**ML/LLM theory:** bias-variance, overfitting, metrics, gradient descent, transformers, RAG and embeddings.",
+      "**Project deep-dive:** the project on your resume — they will ask \"why?\" for every line.",
+      "**System design (mid level):** \"design a support chatbot\" — clarify, then cover architecture, data, scale and monitoring.",
+      "**HR/managerial:** teamwork, conflict, what you learned from failure."
+     ]
+    ],
+    [
+     "sketch",
+     {
+      "k": "boxes",
+      "title": "Explaining a project: STAR",
+      "items": [
+       {
+        "label": "S - Situation",
+        "value": "what the situation was"
+       },
+       {
+        "label": "T - Task",
+        "value": "what my job was"
+       },
+       {
+        "label": "A - Action",
+        "value": "what I did"
+       },
+       {
+        "label": "R - Result",
+        "value": "benefit in numbers"
+       }
+      ]
+     }
+    ],
+    [
+     "code",
+     "text",
+     "S: GEEP mein sales team ko har cable quote ke liye TDS aur IS standard\n   PDFs mein haath se dhoondhna padta tha, ek quote mein ~20 min.\nT: Mujhe aisa tool banana tha jo sawaal ka jawab source ke saath de.\nA: Maine 300 PDFs ko chunk kiya (500 tokens, 50 overlap), embeddings\n   FAISS mein rakhi, FastAPI /chat endpoint banaya, Streamlit UI,\n   Docker se server pe deploy kiya. 40 sawaalon ka eval set banaya.\nR: Search time 20 min se ~2 min, eval pe 85% sahi jawab.\n   Galat jawab kam karne ke liye re-ranking add kiya (72% -> 85%).",
+     ""
+    ],
+    [
+     "tip",
+     "Look carefully: in Action, say \"**I**\", not \"we\" — the interviewer wants to know your work. Give a **number** in Result. And always mention one **challenge + trade-off** (\"smaller chunks broke the context, so I kept an overlap\")."
+    ],
+    [
+     "p",
+     "**Most frequently asked theory questions** (answers are in the IQ section, and in detail in earlier stages):"
+    ],
+    [
+     "list",
+     [
+      "What is overfitting, and how do you prevent it? The bias-variance trade-off.",
+      "Precision vs recall vs F1 — when to use which? Why accuracy fools you on imbalanced data.",
+      "Why train/validation/test splits and cross-validation.",
+      "Gradient descent, learning rate, and L1 vs L2 regularization.",
+      "Random forest vs gradient boosting — how they differ.",
+      "Transformer / attention in simple words. Tokens, context window, temperature.",
+      "What is RAG, and when to fine-tune? How to reduce hallucination.",
+      "Embeddings and cosine similarity. Why a vector DB.",
+      "How to monitor a model in production (data drift)."
+     ]
+    ],
+    [
+     "p",
+     "**Career roadmap** (practical, for you):"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Roadmap",
+      "head": [
+       "Time",
+       "Focus",
+       "Output"
+      ],
+      "rows": [
+       [
+        "Month 1-2",
+        "DSA, 1-2 questions daily",
+        "60 problems"
+       ],
+       [
+        "Month 2-3",
+        "Project 1-2 + Docker",
+        "GitHub + demo"
+       ],
+       [
+        "Month 3-4",
+        "Project 3-5, README",
+        "Live links"
+       ],
+       [
+        "Month 4+",
+        "Apply + mock IQ",
+        "Calls"
+       ]
+      ]
+     }
+    ],
+    [
+     "p",
+     "**Resume tips:**"
+    ],
+    [
+     "list",
+     [
+      "**1 page.** At the top: name, phone, email, GitHub, LinkedIn, portfolio link.",
+      "Headline, for example: \"AI/ML Engineer | Python | ML | LLM/RAG | FastAPI | Docker\".",
+      "Projects section above education (for freshers/career switchers).",
+      "Every line = action verb + what + how + **number**: \"Built RAG chatbot over 300 TDS PDFs; cut search time 90%\".",
+      "Write your current job from an AI angle: automation, data, ERP integration — whatever you really did.",
+      "Generic objective, rating bars (Python 4/5), photo — leave them out. Only list skills you can handle questions on.",
+      "For ATS, use keywords from the job description (the ones that are true)."
+     ]
+    ],
+    [
+     "warn",
+     "Common mistake: writing things on the resume that you don't know (\"Kubernetes expert\"). The interviewer asks exactly that and trust breaks. Honesty + \"I am learning this\" looks much better."
+    ],
+    [
+     "p",
+     "**Where to look for jobs:** LinkedIn, Naukri, Instahyre, Wellfound (startups), company career pages. Most effective = **referral**: connect with people on LinkedIn, post your projects, then politely ask for a referral. Practice mock IQs with friends or by recording yourself."
+    ]
+   ]
+  }
+ ],
+ "teach": [
+  {
+   "say": "Last stage! So far you learned to build models. Now you will learn to take them to the world, and land a job.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Code",
+     "Git",
+     "Docker",
+     "Deploy",
+     "Job"
+    ],
+    "dir": "h"
+   },
+   "code": null
+  },
+  {
+   "say": "Git is a diary. add puts it in staging, commit takes a photo, push sends it to GitHub.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Edit",
+     "git add",
+     "git commit",
+     "git push"
+    ],
+    "dir": "h"
+   },
+   "code": "git add .\ngit commit -m \"Add predict API\"\ngit push"
+  },
+  {
+   "say": "A new feature always goes on a new branch. When the work is done, open a Pull Request, and merge after review.",
+   "sketch": {
+    "k": "tree",
+    "root": {
+     "label": "main",
+     "children": [
+      {
+       "label": "feature/x",
+       "children": []
+      },
+      {
+       "label": "fix/y",
+       "children": []
+      }
+     ]
+    }
+   },
+   "code": "git checkout -b feature/x"
+  },
+  {
+   "say": "Docker is a tiffin box. Dockerfile is the recipe, the image is the packed box, the container is the opened, running meal.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Dockerfile",
+     "docker build",
+     "Image",
+     "docker run",
+     "Container"
+    ],
+    "dir": "h"
+   },
+   "code": "docker build -t ml-api .\ndocker run -p 8000:8000 ml-api"
+  },
+  {
+   "say": "Three services together? docker-compose. One YAML, one command, everything running.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Streamlit",
+     "FastAPI",
+     "Postgres"
+    ],
+    "dir": "h"
+   },
+   "code": "docker compose up -d"
+  },
+  {
+   "say": "Streamlit is the counter, FastAPI the warehouse. The user presses a button at the counter, the model works in the warehouse.",
+   "sketch": {
+    "k": "stack",
+    "items": [
+     "User",
+     "Streamlit UI",
+     "FastAPI",
+     "Model / RAG",
+     "Data"
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "Big-O means: when the input grows, how much does the work grow. Dict lookup O(1), one loop O(n), nested loop O(n²).",
+   "sketch": {
+    "k": "chart",
+    "type": "bar",
+    "points": [
+     [
+      "O(1)",
+      1
+     ],
+     [
+      "O(log n)",
+      3
+     ],
+     [
+      "O(n)",
+      8
+     ],
+     [
+      "O(n²)",
+      20
+     ]
+    ],
+    "xl": "",
+    "yl": "steps"
+   },
+   "code": null
+  },
+  {
+   "say": "Two Sum: for every number ask, have I already seen my partner? Check the dict. Just one loop.",
+   "sketch": {
+    "k": "boxes",
+    "items": [
+     {
+      "label": "seen",
+      "value": "{2: 0}"
+     },
+     {
+      "label": "x = 7",
+      "value": "need 2 ✓"
+     }
+    ]
+   },
+   "code": "need = target - x\nif need in seen: return [seen[need], i]"
+  },
+  {
+   "say": "Use a stack to check brackets. Put an opening bracket on top; when a closing bracket comes, match it with the top one.",
+   "sketch": {
+    "k": "stack",
+    "items": [
+     "[  ← top",
+     "(",
+     "{"
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "In an IQ, explain your project with STAR: Situation, Task, Action, Result. Always put a number in Result.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Situation",
+     "Task",
+     "Action",
+     "Result"
+    ],
+    "dir": "h"
+   },
+   "code": null
+  }
+ ],
+ "practice": [
+  {
+   "q": "**Two Sum (with a dict)** — write `two_sum(nums, target)` that returns, as a list, the indexes of the two numbers that add up to target (return `[]` if not found). Use only one loop and a dict. Then print these 3:\n`two_sum([2, 7, 11, 15], 9)`\n`two_sum([3, 2, 4], 6)`\n`two_sum([1, 5, 3], 100)`",
+   "starter": "def two_sum(nums, target):\n    seen = {}  # value -> index\n    for i, x in enumerate(nums):\n        # TODO: need = target - x\n        # TODO: agar need seen mein hai toh [seen[need], i] return karo\n        # TODO: seen[x] = i\n        pass\n    return []\n\nprint(two_sum([2, 7, 11, 15], 9))\nprint(two_sum([3, 2, 4], 6))\nprint(two_sum([1, 5, 3], 100))\n",
+   "expect": "[0, 1]\n[1, 2]\n[]",
+   "hint": "Check first, then add to the dict. If you do it the other way round, in [3,2,4] the 3 will pair with itself (3+3=6).",
+   "solution": "def two_sum(nums, target):\n    seen = {}\n    for i, x in enumerate(nums):\n        need = target - x\n        if need in seen:\n            return [seen[need], i]\n        seen[x] = i\n    return []\n\nprint(two_sum([2, 7, 11, 15], 9))\nprint(two_sum([3, 2, 4], 6))\nprint(two_sum([1, 5, 3], 100))\n"
+  },
+  {
+   "q": "**Valid Parentheses (with a stack)** — write `is_valid(s)` that returns True/False: whether every opening bracket `( [ {` was closed in the right order. Then print `string -> result` for these strings: `\"()[]{}\"`, `\"([)]\"`, `\"{[()]}\"`, `\"(((\"`, `\"\"`.",
+   "starter": "def is_valid(s):\n    pairs = {')': '(', ']': '[', '}': '{'}\n    stack = []\n    for ch in s:\n        if ch in '([{':\n            pass  # TODO: push karo\n        else:\n            pass  # TODO: stack khaali ya upar wala match nahi -> False\n    return False  # TODO: sahi condition (stack khaali?)\n\nfor t in [\"()[]{}\", \"([)]\", \"{[()]}\", \"(((\", \"\"]:\n    print(repr(t), '->', is_valid(t))\n",
+   "expect": "'()[]{}' -> True\n'([)]' -> False\n'{[()]}' -> True\n'(((' -> False\n'' -> True",
+   "hint": "On a closing bracket: `if not stack or stack.pop() != pairs[ch]: return False`. At the end, `return not stack`.",
+   "solution": "def is_valid(s):\n    pairs = {')': '(', ']': '[', '}': '{'}\n    stack = []\n    for ch in s:\n        if ch in '([{':\n            stack.append(ch)\n        else:\n            if not stack or stack.pop() != pairs[ch]:\n                return False\n    return not stack\n\nfor t in [\"()[]{}\", \"([)]\", \"{[()]}\", \"(((\", \"\"]:\n    print(repr(t), '->', is_valid(t))\n"
+  },
+  {
+   "q": "**Binary search + steps** — in the sorted cable sizes `[1.5, 2.5, 4, 6, 10, 16, 25, 35, 50]`, write `binary_search(arr, target)` that returns `(index, steps)` (index `-1` if not found). steps = how many times the loop ran. Print for `16`, `1.5` and `20`, in the format: `16 -> (index, steps)`.",
+   "starter": "def binary_search(arr, target):\n    lo, hi = 0, len(arr) - 1\n    steps = 0\n    while lo <= hi:\n        steps += 1\n        mid = (lo + hi) // 2\n        # TODO: mila -> (mid, steps)\n        # TODO: arr[mid] < target -> lo = mid + 1, warna hi = mid - 1\n        break\n    return (-1, steps)\n\nsizes = [1.5, 2.5, 4, 6, 10, 16, 25, 35, 50]\nfor t in [16, 1.5, 20]:\n    print(t, '->', binary_search(sizes, t))\n",
+   "expect": "16 -> (5, 3)\n1.5 -> (0, 3)\n20 -> (-1, 3)",
+   "hint": "The first mid = (0+8)//2 = 4 (value 10). 16 is bigger, so go to the right side. Remove the `break`.",
+   "solution": "def binary_search(arr, target):\n    lo, hi = 0, len(arr) - 1\n    steps = 0\n    while lo <= hi:\n        steps += 1\n        mid = (lo + hi) // 2\n        if arr[mid] == target:\n            return (mid, steps)\n        if arr[mid] < target:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return (-1, steps)\n\nsizes = [1.5, 2.5, 4, 6, 10, 16, 25, 35, 50]\nfor t in [16, 1.5, 20]:\n    print(t, '->', binary_search(sizes, t))\n"
+  }
+ ],
+ "quiz": [
+  {
+   "q": "Which command sends a file to the staging area?",
+   "o": [
+    "git commit",
+    "git add",
+    "git push",
+    "git init"
+   ],
+   "a": 1,
+   "why": "`git add` puts it in staging; `commit` takes its photo; `push` sends it to GitHub."
+  },
+  {
+   "q": "What is the main job of a Pull Request (PR)?",
+   "o": [
+    "Get the branch's code merged into main after review",
+    "Download code from GitHub",
+    "Delete an old commit",
+    "Build a Docker image"
+   ],
+   "a": 0,
+   "why": "PR = \"merge my branch into main\" — it is merged after review and CI."
+  },
+  {
+   "q": "What is the correct difference between a Docker image and a container?",
+   "o": [
+    "Both are the same thing",
+    "The container is the recipe, the image is the running process",
+    "The image is a packed template, the container is its running instance",
+    "Images only run on Windows"
+   ],
+   "a": 2,
+   "why": "Image = read-only template (the box); container = a process running from it. Many containers from one image."
+  },
+  {
+   "q": "Why do we write `COPY requirements.txt .` separately, before `COPY . .`, in a Dockerfile?",
+   "o": [
+    "For security",
+    "To make the image smaller",
+    "It is required syntax",
+    "Layer cache: pip install won't run again when only the code changes"
+   ],
+   "a": 3,
+   "why": "The requirements layer gets cached; when only the code changes, the build stays fast."
+  },
+  {
+   "q": "In docker-compose, which URL will the `ui` service use to call the `api` service?",
+   "o": [
+    "http://localhost:8000",
+    "http://api:8000",
+    "http://127.0.0.1:8501",
+    "http://docker:8000"
+   ],
+   "a": 1,
+   "why": "In a compose network, the service name is the hostname. Every container has its own localhost."
+  },
+  {
+   "q": "In Streamlit, why does chat history disappear on refresh/click if you keep it in a normal list?",
+   "o": [
+    "The whole script runs again on every interaction",
+    "Streamlit doesn't support lists",
+    "The browser cache gets cleared",
+    "A Python memory leak"
+   ],
+   "a": 0,
+   "why": "Streamlit runs the script from the top on every click; use `st.session_state` to remember things."
+  },
+  {
+   "q": "How much time does the dict solution to Two Sum take?",
+   "o": [
+    "O(n²)",
+    "O(log n)",
+    "O(n)",
+    "O(1)"
+   ],
+   "a": 2,
+   "why": "One loop (n) and an O(1) dict lookup at each step → O(n) time, O(n) space."
+  },
+  {
+   "q": "About how many steps does binary search take on a sorted list of 1 million items?",
+   "o": [
+    "1 million",
+    "1000",
+    "500",
+    "20"
+   ],
+   "a": 3,
+   "why": "Each step halves it: log2(1,000,000) ≈ 20."
+  },
+  {
+   "q": "Best choice in Python for a queue (FIFO)?",
+   "o": [
+    "list.pop(0)",
+    "collections.deque.popleft()",
+    "set.pop()",
+    "dict.popitem()"
+   ],
+   "a": 1,
+   "why": "`deque.popleft()` is O(1); `list.pop(0)` is O(n) because all items shift."
+  },
+  {
+   "q": "In the STAR method, what is the best thing to say in 'R'?",
+   "o": [
+    "A measurable result, like \"search time from 20 min to 2 min\"",
+    "What the team did",
+    "Which language was used",
+    "The project name"
+   ],
+   "a": 0,
+   "why": "Result = benefit in numbers. It shows the impact clearly."
+  }
+ ],
+ "iq": [
+  {
+   "q": "Tell me about yourself (what should a 2-minute answer for an AI/ML role look like?)",
+   "a": "Present → past → future format: \"I am currently a software developer at GEEP Polymers (cable manufacturing), where I work on ERP automation and data tools. In the last few months I have focused on ML and LLMs — I built a RAG chatbot that answers from TDS PDFs with sources, and a price prediction API on FastAPI + Docker. Now I want an AI/ML engineer role where I can take models to production on real business problems.\" Under 2 minutes, with projects and numbers."
+  },
+  {
+   "q": "Explain your best project. (Project deep-dive)",
+   "a": "Use STAR: Situation (the business pain), Task (your role), Action (architecture, data, model choice and WHY, one trade-off), Result (a number). Then say yourself what you would improve (bigger eval set, re-ranking, monitoring). The interviewer will ask \"why\" for every choice, like \"Why FAISS, why not Postgres pgvector?\" — so keep a reason ready for every decision."
+  },
+  {
+   "q": "Solve Two Sum and state its complexity.",
+   "a": "Brute force: check every pair, O(n²). Optimized: keep value→index in a dict; for every number x, look for `target - x` in the dict. If found, return both indexes. O(n) time, O(n) space.\n`need = target - x; if need in seen: return [seen[need], i]; seen[x] = i`\nCheck first, then insert — so an element doesn't pair with itself."
+  },
+  {
+   "q": "What is the difference between time complexity and space complexity? What is the complexity of `in` for a Python list vs a set?",
+   "a": "Time complexity = how the steps grow as the input grows; space = how much extra memory grows. `x in list` is O(n) because it checks elements one by one; `x in set` is O(1) on average because hashing jumps straight to the bucket. So if you need to check membership again and again, build a set first."
+  },
+  {
+   "q": "What is overfitting and how do you prevent it?",
+   "a": "The model memorizes the training data — accuracy is very good on train but bad on test/new data (high variance). Ways to prevent it: more data / augmentation, a simpler model, regularization (L1/L2, dropout), early stopping, tuning with cross-validation, limiting max_depth in trees. How to spot it: a big gap between train and validation scores."
+  },
+  {
+   "q": "Precision, recall, F1 — when would you use which?",
+   "a": "Precision = of those predicted positive, how many are really positive (when you want fewer false alarms, like a spam filter). Recall = of the real positives, how many were caught (when a miss is costly, like cable defects or cancer detection). F1 = the harmonic mean of both, for imbalanced data. On imbalanced data (99% normal), accuracy fools you — calling everything normal still gives 99%."
+  },
+  {
+   "q": "What is RAG and when is it better than fine-tuning?",
+   "a": "RAG = retrieve relevant chunks from your own documents based on the question (embeddings + vector search), and give them to the LLM as context, so the answer is grounded and shows its source. When knowledge changes often, citations are needed, or the data is private — RAG is better and cheaper. Fine-tuning is for changing the model's style/format/behaviour, not for adding new knowledge. Often both are used together."
+  },
+  {
+   "q": "Explain attention in a Transformer in simple words.",
+   "a": "Every token looks at all the other tokens and decides how much attention to give each one. Each token gets a Query, Key and Value vector; Query·Key gives a score, softmax turns it into weights, and the weighted sum of the Values is the new representation. This is how \"bank\" gets its meaning from context (river or money), and unlike an RNN it doesn't go step by step — everything runs in parallel, so training is fast."
+  },
+  {
+   "q": "Why do you use Docker in ML deployment? Image vs container?",
+   "a": "Docker packs the code, libraries, Python version and OS settings into one image, so it runs the same on a laptop, a test server and the cloud — no more \"works on my machine\", and scaling/rollback become easy. Image = a read-only template (built from a Dockerfile), container = a running instance of that image. With Compose, API + UI + DB run with one command."
+  },
+  {
+   "q": "What is the difference between git merge and git rebase? How do you resolve a merge conflict?",
+   "a": "Merge joins the history of two branches and creates a merge commit — safe, and the real history is visible. Rebase replays your commits on top of the latest main — a straight history, but we don't rebase a shared/pushed branch because it rewrites history. Conflict: open the file, keep the correct code between `<<<<<<<`/`=======`/`>>>>>>>`, remove the markers, run the tests, `git add` + `git commit`."
+  },
+  {
+   "q": "How would you take a trained model to production? (Mini system design)",
+   "a": "Save the model with joblib/ONNX, load it once at startup in a FastAPI service, validate input with Pydantic, add `/predict` and `/health` endpoints. Build a Docker image and deploy after CI (tests). Logging (latency, inputs, predictions), monitoring for data drift and accuracy, model versioning (MLflow), and a rollback plan. For an LLM app, also caching, rate limiting and token cost tracking."
+  },
+  {
+   "q": "What is your weakness? / You don't have a CS degree or ML experience, so why should we hire you?",
+   "a": "An honest, improvement-focused answer: \"My formal ML industry experience is limited, so I built 5 end-to-end projects, two of them on real problems from my factory, and I practise DSA every day.\" Then add your strengths: real business understanding, working with production data, learning fast. Never give a fake weakness (\"I work too hard\")."
+  }
+ ]
+}

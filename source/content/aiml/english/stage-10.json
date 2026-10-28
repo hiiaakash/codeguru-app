@@ -1,0 +1,1309 @@
+{
+ "n": 10,
+ "id": "aiml-10",
+ "title": "Machine Learning with scikit-learn",
+ "goal": "You will understand what ML means, build regression, classification and clustering models with scikit-learn, judge them with the right metrics, and catch overfitting and tune models with GridSearchCV.",
+ "lessons": [
+  {
+   "title": "What is ML — rules vs learning from data",
+   "blocks": [
+    [
+     "p",
+     "So far we have **prepared** data (NumPy, Pandas, graphs). Now the real work: building a **model** that looks at data, learns the **pattern** by itself, and **predicts** on new data. This is **Machine Learning (ML)**."
+    ],
+    [
+     "p",
+     "In normal programming **you write the rules**: `if marks >= 40: pass`. In ML **you give the data** (old marks + pass/fail), and the model **finds the rules by itself**."
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "Normal code vs ML",
+      "left": {
+       "title": "Normal code",
+       "items": [
+        "Rules + Data",
+        "→ Answer",
+        "Humans write rules",
+        "New case? Change code"
+       ]
+      },
+      "right": {
+       "title": "Machine Learning",
+       "items": [
+        "Data + Answers",
+        "→ Rules (model)",
+        "Model learns itself",
+        "New data? Retrain"
+       ]
+      }
+     }
+    ],
+    [
+     "analogy",
+     "A new helper joins the factory. You don't give him a book of 1000 rules. You show him 100 cables: \"this one is fine, this one is reject\". In a few days he can tell by himself. A model also learns like this, **from examples**."
+    ],
+    [
+     "p",
+     "**3 types of ML:**"
+    ],
+    [
+     "sketch",
+     {
+      "k": "tree",
+      "title": "Types of ML",
+      "root": {
+       "label": "Machine Learning",
+       "children": [
+        {
+         "label": "Supervised",
+         "children": [
+          {
+           "label": "Regression",
+           "children": []
+          },
+          {
+           "label": "Classification",
+           "children": []
+          }
+         ]
+        },
+        {
+         "label": "Unsupervised",
+         "children": [
+          {
+           "label": "Clustering",
+           "children": []
+          }
+         ]
+        },
+        {
+         "label": "Reinforcement",
+         "children": [
+          {
+           "label": "Learn from reward",
+           "children": []
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ],
+    [
+     "list",
+     [
+      "**Supervised** = along with the data, the **correct answer (label)** is also given. Like a teacher teaching with the answer key. Example: house size → price, email → spam/not spam.",
+      "**Unsupervised** = **no** label is given. The model finds groups by itself. Example: split customers into 3 groups based on what they buy.",
+      "**Reinforcement** = the model (agent) **does** something and gets a **reward or punishment**. Example: an AI that plays games, a robot learning to walk."
+     ]
+    ],
+    [
+     "p",
+     "Supervised has 2 jobs: **Regression** = predict a number (price, temperature). **Classification** = predict a category (spam/not spam, pass/fail, which flower)."
+    ],
+    [
+     "p",
+     "**Features (X)** = the input columns you predict from. **Label / Target (y)** = what you want to predict. Convention: `X` capital (table, 2D), `y` small (one column, 1D)."
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Features and Label",
+      "head": [
+       "size (X)",
+       "rooms (X)",
+       "price (y)"
+      ],
+      "rows": [
+       [
+        "500",
+        "1",
+        "25"
+       ],
+       [
+        "800",
+        "2",
+        "40"
+       ],
+       [
+        "1200",
+        "3",
+        "62"
+       ]
+      ]
+     }
+    ],
+    [
+     "p",
+     "**Train/Test split:** don't use all the data to teach the model. The model **learns** from ~80% (train); keep ~20% **hidden** and **test** on it later. This tells you how the model will do on new data."
+    ],
+    [
+     "analogy",
+     "If you show the exam questions during study time, you'll score 100 but understand nothing. Test data = a **new exam paper** the model has never seen before."
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\nfrom sklearn.model_selection import train_test_split\n\nX = np.arange(20).reshape(10, 2)   # 10 rows, 2 features\ny = np.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 1])\n\nX_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.2, random_state=42)\n\nprint(X_train.shape, X_test.shape)\nprint(y_test)",
+     "(8, 2) (2, 2)\n[0 1]"
+    ],
+    [
+     "tip",
+     "Look carefully: `train_test_split` returns **4 things**, remember the order: `X_train, X_test, y_train, y_test`. `random_state=42` = the **same split** every time (so results can be repeated). In classification, add `stratify=y` so the class ratio stays the same in both parts."
+    ],
+    [
+     "p",
+     "The best thing about scikit-learn: **every model has the same API**. Just 3 steps:"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Every sklearn model",
+      "steps": [
+       "model = Model()",
+       "model.fit(X, y)",
+       "model.predict(X_new)"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "warn",
+     "Common mistake: making `y` 2D or giving `X` as 1D. sklearn always needs `X` in 2D. Even with a single feature, use `X.reshape(-1, 1)` or `df[[\"size\"]]` (double brackets)."
+    ]
+   ]
+  },
+  {
+   "title": "Linear Regression — predict a number",
+   "blocks": [
+    [
+     "p",
+     "**Linear Regression** = draw a **straight line** through the data that makes the least error. Line formula: `y = m*x + c` (m = slope / weight, c = intercept / bias)."
+    ],
+    [
+     "sketch",
+     {
+      "k": "chart",
+      "title": "Size vs Price",
+      "type": "scatter",
+      "points": [
+       [
+        5,
+        26
+       ],
+       [
+        8,
+        39
+       ],
+       [
+        10,
+        52
+       ],
+       [
+        12,
+        59
+       ],
+       [
+        15,
+        77
+       ]
+      ],
+      "line": [
+       [
+        4,
+        21
+       ],
+       [
+        16,
+        81
+       ]
+      ],
+      "xl": "size (100 sqft)",
+      "yl": "price (lakh)"
+     }
+    ],
+    [
+     "analogy",
+     "A tea seller notices: 10 cups = 100 rupees, 20 cups = 200. He gets the line: each cup = 10 rupees. Now he can tell the bill for 35 cups without counting. A model also learns the **slope** by looking at points."
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\nfrom sklearn.linear_model import LinearRegression\n\n# house size (in 100 sqft) -> price (lakh)\nX = np.array([[5], [8], [10], [12], [15]])\ny = np.array([26, 39, 52, 59, 77])\n\nmodel = LinearRegression()\nmodel.fit(X, y)\n\nprint(\"slope m:\", round(model.coef_[0], 2))\nprint(\"intercept c:\", round(model.intercept_, 2))\nprint(\"20 ka price:\", round(model.predict([[20]])[0], 1))",
+     "slope m: 5.09\nintercept c: -0.26\n20 ka price: 101.5"
+    ],
+    [
+     "p",
+     "The model learned by itself: for every 100 sqft more, the price goes up by about **5 lakh**. The `_` at the end of `coef_` and `intercept_` means: this value was learned **after fit**."
+    ],
+    [
+     "p",
+     "How is the line chosen? Take each point's error (actual − predicted), **square** it, and add them all. The line that makes this total the **smallest** is the best. This is called **Least Squares**."
+    ],
+    [
+     "p",
+     "**Regression metrics** — how good is the model:"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Regression metrics",
+      "head": [
+       "Metric",
+       "Meaning",
+       "Good"
+      ],
+      "rows": [
+       [
+        "MAE",
+        "avg |error|",
+        "low"
+       ],
+       [
+        "MSE",
+        "avg error²",
+        "low"
+       ],
+       [
+        "RMSE",
+        "√MSE, unit of y",
+        "low"
+       ],
+       [
+        "R²",
+        "how much explained",
+        "close to 1"
+       ]
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\nfrom sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score\n\ny_true = np.array([30, 45, 50, 65])\ny_pred = np.array([32, 40, 53, 66])\n\nmae = mean_absolute_error(y_true, y_pred)\nmse = mean_squared_error(y_true, y_pred)\nrmse = np.sqrt(mse)\nr2 = r2_score(y_true, y_pred)\nprint(\"MAE:\", mae)\nprint(\"MSE:\", mse)\nprint(\"RMSE:\", round(rmse, 2))\nprint(\"R2:\", round(r2, 3))",
+     "MAE: 2.75\nMSE: 9.75\nRMSE: 3.12\nR2: 0.938"
+    ],
+    [
+     "list",
+     [
+      "**MAE** — the plain average of errors. Easiest to understand: \"average error of 2.75 lakh\".",
+      "**MSE** — squares the error, so **big errors get punished more**. But the unit also gets squared (lakh²).",
+      "**RMSE** — the square root of MSE, back in the **unit of y**. Sensitive to big errors.",
+      "**R²** — 1 = perfect, 0 = the model just says the average, negative = worse than the average."
+     ]
+    ],
+    [
+     "tip",
+     "Look carefully: if the data has some **outliers** (very unusual values) and their errors are very costly, look at RMSE; if all errors matter equally, use MAE."
+    ],
+    [
+     "p",
+     "With more than one feature the code is the same: `X` just has more columns. This is called **Multiple Linear Regression**: `price = w1*size + w2*rooms + w3*age + c`."
+    ],
+    [
+     "warn",
+     "Common mistake: using Linear Regression to predict a category (yes/no). It gives numbers like 0.7 or 1.4. For a category you need a **classification** model (next lesson)."
+    ]
+   ]
+  },
+  {
+   "title": "Classification models — LogReg, KNN, Tree, Forest",
+   "blocks": [
+    [
+     "p",
+     "Classification = predicting a **category**. We'll use sklearn's built-in **Iris** dataset: 150 flowers, 4 features (petal/sepal length and width), 3 types (setosa, versicolor, virginica)."
+    ],
+    [
+     "code",
+     "python",
+     "from sklearn.datasets import load_iris\nfrom sklearn.model_selection import train_test_split\n\nX, y = load_iris(return_X_y=True)\nprint(X.shape, y.shape)\nprint(\"classes:\", sorted(set(y.tolist())))\n\nX_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.2, random_state=42, stratify=y)\nprint(len(X_train), len(X_test))",
+     "(150, 4) (150,)\nclasses: [0, 1, 2]\n120 30"
+    ],
+    [
+     "p",
+     "**1. Logistic Regression** — the name says regression, but the job is **classification**. The line's output passes through a **sigmoid** and becomes a **probability** between 0 and 1. Above 0.5 = class 1."
+    ],
+    [
+     "sketch",
+     {
+      "k": "chart",
+      "title": "Sigmoid: score → prob",
+      "type": "line",
+      "points": [
+       [
+        -6,
+        0.0
+       ],
+       [
+        -4,
+        0.02
+       ],
+       [
+        -2,
+        0.12
+       ],
+       [
+        0,
+        0.5
+       ],
+       [
+        2,
+        0.88
+       ],
+       [
+        4,
+        0.98
+       ],
+       [
+        6,
+        1.0
+       ]
+      ],
+      "xl": "score",
+      "yl": "probability"
+     }
+    ],
+    [
+     "p",
+     "**2. KNN (K-Nearest Neighbors)** — look at the **K nearest neighbours** of the new point; whichever class is the majority is the answer. No training, just remembering."
+    ],
+    [
+     "analogy",
+     "You moved into a new neighbourhood. Want to know which team people support here? Ask your 5 nearest neighbours. If 4 say CSK, you are in a CSK area too. That is KNN (K = 5)."
+    ],
+    [
+     "p",
+     "**3. Decision Tree** — a **chain** of yes/no questions: \"petal length < 2.5?\" → yes → setosa. A human can also read why this decision was made."
+    ],
+    [
+     "sketch",
+     {
+      "k": "tree",
+      "title": "Decision Tree",
+      "root": {
+       "label": "petal len < 2.5?",
+       "children": [
+        {
+         "label": "Yes: setosa",
+         "children": []
+        },
+        {
+         "label": "No: width < 1.8?",
+         "children": [
+          {
+           "label": "Yes: versicolor",
+           "children": []
+          },
+          {
+           "label": "No: virginica",
+           "children": []
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ],
+    [
+     "p",
+     "**4. Random Forest** — **many decision trees** (each on slightly different data), they all vote and the majority wins. If one tree makes a mistake, the others cover it."
+    ],
+    [
+     "analogy",
+     "One doctor's opinion vs a vote of 100 doctors. The decision of 100 is more reliable. This is called an **ensemble**."
+    ],
+    [
+     "code",
+     "python",
+     "from sklearn.datasets import load_iris\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.linear_model import LogisticRegression\nfrom sklearn.neighbors import KNeighborsClassifier\nfrom sklearn.tree import DecisionTreeClassifier\nfrom sklearn.ensemble import RandomForestClassifier\n\nX, y = load_iris(return_X_y=True)\nX_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.2, random_state=42, stratify=y)\n\nmodels = {\n    \"LogReg\": LogisticRegression(max_iter=1000),\n    \"KNN\": KNeighborsClassifier(n_neighbors=5),\n    \"Tree\": DecisionTreeClassifier(random_state=42),\n    \"Forest\": RandomForestClassifier(n_estimators=100, random_state=42),\n}\nfor name, m in models.items():\n    m.fit(X_train, y_train)\n    print(f\"{name}: {m.score(X_test, y_test):.3f}\")",
+     "LogReg: 0.967\nKNN: 1.000\nTree: 0.933\nForest: 0.900"
+    ],
+    [
+     "tip",
+     "Look carefully: 4 different models, but the code is **exactly the same**: `fit` and `score`. Only the model name changed. That is the beauty of scikit-learn. In classification, `score()` gives **accuracy**."
+    ],
+    [
+     "warn",
+     "Common mistake: deciding 'KNN is the best' from this one result. The test has only 30 flowers, 1 mistake = 3.3% difference. Change the split and the ranking can change. That's why we compare models with **cross-validation** (Lesson 6)."
+    ],
+    [
+     "code",
+     "python",
+     "from sklearn.datasets import load_iris\nfrom sklearn.linear_model import LogisticRegression\n\nX, y = load_iris(return_X_y=True)\nmodel = LogisticRegression(max_iter=1000).fit(X, y)\n\nflower = [[5.0, 3.4, 1.5, 0.2]]\nprint(\"class:\", model.predict(flower)[0])\nprint(\"probs:\", model.predict_proba(flower).round(3)[0].tolist())",
+     "class: 0\nprobs: [0.976, 0.024, 0.0]"
+    ],
+    [
+     "p",
+     "`predict` = the class directly. `predict_proba` = the **probability** of each class (all add up to 1). Probability is very useful: for example \"auto-approve only if more than 90% sure\"."
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Which model when",
+      "head": [
+       "Model",
+       "Strength",
+       "Weakness"
+      ],
+      "rows": [
+       [
+        "LogReg",
+        "fast, simple",
+        "only straight line"
+       ],
+       [
+        "KNN",
+        "no training",
+        "slow on big data"
+       ],
+       [
+        "Tree",
+        "easy to understand",
+        "overfits fast"
+       ],
+       [
+        "Forest",
+        "strong, stable",
+        "slow, less explainable"
+       ]
+      ]
+     }
+    ],
+    [
+     "warn",
+     "Common mistake: running `LogisticRegression()` without `max_iter` and getting a `ConvergenceWarning`. Give `max_iter=1000`, or scale the features (Lesson 5)."
+    ]
+   ]
+  },
+  {
+   "title": "Classification metrics — the accuracy trap",
+   "blocks": [
+    [
+     "p",
+     "**Accuracy** = how many correct / total. It's simple, but it can **fool** you."
+    ],
+    [
+     "analogy",
+     "Out of 100 emails only 1 is spam. A silly model says \"not spam\" for every email. Accuracy = 99%! But it doesn't catch a single spam. Useless model, good number. So with **class imbalance**, don't trust accuracy."
+    ],
+    [
+     "p",
+     "**Confusion Matrix** = a 2x2 table that shows **where** the model was right and **where** it was wrong."
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Confusion Matrix",
+      "head": [
+       "",
+       "Pred: No",
+       "Pred: Yes"
+      ],
+      "rows": [
+       [
+        "Actual: No",
+        "TN",
+        "FP (false alarm)"
+       ],
+       [
+        "Actual: Yes",
+        "FN (miss)",
+        "TP"
+       ]
+      ]
+     }
+    ],
+    [
+     "list",
+     [
+      "**TP** (True Positive) = was Yes, said Yes. Correct.",
+      "**TN** (True Negative) = was No, said No. Correct.",
+      "**FP** (False Positive) = was No, said Yes. **False alarm**.",
+      "**FN** (False Negative) = was Yes, said No. **Missed** it."
+     ]
+    ],
+    [
+     "p",
+     "Now three important metrics:"
+    ],
+    [
+     "list",
+     [
+      "**Precision** = TP / (TP + FP). \"Of all the ones you called Yes, how many were really Yes?\" If you want fewer false alarms, look at precision. Example: spam filter (an important email must not go to spam).",
+      "**Recall** = TP / (TP + FN). \"Of all the real Yes cases, how many did you catch?\" If nothing should be missed, look at recall. Example: cancer detection, fraud.",
+      "**F1** = 2·P·R / (P + R). The **balance** of Precision and Recall. Use it when both matter."
+     ]
+    ],
+    [
+     "code",
+     "python",
+     "from sklearn.metrics import confusion_matrix, accuracy_score\nfrom sklearn.metrics import precision_score, recall_score, f1_score\n\ny_true = [1, 0, 1, 1, 0, 0, 1, 0, 1, 0]\ny_pred = [1, 0, 0, 1, 0, 1, 1, 0, 0, 0]\n\nprint(confusion_matrix(y_true, y_pred))\nprint(\"accuracy:\", accuracy_score(y_true, y_pred))\nprint(\"precision:\", precision_score(y_true, y_pred))\nprint(\"recall:\", recall_score(y_true, y_pred))\nprint(\"f1:\", round(f1_score(y_true, y_pred), 3))",
+     "[[4 1]\n [2 3]]\naccuracy: 0.7\nprecision: 0.75\nrecall: 0.6\nf1: 0.667"
+    ],
+    [
+     "p",
+     "sklearn's matrix layout: top row = actual 0 → `[TN FP]`, bottom row = actual 1 → `[FN TP]`. Here TN=4, FP=1, FN=2, TP=3. Precision = 3/4 = 0.75, Recall = 3/5 = 0.6."
+    ],
+    [
+     "tip",
+     "Look carefully: precision and recall are in a **tug-of-war**. Lower the threshold (0.5 → 0.3) and you say Yes more often: recall goes up, precision goes down. The business decides which mistake is more costly."
+    ],
+    [
+     "p",
+     "**ROC-AUC** — how good the model's **ranking** is. Take one random Yes and one random No; AUC = the probability that the model gives the Yes one a **higher score**. 1.0 = perfect, 0.5 = tossing a coin."
+    ],
+    [
+     "sketch",
+     {
+      "k": "chart",
+      "title": "ROC curve",
+      "type": "line",
+      "points": [
+       [
+        0,
+        0
+       ],
+       [
+        0.1,
+        0.6
+       ],
+       [
+        0.2,
+        0.8
+       ],
+       [
+        0.4,
+        0.92
+       ],
+       [
+        1,
+        1
+       ]
+      ],
+      "line": [
+       [
+        0,
+        0
+       ],
+       [
+        1,
+        1
+       ]
+      ],
+      "xl": "False Pos Rate",
+      "yl": "True Pos Rate"
+     }
+    ],
+    [
+     "code",
+     "python",
+     "from sklearn.datasets import load_breast_cancer\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.ensemble import RandomForestClassifier\nfrom sklearn.metrics import roc_auc_score, classification_report\n\nX, y = load_breast_cancer(return_X_y=True)\nX_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.25, random_state=0, stratify=y)\n\nmodel = RandomForestClassifier(n_estimators=100, random_state=0)\nmodel.fit(X_train, y_train)\nprob = model.predict_proba(X_test)[:, 1]   # probability of class 1\nprint(\"ROC-AUC:\", round(roc_auc_score(y_test, prob), 3))",
+     "ROC-AUC: 0.977"
+    ],
+    [
+     "warn",
+     "Common mistake: passing the 0/1 output of `predict()` to `roc_auc_score`. AUC needs a **probability / score**: `predict_proba(X)[:, 1]`."
+    ],
+    [
+     "p",
+     "`classification_report(y_test, y_pred)` prints precision, recall, F1 and support (how many samples) for every class in one shot. In real projects this is the first thing people look at."
+    ]
+   ]
+  },
+  {
+   "title": "Data preparation: scaling, encoding, pipeline + k-means",
+   "blocks": [
+    [
+     "p",
+     "A model needs data that is **clean and in numbers**. Two big jobs: **scaling** (all features in a similar range) and **encoding** (text → number)."
+    ],
+    [
+     "p",
+     "**Why feature scaling?** Salary is 50000 and age is 25. When KNN measures distance, the salary difference decides everything and age counts for nothing. Scaling gives both an equal chance."
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "2 scalers",
+      "left": {
+       "title": "StandardScaler",
+       "items": [
+        "(x - mean) / std",
+        "mean 0, std 1",
+        "used most"
+       ]
+      },
+      "right": {
+       "title": "MinMaxScaler",
+       "items": [
+        "(x - min)/(max - min)",
+        "range 0 to 1",
+        "images, NN"
+       ]
+      }
+     }
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\nfrom sklearn.preprocessing import StandardScaler\n\nX_train = np.array([[25, 30000], [35, 50000], [45, 70000]])\nX_test = np.array([[30, 40000]])\n\nscaler = StandardScaler()\nX_train_s = scaler.fit_transform(X_train)   # fit + transform on train\nX_test_s = scaler.transform(X_test)         # ONLY transform on test\nprint(X_train_s.round(2))\nprint(X_test_s.round(2))",
+     "[[-1.22 -1.22]\n [ 0.    0.  ]\n [ 1.22  1.22]]\n[[-0.61 -0.61]]"
+    ],
+    [
+     "warn",
+     "Common mistake (it can get you rejected in an IQ): doing `fit` or `fit_transform` on test data. This leaks test information into training = **data leakage** = cheating. Rule: **fit only on train**, only `transform` on test."
+    ],
+    [
+     "p",
+     "**Encoding:** a model doesn't understand `\"Delhi\"`. **OneHotEncoder** makes a separate 0/1 column for each category. For categories with an order (small < medium < large), use **OrdinalEncoder**."
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\nfrom sklearn.preprocessing import OneHotEncoder\n\ncity = np.array([[\"Delhi\"], [\"Bhiwadi\"], [\"Delhi\"], [\"Jaipur\"]])\nenc = OneHotEncoder()\nout = enc.fit_transform(city).toarray()\nprint(enc.categories_[0].tolist())\nprint(out.astype(int))",
+     "['Bhiwadi', 'Delhi', 'Jaipur']\n[[0 1 0]\n [1 0 0]\n [0 1 0]\n [0 0 1]]"
+    ],
+    [
+     "tip",
+     "Look carefully: why not give numbers like Delhi=1, Jaipur=2 in OneHot? Because then the model would think Jaipur is \"double Delhi\". Categories have no order, so each gets its own 0/1 column."
+    ],
+    [
+     "p",
+     "**Pipeline** = all the steps (scale → model) in one box. When you `fit`, every step runs in the right order, and the fear of leakage is gone."
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Pipeline",
+      "steps": [
+       "Raw X",
+       "Scaler",
+       "Model",
+       "Prediction"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "code",
+     "python",
+     "from sklearn.datasets import load_iris\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.neighbors import KNeighborsClassifier\n\nX, y = load_iris(return_X_y=True)\nX_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.2, random_state=42, stratify=y)\n\npipe = Pipeline([\n    (\"scale\", StandardScaler()),\n    (\"knn\", KNeighborsClassifier(n_neighbors=5)),\n])\npipe.fit(X_train, y_train)\nprint(\"test accuracy:\", round(pipe.score(X_test, y_test), 3))",
+     "test accuracy: 0.933"
+    ],
+    [
+     "tip",
+     "Look carefully: all Iris features are already in the same unit (cm) and a similar range, so scaling didn't raise the score here. With data like salary + age (the first example in this lesson), scaling completely changes KNN's result. The real benefit of a Pipeline: protection from leakage and clean code."
+    ],
+    [
+     "p",
+     "A real table has both number and text columns. Then we use `ColumnTransformer`: `StandardScaler` on number columns, `OneHotEncoder` on text columns, then the model. All in one Pipeline."
+    ],
+    [
+     "p",
+     "**K-Means Clustering (unsupervised):** there is no label, but we still find groups. You give K (how many groups); the algorithm places K centres, each point goes to the nearest centre, each centre moves to the middle of its group, repeat."
+    ],
+    [
+     "sketch",
+     {
+      "k": "cycle",
+      "title": "K-Means loop",
+      "steps": [
+       "Place K centres",
+       "Point → nearest centre",
+       "Centre = group mean",
+       "Changed? Repeat"
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\nfrom sklearn.cluster import KMeans\n\n# customers: [visits per month, spend (thousand)]\nX = np.array([[1, 2], [2, 1], [1, 1],\n              [8, 9], [9, 8], [8, 8]])\nkm = KMeans(n_clusters=2, n_init=10, random_state=0)\nlabels = km.fit_predict(X)\nprint(labels.tolist())\nprint(km.cluster_centers_.round(2).tolist())",
+     "[1, 1, 1, 0, 0, 0]\n[[8.33, 8.33], [1.33, 1.33]]"
+    ],
+    [
+     "p",
+     "The model made 2 groups by itself: small customers who come rarely and big customers who come daily. The group number (0 or 1) is just a name; it has no meaning. To choose the right K we look at the **elbow method** (inertia vs K) or the **silhouette score**."
+    ]
+   ]
+  },
+  {
+   "title": "Overfitting, Cross-Validation and GridSearchCV",
+   "blocks": [
+    [
+     "p",
+     "The model is built. Now the biggest question: will it also work on **new data**?"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Train vs Test score",
+      "head": [
+       "Train",
+       "Test",
+       "Meaning"
+      ],
+      "rows": [
+       [
+        "99%",
+        "70%",
+        "Overfitting"
+       ],
+       [
+        "55%",
+        "52%",
+        "Underfitting"
+       ],
+       [
+        "92%",
+        "90%",
+        "Good fit"
+       ]
+      ]
+     }
+    ],
+    [
+     "list",
+     [
+      "**Overfitting** = the model **memorised** everything. Perfect on training data, fails on new data. Like a student who only memorised last year's paper.",
+      "**Underfitting** = the model **didn't learn anything**. Bad in both places. Like explaining a curved pattern with a straight line.",
+      "**Good fit** = both scores are good and **close to each other**."
+     ]
+    ],
+    [
+     "code",
+     "python",
+     "from sklearn.datasets import load_breast_cancer\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.tree import DecisionTreeClassifier\n\nX, y = load_breast_cancer(return_X_y=True)\nX_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.3, random_state=1, stratify=y)\n\nfor depth in [1, 3, None]:\n    t = DecisionTreeClassifier(max_depth=depth, random_state=1).fit(X_train, y_train)\n    print(f\"depth={depth}: train={t.score(X_train, y_train):.3f} test={t.score(X_test, y_test):.3f}\")",
+     "depth=1: train=0.922 test=0.906\ndepth=3: train=0.970 test=0.953\ndepth=None: train=1.000 test=0.942"
+    ],
+    [
+     "p",
+     "With `max_depth=None` (no limit) the train score is **1.000** = full memorising, but the test score is lower than with `depth=3`. `depth=1` = so simple that both scores are low (towards underfit). `depth=3` = the sweet spot. Limiting depth = keeping the model simple = the cure for overfitting."
+    ],
+    [
+     "p",
+     "**Bias-Variance tradeoff:** **Bias** = the model is too simple, wrong assumptions (underfit). **Variance** = the model is too fussy and catches every bit of noise in the data (overfit). We need the sweet spot between the two."
+    ],
+    [
+     "analogy",
+     "Darts: high bias = all darts in one place but far from the centre. High variance = darts scattered everywhere. A good model = darts close to the centre and close together."
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "Fixes",
+      "left": {
+       "title": "Overfit fix",
+       "items": [
+        "more data",
+        "simple model",
+        "regularization",
+        "lower max_depth",
+        "fewer features"
+       ]
+      },
+      "right": {
+       "title": "Underfit fix",
+       "items": [
+        "complex model",
+        "new features",
+        "less regularization",
+        "more training"
+       ]
+      }
+     }
+    ],
+    [
+     "p",
+     "**Cross-Validation (CV):** with a single split, **luck** plays a role. 5-fold CV: split the data into 5 parts, train/test 5 times (a different part is the test each time), then take the average. A more reliable score."
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "5-fold CV",
+      "head": [
+       "Round",
+       "Test fold",
+       "Train folds"
+      ],
+      "rows": [
+       [
+        "1",
+        "F1",
+        "F2-F5"
+       ],
+       [
+        "2",
+        "F2",
+        "F1,F3-F5"
+       ],
+       [
+        "3",
+        "F3",
+        "other 4"
+       ],
+       [
+        "4",
+        "F4",
+        "other 4"
+       ],
+       [
+        "5",
+        "F5",
+        "F1-F4"
+       ]
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "from sklearn.datasets import load_iris\nfrom sklearn.model_selection import cross_val_score\nfrom sklearn.ensemble import RandomForestClassifier\n\nX, y = load_iris(return_X_y=True)\nmodel = RandomForestClassifier(n_estimators=50, random_state=42)\nscores = cross_val_score(model, X, y, cv=5)\nprint(scores.round(3).tolist())\nprint(f\"mean={scores.mean():.3f} std={scores.std():.3f}\")",
+     "[0.967, 0.967, 0.933, 0.967, 1.0]\nmean=0.967 std=0.021"
+    ],
+    [
+     "p",
+     "**Hyperparameter** = a setting that **you** give the model; the model doesn't learn it: `max_depth`, `n_neighbors`, `n_estimators`. (Weights / coef_ = **parameters**, the model learns them.)"
+    ],
+    [
+     "p",
+     "**GridSearchCV** = tries every combination you give it, computes the CV score for each, and tells you the best one."
+    ],
+    [
+     "code",
+     "python",
+     "from sklearn.datasets import load_iris\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import KNeighborsClassifier\n\nX, y = load_iris(return_X_y=True)\nparams = {\"n_neighbors\": [1, 3, 5, 7, 9], \"weights\": [\"uniform\", \"distance\"]}\ngrid = GridSearchCV(KNeighborsClassifier(), params, cv=5)\ngrid.fit(X, y)\nprint(\"best params:\", grid.best_params_)\nprint(\"best CV score:\", round(grid.best_score_, 3))",
+     "best params: {'n_neighbors': 7, 'weights': 'uniform'}\nbest CV score: 0.98"
+    ],
+    [
+     "tip",
+     "Look carefully: 5 x 2 = 10 combinations, each with 5 folds = **50 trainings**. If there are too many combinations, use `RandomizedSearchCV` (tries a few random combos, fast). `n_jobs=-1` = all CPU cores. `grid.best_estimator_` = the best trained model, use it directly."
+    ],
+    [
+     "warn",
+     "Common mistake: reporting GridSearch's best score on the same data as the final result. The right way: GridSearch on train, then a final one-time check on the **test set kept aside**."
+    ]
+   ]
+  }
+ ],
+ "teach": [
+  {
+   "say": "In normal programming we wrote the rules. In Machine Learning we give data and the correct answers, and the model finds the rules by itself.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Data + Answers",
+     "Model learns",
+     "Predict on new"
+    ],
+    "dir": "h"
+   },
+   "code": null
+  },
+  {
+   "say": "Three types of ML. Supervised gets an answer key, unsupervised doesn't, and reinforcement gets a reward or punishment.",
+   "sketch": {
+    "k": "tree",
+    "root": {
+     "label": "ML",
+     "children": [
+      {
+       "label": "Supervised",
+       "children": []
+      },
+      {
+       "label": "Unsupervised",
+       "children": []
+      },
+      {
+       "label": "Reinforcement",
+       "children": []
+      }
+     ]
+    }
+   },
+   "code": null
+  },
+  {
+   "say": "The input columns of the table are features, capital X. What you want to predict is the label, small y. Then teach with 80 percent and test on the hidden 20 percent.",
+   "sketch": {
+    "k": "table",
+    "head": [
+     "size (X)",
+     "price (y)"
+    ],
+    "rows": [
+     [
+      "500",
+      "25"
+     ],
+     [
+      "800",
+      "40"
+     ],
+     [
+      "1200",
+      "62"
+     ]
+    ]
+   },
+   "code": "X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)"
+  },
+  {
+   "say": "To predict a number, use Linear Regression. A straight line through the points that makes the least error.",
+   "sketch": {
+    "k": "chart",
+    "type": "scatter",
+    "points": [
+     [
+      5,
+      26
+     ],
+     [
+      8,
+      39
+     ],
+     [
+      10,
+      52
+     ],
+     [
+      12,
+      59
+     ],
+     [
+      15,
+      77
+     ]
+    ],
+    "line": [
+     [
+      4,
+      21
+     ],
+     [
+      16,
+      81
+     ]
+    ],
+    "xl": "size",
+    "yl": "price"
+   },
+   "code": "model = LinearRegression().fit(X, y)"
+  },
+  {
+   "say": "To predict a category, use classification. Logistic regression, KNN, decision tree, random forest. The code is the same for all: fit, predict, score.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Model()",
+     "fit(X, y)",
+     "predict(X_new)",
+     "score()"
+    ],
+    "dir": "h"
+   },
+   "code": "model.fit(X_train, y_train)\nprint(model.score(X_test, y_test))"
+  },
+  {
+   "say": "Accuracy can fool you. So build a confusion matrix: where it's right, where it's a false alarm, where it's a miss.",
+   "sketch": {
+    "k": "table",
+    "head": [
+     "",
+     "Pred No",
+     "Pred Yes"
+    ],
+    "rows": [
+     [
+      "Actual No",
+      "TN",
+      "FP"
+     ],
+     [
+      "Actual Yes",
+      "FN",
+      "TP"
+     ]
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "Precision: of the ones called Yes, how many were true. Recall: of the real Yes cases, how many were caught. F1 is the balance of both.",
+   "sketch": {
+    "k": "compare",
+    "left": {
+     "title": "Precision",
+     "items": [
+      "TP / (TP+FP)",
+      "fewer false alarms",
+      "spam filter"
+     ]
+    },
+    "right": {
+     "title": "Recall",
+     "items": [
+      "TP / (TP+FN)",
+      "fewer misses",
+      "cancer, fraud"
+     ]
+    }
+   },
+   "code": null
+  },
+  {
+   "say": "Fit scaling only on train, only transform on test. Put it in a Pipeline and this mistake can't happen at all.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Raw X",
+     "Scaler",
+     "Model",
+     "Prediction"
+    ],
+    "dir": "h"
+   },
+   "code": "pipe = Pipeline([(\"scale\", StandardScaler()), (\"knn\", KNeighborsClassifier())])"
+  },
+  {
+   "say": "Train 99 and test 70 means memorising, that is overfitting. Both low means underfitting. Both good and close together is what we want.",
+   "sketch": {
+    "k": "table",
+    "head": [
+     "Train",
+     "Test",
+     "Meaning"
+    ],
+    "rows": [
+     [
+      "99%",
+      "70%",
+      "Overfit"
+     ],
+     [
+      "55%",
+      "52%",
+      "Underfit"
+     ],
+     [
+      "92%",
+      "90%",
+      "Good"
+     ]
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "Finally, cross-validation gives a reliable score, and GridSearchCV gives the best settings. Now practise!",
+   "sketch": {
+    "k": "cycle",
+    "steps": [
+     "Pick a combo",
+     "5-fold CV",
+     "Note the score",
+     "Keep the best"
+    ]
+   },
+   "code": "grid = GridSearchCV(model, params, cv=5).fit(X, y)\nprint(grid.best_params_)"
+  }
+ ],
+ "practice": [
+  {
+   "q": "Without numpy/sklearn, apply the **Linear Regression** formula yourself.\nx = [1, 2, 3, 4, 5], y = [3, 5, 7, 9, 11]\nslope m = sum((x-mx)*(y-my)) / sum((x-mx)**2), intercept c = my - m*mx\nPrint:\nm = 2.0\nc = 1.0\nx=6 pe y = 13.0",
+   "starter": "x = [1, 2, 3, 4, 5]\ny = [3, 5, 7, 9, 11]\nmx = sum(x) / len(x)\nmy = sum(y) / len(y)\n# TODO: num = sum((xi-mx)*(yi-my)) and den = sum((xi-mx)**2)\n# TODO: m = num / den, c = my - m*mx\n# TODO: print the three lines\n",
+   "expect": "m = 2.0\nc = 1.0\nx=6 pe y = 13.0",
+   "hint": "num = sum((xi - mx) * (yi - my) for xi, yi in zip(x, y))",
+   "solution": "x = [1, 2, 3, 4, 5]\ny = [3, 5, 7, 9, 11]\nmx = sum(x) / len(x)\nmy = sum(y) / len(y)\nnum = sum((xi - mx) * (yi - my) for xi, yi in zip(x, y))\nden = sum((xi - mx) ** 2 for xi in x)\nm = num / den\nc = my - m * mx\nprint(f\"m = {m}\")\nprint(f\"c = {c}\")\nprint(f\"x=6 pe y = {m * 6 + c}\")"
+  },
+  {
+   "q": "Count the 4 parts of the confusion matrix yourself and compute the metrics.\ny_true = [1, 0, 1, 1, 0, 1, 0, 0, 1, 1]\ny_pred = [1, 0, 0, 1, 0, 1, 1, 0, 1, 0]\nPrint (2 decimals):\nTP=4 TN=3 FP=1 FN=2\nprecision=0.80\nrecall=0.67\nf1=0.73",
+   "starter": "y_true = [1, 0, 1, 1, 0, 1, 0, 0, 1, 1]\ny_pred = [1, 0, 0, 1, 0, 1, 1, 0, 1, 0]\ntp = tn = fp = fn = 0\nfor t, p in zip(y_true, y_pred):\n    # TODO: check the 4 cases and increase the count\n    pass\n# TODO: compute precision, recall, f1 and print them\n",
+   "expect": "TP=4 TN=3 FP=1 FN=2\nprecision=0.80\nrecall=0.67\nf1=0.73",
+   "hint": "precision = tp/(tp+fp), recall = tp/(tp+fn), f1 = 2*p*r/(p+r). Format: f\"{precision:.2f}\"",
+   "solution": "y_true = [1, 0, 1, 1, 0, 1, 0, 0, 1, 1]\ny_pred = [1, 0, 0, 1, 0, 1, 1, 0, 1, 0]\ntp = tn = fp = fn = 0\nfor t, p in zip(y_true, y_pred):\n    if t == 1 and p == 1:\n        tp += 1\n    elif t == 0 and p == 0:\n        tn += 1\n    elif t == 0 and p == 1:\n        fp += 1\n    else:\n        fn += 1\nprecision = tp / (tp + fp)\nrecall = tp / (tp + fn)\nf1 = 2 * precision * recall / (precision + recall)\nprint(f\"TP={tp} TN={tn} FP={fp} FN={fn}\")\nprint(f\"precision={precision:.2f}\")\nprint(f\"recall={recall:.2f}\")\nprint(f\"f1={f1:.2f}\")"
+  },
+  {
+   "q": "Build your own **KNN classifier** (K = 3). Each training point: (x, y, label). For the new point (3, 3), compute the distance to every point (`math.dist`), take the 3 nearest, and print the majority label.\nIf distances are equal, the tuple sort breaks the tie by label.\nExpected output:\nnearest: ['A', 'B', 'A']\nprediction: A",
+   "starter": "import math\nfrom collections import Counter\n\ndata = [(1, 1, \"A\"), (2, 2, \"A\"), (3, 4, \"A\"), (6, 6, \"B\"), (7, 7, \"B\"), (4, 3, \"B\")]\nnew = (3, 3)\n# TODO: build a (distance, label) list for every point\n# TODO: sort by distance, take the labels of the first 3\n# TODO: majority with Counter(...).most_common(1)\n",
+   "expect": "nearest: ['A', 'B', 'A']\nprediction: A",
+   "hint": "dists = sorted((math.dist(new, (x, y)), lab) for x, y, lab in data)",
+   "solution": "import math\nfrom collections import Counter\n\ndata = [(1, 1, \"A\"), (2, 2, \"A\"), (3, 4, \"A\"), (6, 6, \"B\"), (7, 7, \"B\"), (4, 3, \"B\")]\nnew = (3, 3)\ndists = sorted((math.dist(new, (x, y)), lab) for x, y, lab in data)\nnearest = [lab for d, lab in dists[:3]]\nprint(\"nearest:\", nearest)\nprint(\"prediction:\", Counter(nearest).most_common(1)[0][0])"
+  }
+ ],
+ "quiz": [
+  {
+   "q": "Predicting a house price (in lakh) is which kind of problem?",
+   "o": [
+    "Classification",
+    "Regression",
+    "Clustering",
+    "Reinforcement"
+   ],
+   "a": 1,
+   "why": "The output is a continuous number, so it's regression."
+  },
+  {
+   "q": "Splitting customers into groups without labels is which kind of learning?",
+   "o": [
+    "Supervised",
+    "Reinforcement",
+    "Unsupervised",
+    "Transfer"
+   ],
+   "a": 2,
+   "why": "No label is given; the model finds groups by itself: unsupervised (like k-means)."
+  },
+  {
+   "q": "What is the correct return order of `train_test_split`?",
+   "o": [
+    "X_train, X_test, y_train, y_test",
+    "X_train, y_train, X_test, y_test",
+    "X_test, X_train, y_test, y_train",
+    "y_train, y_test, X_train, X_test"
+   ],
+   "a": 0,
+   "why": "First both X (train, test), then both y (train, test)."
+  },
+  {
+   "q": "How do you use StandardScaler correctly?",
+   "o": [
+    "Fit on all data, then split",
+    "fit_transform on test, transform on train",
+    "fit_transform on train, only transform on test",
+    "Separate fit_transform on both"
+   ],
+   "a": 2,
+   "why": "Fit only on train; otherwise test information leaks (data leakage)."
+  },
+  {
+   "q": "10 out of 1000 are fraud. The model says 'not fraud' for everything. What is the accuracy and what is wrong?",
+   "o": [
+    "50%, the model is random",
+    "1%, the model is useless",
+    "100%, perfect",
+    "99%, but recall is 0"
+   ],
+   "a": 3,
+   "why": "990/1000 correct = 99%, but not a single fraud was caught; with imbalance, accuracy is misleading."
+  },
+  {
+   "q": "In cancer detection no patient should be missed. Which metric matters most?",
+   "o": [
+    "Precision",
+    "Recall",
+    "Accuracy",
+    "R²"
+   ],
+   "a": 1,
+   "why": "Recall = how many of the real positives were caught; we need fewer FN (misses)."
+  },
+  {
+   "q": "Train accuracy 99%, test accuracy 68%. What is this?",
+   "o": [
+    "Overfitting",
+    "Underfitting",
+    "Good fit",
+    "Data leakage fix"
+   ],
+   "a": 0,
+   "why": "Memorised the training data, fails on new data = overfitting."
+  },
+  {
+   "q": "How should you convert a City column (Delhi, Jaipur, Bhiwadi) for the model?",
+   "o": [
+    "Delhi=1, Jaipur=2, Bhiwadi=3",
+    "Drop the column",
+    "Apply StandardScaler",
+    "Separate 0/1 columns with OneHotEncoder"
+   ],
+   "a": 3,
+   "why": "Categories have no order; OneHot makes a separate 0/1 column for each city."
+  },
+  {
+   "q": "What does ROC-AUC = 0.5 mean?",
+   "o": [
+    "Perfect model",
+    "Same as a random guess",
+    "A very good model",
+    "Overfitting"
+   ],
+   "a": 1,
+   "why": "0.5 = like tossing a coin; 1.0 = perfect ranking."
+  },
+  {
+   "q": "What does GridSearchCV do?",
+   "o": [
+    "Cleans the data",
+    "Scales the features",
+    "Tests every hyperparameter combination with CV and picks the best",
+    "Writes the model's weights itself"
+   ],
+   "a": 2,
+   "why": "Computes the cross-validation score of every combo in the given param grid and gives best_params_."
+  }
+ ],
+ "iq": [
+  {
+   "q": "Explain the difference between supervised and unsupervised learning, with an example.",
+   "a": "In supervised learning every example has a label, and the model learns to map input to output, like email → spam/not spam or size → price. In unsupervised learning there is no label; the model finds the structure of the data by itself, like customer segments with k-means. Reinforcement is a third type where an agent learns from rewards."
+  },
+  {
+   "q": "What is the difference between regression and classification?",
+   "a": "Regression predicts a continuous number (price, demand); metrics are MAE/RMSE/R². Classification predicts a category (spam, churn); metrics are accuracy/precision/recall/F1/AUC. Despite its name, logistic regression is a classification algorithm."
+  },
+  {
+   "q": "What is overfitting, how will you detect it and how will you fix it?",
+   "a": "The model memorises even the noise in the training data, so the train score is very high and the test score is much lower. Detect: compare train vs test (or CV) scores. Fix: more data, a simpler model (lower max_depth), regularization (L1/L2), feature selection, cross-validation, and ensembles like random forest."
+  },
+  {
+   "q": "Explain the bias-variance tradeoff.",
+   "a": "Bias = error that comes from the model's simplification (underfit); variance = how much the model changes with small changes in the training data (overfit). Making the model more complex lowers bias but raises variance. The goal is to minimise the total error of both, which we tune with CV."
+  },
+  {
+   "q": "What are precision and recall? When is each more important?",
+   "a": "Precision = TP/(TP+FP), how many of the predicted positives are correct; recall = TP/(TP+FN), how many of the actual positives were caught. In a spam filter, precision (an important email must not become spam); in cancer/fraud detection, recall (nothing should be missed). When both matter, we look at F1."
+  },
+  {
+   "q": "When is accuracy misleading?",
+   "a": "When the classes are imbalanced. With 99% normal and 1% fraud, a model that says 'all normal' gets 99% accuracy but is useless. In such cases look at the confusion matrix, precision, recall, F1, PR-AUC, and use stratify, class_weight='balanced' or resampling."
+  },
+  {
+   "q": "What is data leakage? Give an example.",
+   "a": "When the model gets information during training that it won't have at prediction time, or test data info leaks into training. Example: fitting StandardScaler on the whole data before the split, or a feature built from the target. This makes the score falsely high. Fix: split first, then do preprocessing inside a Pipeline."
+  },
+  {
+   "q": "Why do we do cross-validation? How does k-fold work?",
+   "a": "A single train/test split depends on luck. In k-fold we split the data into k parts, train k times and test on a different fold each time, then take the mean and std of the scores. This gives a reliable estimate of model performance. `cross_val_score(model, X, y, cv=5)`."
+  },
+  {
+   "q": "Difference between parameters and hyperparameters? How do you tune them?",
+   "a": "Parameters are learned by the model itself during training (coef_ in linear regression, weights in a NN). Hyperparameters are set by us beforehand (max_depth, n_neighbors, learning rate). To tune them, use GridSearchCV (every combo) or RandomizedSearchCV (random combos, fast), always with cross-validation."
+  },
+  {
+   "q": "What is the difference between a decision tree and a random forest?",
+   "a": "A decision tree is a single tree, easy to understand but overfits quickly. A random forest is an ensemble of many trees; each tree trains on a bootstrap sample and random features (bagging), and they all vote. This lowers variance and keeps accuracy stable, but interpretability is lower."
+  },
+  {
+   "q": "When is feature scaling needed and when is it not?",
+   "a": "Models that work on distance or gradients need it: KNN, SVM, k-means, logistic/linear regression with regularization, neural networks. Tree-based models (decision tree, random forest, XGBoost) don't need it because they split on thresholds. StandardScaler is the usual choice, MinMaxScaler for a 0-1 range."
+  },
+  {
+   "q": "What does ROC-AUC tell you?",
+   "a": "The ROC curve shows True Positive Rate vs False Positive Rate at every threshold. AUC is the area under that curve: the probability that a random positive gets a higher score than a random negative. 1.0 = perfect, 0.5 = random. It is threshold-independent, but on very imbalanced data PR-AUC gives a clearer picture."
+  }
+ ]
+}

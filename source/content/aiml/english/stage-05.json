@@ -1,0 +1,1059 @@
+{
+ "n": 5,
+ "id": "aiml-05",
+ "title": "Files, Errors & OOP",
+ "goal": "Read and write text, JSON and CSV files, handle errors with try/except and raise your own, write clean code with classes, objects and the 4 pillars of OOP, and understand the basic use of generators and decorators — all from the point of view of ML data and models.",
+ "lessons": [
+  {
+   "title": "File handling — saving data for good",
+   "blocks": [
+    [
+     "p",
+     "Data kept in a variable lives in **RAM**. Program closes, data is gone. If you want to keep data **permanently** (report, log, ML results), you have to write it to a **file**."
+    ],
+    [
+     "list",
+     [
+      "**What:** reading/writing files with Python — text, JSON, CSV",
+      "**Why:** the data stays even after the program closes",
+      "**When:** logs, loading config, data import/export, model results",
+      "**Where:** every real project — ERP data, ML training logs, reports"
+     ]
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "3 jobs with a file",
+      "steps": [
+       "open",
+       "read / write",
+       "close"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "code",
+     "python",
+     "with open(\"report.txt\", \"w\") as f:\n    f.write(\"Cable 1: PASS\\n\")\n    f.write(\"Cable 2: FAIL\\n\")\n\nwith open(\"report.txt\", \"r\") as f:\n    data = f.read()\nprint(data)",
+     "Cable 1: PASS\nCable 2: FAIL"
+    ],
+    [
+     "p",
+     "Understand the line: `open(\"report.txt\", \"w\")` = open the file in **write mode**. `as f` = give the open file the name `f`. `f.write(...)` = write. `\\n` is for a new line; it is not added by itself."
+    ],
+    [
+     "p",
+     "**Why `with`?** As soon as the `with` block ends, the file **closes by itself**, even if an error happens. If a file is not closed, the data may not be fully saved, or the file may stay locked."
+    ],
+    [
+     "analogy",
+     "`with` is an automatic door: you go in, do the work, come out, and the door shuts by itself. In the old way you had to remember `f.close()` yourself — forget it and the door stays open."
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "File modes",
+      "head": [
+       "Mode",
+       "Job",
+       "Careful"
+      ],
+      "rows": [
+       [
+        "\"r\"",
+        "read (default)",
+        "error if no file"
+       ],
+       [
+        "\"w\"",
+        "write",
+        "wipes everything old!"
+       ],
+       [
+        "\"a\"",
+        "add at the end",
+        "old data safe"
+       ],
+       [
+        "\"rb\"/\"wb\"",
+        "binary",
+        "image, PDF, model"
+       ]
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "with open(\"report.txt\", \"w\") as f:\n    f.write(\"Cable 1: PASS\\n\")\n    f.write(\"Cable 2: FAIL\\n\")\nwith open(\"report.txt\", \"a\") as f:\n    f.write(\"Cable 3: PASS\\n\")\n\nwith open(\"report.txt\") as f:\n    for line in f:\n        print(line.strip())",
+     "Cable 1: PASS\nCable 2: FAIL\nCable 3: PASS"
+    ],
+    [
+     "tip",
+     "Read a big file line by line with `for line in f`. Only one line comes into memory at a time, so even a 5 GB log file works. `.strip()` removes the `\\n` at the end."
+    ],
+    [
+     "code",
+     "python",
+     "with open(\"report.txt\", \"w\") as f:\n    f.write(\"Cable 1: PASS\\nCable 2: FAIL\\nCable 3: PASS\\n\")\nwith open(\"report.txt\") as f:\n    lines = f.read().splitlines()\npassed = [l for l in lines if l.endswith(\"PASS\")]\nprint(len(lines), len(passed))",
+     "3 2"
+    ],
+    [
+     "warn",
+     "Common mistake: a file opened in `\"w\"` mode loses its old data **immediately**, even if you write nothing. To add, use `\"a\"`. And in `\"r\"` mode, if the file is not found you get **FileNotFoundError**."
+    ],
+    [
+     "code",
+     "python",
+     "import os\nprint(os.path.exists(\"report.txt\"))\nprint(os.path.exists(\"nahi_hai.txt\"))",
+     "True\nFalse"
+    ],
+    [
+     "tip",
+     "If you write Hindi/special characters, writing `open(path, \"w\", encoding=\"utf-8\")` is a good habit. On Windows the default encoding is different and can give an error."
+    ]
+   ]
+  },
+  {
+   "title": "JSON and CSV — the real data of AI/ML",
+   "blocks": [
+    [
+     "p",
+     "**JSON** = a text format that looks just like a Python dict/list. APIs, config files, LLM responses — all come in JSON. In AI/ML you will use it **the most**."
+    ],
+    [
+     "code",
+     "python",
+     "import json\ncable = {\"name\": \"5 Core\", \"price\": 4500, \"stock\": True, \"sizes\": [10, 16]}\n\nwith open(\"cable.json\", \"w\") as f:\n    json.dump(cable, f, indent=2)\n\nwith open(\"cable.json\") as f:\n    loaded = json.load(f)\nprint(loaded[\"name\"], loaded[\"sizes\"][1])\nprint(type(loaded))",
+     "5 Core 16\n<class 'dict'>"
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "4 json functions",
+      "left": {
+       "title": "With a file",
+       "items": [
+        "json.dump(d, f)",
+        "json.load(f)"
+       ]
+      },
+      "right": {
+       "title": "With a string",
+       "items": [
+        "json.dumps(d)",
+        "json.loads(text)"
+       ]
+      }
+     }
+    ],
+    [
+     "tip",
+     "How to remember: **s = string**. `dumps`/`loads` work with text, `dump`/`load` work with a file."
+    ],
+    [
+     "code",
+     "python",
+     "import json\nresponse = '{\"status\": \"ok\", \"data\": [{\"id\": 1, \"score\": 0.91}, {\"id\": 2, \"score\": 0.47}]}'\nobj = json.loads(response)\nprint(obj[\"status\"])\ngood = [d[\"id\"] for d in obj[\"data\"] if d[\"score\"] > 0.5]\nprint(good)\nprint(json.dumps({\"ok\": True, \"n\": None}))",
+     "ok\n[1]\n{\"ok\": true, \"n\": null}"
+    ],
+    [
+     "p",
+     "Look carefully at the last line: Python `True` → JSON `true`, `None` → `null`. In JSON, keys are always in **double quotes**."
+    ],
+    [
+     "p",
+     "**CSV** = Comma Separated Values. A table like Excel, in simple text. Each line is one row. Most datasets (Kaggle etc.) come as CSV."
+    ],
+    [
+     "code",
+     "python",
+     "import csv\nrows = [[\"name\", \"city\", \"amount\"], [\"Rahul\", \"Delhi\", 50000], [\"Neha\", \"Jaipur\", 20000]]\nwith open(\"leads.csv\", \"w\", newline=\"\") as f:\n    writer = csv.writer(f)\n    writer.writerows(rows)\n\nwith open(\"leads.csv\") as f:\n    print(f.read().strip())",
+     "name,city,amount\nRahul,Delhi,50000\nNeha,Jaipur,20000"
+    ],
+    [
+     "code",
+     "python",
+     "import csv\nwith open(\"leads.csv\", \"w\", newline=\"\") as f:\n    w = csv.DictWriter(f, fieldnames=[\"name\", \"city\", \"amount\"])\n    w.writeheader()\n    w.writerow({\"name\": \"Rahul\", \"city\": \"Delhi\", \"amount\": 50000})\n    w.writerow({\"name\": \"Neha\", \"city\": \"Jaipur\", \"amount\": 20000})\n\ntotal = 0\nwith open(\"leads.csv\") as f:\n    for row in csv.DictReader(f):\n        print(row[\"name\"], row[\"city\"])\n        total += int(row[\"amount\"])\nprint(\"Total:\", total)",
+     "Rahul Delhi\nNeha Jaipur\nTotal: 70000"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Dataset from CSV",
+      "steps": [
+       "leads.csv",
+       "csv.DictReader",
+       "each row = dict",
+       "list of dicts"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "warn",
+     "Common mistake: **every value** from a CSV comes as a **string**, even `\"50000\"`. Do `int()` / `float()` before any maths. And when writing, pass `newline=\"\"`, otherwise on Windows you get empty lines in between."
+    ],
+    [
+     "p",
+     "Later, in Stage 8, `pd.read_csv()` will do all of this in one line. But now you know what happens inside — that is exactly the difference that shows in an IQ."
+    ]
+   ]
+  },
+  {
+   "title": "Errors — save your program from crashing",
+   "blocks": [
+    [
+     "p",
+     "When an error comes, the program **stops right there** (crash). In a real app the user may give wrong input, a file may be missing, an API may be down — the whole server should not go down."
+    ],
+    [
+     "p",
+     "**try / except** = \"try this, and if something goes wrong, handle it.\""
+    ],
+    [
+     "code",
+     "python",
+     "try:\n    n = int(\"abc\")\n    print(n)\nexcept ValueError:\n    print(\"Yeh number nahi hai\")\nprint(\"Program chalta raha\")",
+     "Yeh number nahi hai\nProgram chalta raha"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Full structure",
+      "steps": [
+       "try: risky work",
+       "except: error came",
+       "else: no error",
+       "finally: always"
+      ],
+      "dir": "v"
+     }
+    ],
+    [
+     "code",
+     "python",
+     "def divide(a, b):\n    try:\n        result = a / b\n    except ZeroDivisionError:\n        print(\"0 se divide nahi hota\")\n    else:\n        print(\"Result:\", result)\n    finally:\n        print(\"--- done ---\")\n\ndivide(10, 2)\ndivide(10, 0)",
+     "Result: 5.0\n--- done ---\n0 se divide nahi hota\n--- done ---"
+    ],
+    [
+     "p",
+     "`else` runs when **no error** came. `finally` runs **always** — that is why cleanup (closing a file, closing a DB connection) is written there."
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Common errors",
+      "head": [
+       "Error",
+       "When it comes"
+      ],
+      "rows": [
+       [
+        "ValueError",
+        "int(\"abc\")"
+       ],
+       [
+        "ZeroDivisionError",
+        "10 / 0"
+       ],
+       [
+        "KeyError",
+        "key not in dict"
+       ],
+       [
+        "IndexError",
+        "index not in list"
+       ],
+       [
+        "TypeError",
+        "\"5\" + 5"
+       ],
+       [
+        "FileNotFoundError",
+        "file not found"
+       ]
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "tests = [lambda: [1, 2][5], lambda: {\"a\": 1}[\"b\"], lambda: \"5\" + 5, lambda: open(\"nahi.txt\")]\nfor t in tests:\n    try:\n        t()\n    except Exception as e:\n        print(type(e).__name__)",
+     "IndexError\nKeyError\nTypeError\nFileNotFoundError"
+    ],
+    [
+     "p",
+     "**raise** = send an error yourself. When a function gets a wrong value, it is better to give a clear error than to quietly give a wrong result."
+    ],
+    [
+     "code",
+     "python",
+     "def withdraw(amount, balance):\n    if amount > balance:\n        raise ValueError(\"Balance kam hai\")\n    return balance - amount\n\ntry:\n    withdraw(500, 100)\nexcept ValueError as e:\n    print(\"Error:\", e)",
+     "Error: Balance kam hai"
+    ],
+    [
+     "p",
+     "**Custom exception** = your own error class. Inherit from `Exception` (inheritance comes in the next lessons). Then the error's name itself tells what went wrong."
+    ],
+    [
+     "code",
+     "python",
+     "class InvalidCableSize(Exception):\n    pass\n\ndef check_size(sqmm):\n    if sqmm not in (1.5, 2.5, 4, 6, 10, 16):\n        raise InvalidCableSize(f\"{sqmm} sqmm standard size nahi hai\")\n    return \"OK\"\n\nfor s in [16, 7]:\n    try:\n        print(check_size(s))\n    except InvalidCableSize as e:\n        print(\"Rejected:\", e)",
+     "OK\nRejected: 7 sqmm standard size nahi hai"
+    ],
+    [
+     "analogy",
+     "try/except is a safety net, like the net under a trapeze in a circus. A fall (error) can happen, but the show (program) goes on."
+    ],
+    [
+     "warn",
+     "Common mistake: writing `except:` or `except Exception: pass` and hiding all errors. The bug will never be caught. Catch only the errors you **can handle**, and at least log a message."
+    ],
+    [
+     "tip",
+     "In an ML pipeline: don't stop the whole training because of a bad row. Skip that row with `try/except` and count how many rows were bad."
+    ]
+   ]
+  },
+  {
+   "title": "OOP — class and object",
+   "blocks": [
+    [
+     "p",
+     "**Class** = a map (blueprint). **Object** = the real thing built from that map. One map, many objects, each with its own values."
+    ],
+    [
+     "analogy",
+     "A house map says \"3 rooms, 1 kitchen\". The map itself is not a house. From that map you can build 10 houses — each house with a different colour and owner. At GEEP: the \"Cable\" class is the map, the cable on each drum is an object."
+    ],
+    [
+     "sketch",
+     {
+      "k": "tree",
+      "title": "One class, many objects",
+      "root": {
+       "label": "class Cable",
+       "children": [
+        {
+         "label": "c1: 5 Core",
+         "children": []
+        },
+        {
+         "label": "c2: 3 Core",
+         "children": []
+        },
+        {
+         "label": "c3: Fiber",
+         "children": []
+        }
+       ]
+      }
+     }
+    ],
+    [
+     "p",
+     "**Why?** Data (name, size, price) and the work on that data (calculate price, give discount) are tied together in one place. Big projects stay clean. And ML libraries (scikit-learn, PyTorch) are built fully on OOP: `model = LinearRegression()` is an object!"
+    ],
+    [
+     "code",
+     "python",
+     "class Cable:\n    def __init__(self, name, size, price):\n        self.name = name\n        self.size = size\n        self.price = price\n\nc1 = Cable(\"5 Core\", 16, 4500)\nc2 = Cable(\"3 Core\", 10, 2600)\nprint(c1.name, c1.price)\nprint(c2.name, c2.price)",
+     "5 Core 4500\n3 Core 2600"
+    ],
+    [
+     "p",
+     "`__init__` (two underscores in front, two behind) = **constructor**. Whenever you write `Cable(...)`, it runs **by itself** and sets the starting values of the new object."
+    ],
+    [
+     "p",
+     "**`self` = \"this object here\".** When you write `c1 = Cable(...)`, Python runs `__init__(c1, ...)` inside, so `self = c1`. That is why `self.name = name` means `c1.name = \"5 Core\"`. You don't pass `self` yourself, Python does."
+    ],
+    [
+     "sketch",
+     {
+      "k": "boxes",
+      "title": "Each object, own boxes",
+      "items": [
+       {
+        "label": "c1.name",
+        "value": "\"5 Core\""
+       },
+       {
+        "label": "c1.price",
+        "value": "4500"
+       },
+       {
+        "label": "c2.name",
+        "value": "\"3 Core\""
+       },
+       {
+        "label": "c2.price",
+        "value": "2600"
+       }
+      ]
+     }
+    ],
+    [
+     "p",
+     "**Method** = a function inside a class. It works on the object's data."
+    ],
+    [
+     "code",
+     "python",
+     "class Cable:\n    company = \"GEEP\"          # class attribute: same for all\n\n    def __init__(self, name, price):\n        self.name = name      # instance attribute: separate for each object\n        self.price = price\n\n    def discount(self, pct):\n        self.price = round(self.price * (1 - pct / 100))\n\n    def info(self):\n        return f\"{self.company} {self.name}: Rs {self.price}\"\n\nc1 = Cable(\"5 Core\", 4500)\nc2 = Cable(\"3 Core\", 2600)\nc1.discount(10)\nprint(c1.info())\nprint(c2.info())",
+     "GEEP 5 Core: Rs 4050\nGEEP 3 Core: Rs 2600"
+    ],
+    [
+     "tip",
+     "Look carefully: `c1.discount(10)` changed only c1's price, no effect on c2. Every object keeps its own value."
+    ],
+    [
+     "p",
+     "**Dunder methods** (double underscore) = Python's special methods. With them your object starts working with built-in things: `print()`, `len()`, `+`, `==`."
+    ],
+    [
+     "code",
+     "python",
+     "class Batch:\n    def __init__(self, name, items):\n        self.name = name\n        self.items = items\n\n    def __str__(self):\n        return f\"Batch {self.name} ({len(self.items)} drums)\"\n\n    def __len__(self):\n        return len(self.items)\n\n    def __eq__(self, other):\n        return self.items == other.items\n\nb = Batch(\"B-101\", [\"D1\", \"D2\", \"D3\"])\nprint(b)\nprint(len(b))\nprint(b == Batch(\"B-102\", [\"D1\", \"D2\", \"D3\"]))",
+     "Batch B-101 (3 drums)\n3\nTrue"
+    ],
+    [
+     "warn",
+     "Common mistake: forgetting to write `self` as the first parameter of a method → `TypeError: takes 0 positional arguments but 1 was given`. And in `__str__` you must **return**, not `print`."
+    ],
+    [
+     "p",
+     "**Connection to ML:** every scikit-learn model is an object with `fit()` and `predict()`. We can build the same pattern ourselves:"
+    ],
+    [
+     "code",
+     "python",
+     "class MeanModel:\n    def fit(self, y):\n        self.mean_ = sum(y) / len(y)\n        return self\n\n    def predict(self, n):\n        return [self.mean_] * n\n\nmodel = MeanModel().fit([10, 20, 30])\nprint(model.mean_)\nprint(model.predict(2))",
+     "20.0\n[20.0, 20.0]"
+    ],
+    [
+     "tip",
+     "Values created after `fit` have a `_` at the end of their name (like `mean_`, `coef_`) — this is a scikit-learn convention. You will see it in Stage 10."
+    ]
+   ]
+  },
+  {
+   "title": "The 4 pillars of OOP — A PIE",
+   "blocks": [
+    [
+     "p",
+     "This surely comes in an IQ: \"What are the four pillars of OOP?\" Not just the names — say the **meaning + an example** of each. How to remember: **A PIE** — Abstraction, Polymorphism, Inheritance, Encapsulation."
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "4 Pillars",
+      "head": [
+       "Pillar",
+       "One line",
+       "Example"
+      ],
+      "rows": [
+       [
+        "Encapsulation",
+        "hide data, change by rules",
+        "balance"
+       ],
+       [
+        "Inheritance",
+        "take from parent",
+        "Manager(Employee)"
+       ],
+       [
+        "Polymorphism",
+        "same name, diff work",
+        "UPI/Card pay()"
+       ],
+       [
+        "Abstraction",
+        "show only what's needed",
+        "ABC, car"
+       ]
+      ]
+     }
+    ],
+    [
+     "p",
+     "**1. Encapsulation** — data and its work in one class, and stopping the data from being changed directly from outside. Changes happen only through methods, which check the rules."
+    ],
+    [
+     "analogy",
+     "ATM: you cannot take the money out of the machine by hand. Work happens only through buttons (deposit, withdraw), and the machine checks whether there is enough balance."
+    ],
+    [
+     "code",
+     "python",
+     "class Account:\n    def __init__(self, balance):\n        self.__balance = balance      # __ = private\n\n    def deposit(self, amount):\n        if amount <= 0:\n            raise ValueError(\"Invalid amount\")\n        self.__balance += amount\n\n    @property\n    def balance(self):\n        return self.__balance\n\nacc = Account(1000)\nacc.deposit(500)\nprint(acc.balance)\ntry:\n    print(acc.__balance)\nexcept AttributeError:\n    print(\"Private hai, bahar se nahi dikhta\")",
+     "1500\nPrivate hai, bahar se nahi dikhta"
+    ],
+    [
+     "tip",
+     "Naming rules: `name` = public. `_name` = \"it's internal, don't touch\" (just a hint). `__name` = Python changes the name (name mangling), no direct access from outside. With `@property` you can read it like an attribute, but you cannot set it."
+    ],
+    [
+     "p",
+     "**2. Inheritance** — a child class takes all the properties and methods of the parent class, and can add its own new ones. You don't have to write the code again."
+    ],
+    [
+     "code",
+     "python",
+     "class Employee:\n    def __init__(self, name, salary):\n        self.name = name\n        self.salary = salary\n\n    def info(self):\n        return f\"{self.name} earns {self.salary}\"\n\nclass Manager(Employee):\n    def __init__(self, name, salary, team_size):\n        super().__init__(name, salary)\n        self.team_size = team_size\n\n    def team(self):\n        return f\"{self.name} manages {self.team_size} people\"\n\nm = Manager(\"Akash\", 50000, 5)\nprint(m.info())\nprint(m.team())\nprint(isinstance(m, Employee))",
+     "Akash earns 50000\nAkash manages 5 people\nTrue"
+    ],
+    [
+     "sketch",
+     {
+      "k": "tree",
+      "title": "Inheritance",
+      "root": {
+       "label": "Employee",
+       "children": [
+        {
+         "label": "Manager",
+         "children": []
+        },
+        {
+         "label": "Engineer",
+         "children": []
+        }
+       ]
+      }
+     }
+    ],
+    [
+     "p",
+     "`super()` = the parent. `super().__init__(name, salary)` runs the parent's constructor. **is-a test:** Is a Manager an Employee? Yes → inheritance is right."
+    ],
+    [
+     "p",
+     "**3. Polymorphism** — poly = many, morph = form. **Same method name, each object does the work its own way.** When a child rewrites a parent's method, it is called **method overriding**."
+    ],
+    [
+     "code",
+     "python",
+     "class Payment:\n    def pay(self, amount):\n        return f\"Paid {amount}\"\n\nclass UPI(Payment):\n    def pay(self, amount):\n        return f\"Paid {amount} via UPI\"\n\nclass Card(Payment):\n    def pay(self, amount):\n        return f\"Paid {amount} via Card\"\n\nfor p in [UPI(), Card(), Payment()]:\n    print(p.pay(500))\nprint(len(\"abc\"), len([1, 2]))",
+     "Paid 500 via UPI\nPaid 500 via Card\nPaid 500\n3 2"
+    ],
+    [
+     "analogy",
+     "The play button on a remote: press it on the TV and you get a channel, on the music system you get a song. Same button, the work depends on the device. `len()` also works on both strings and lists — that is polymorphism too."
+    ],
+    [
+     "p",
+     "**4. Abstraction** — show only what is needed, hide the complexity inside. In Python an **abstract class (ABC)** is a rule-book: \"every child must create this method\"."
+    ],
+    [
+     "code",
+     "python",
+     "from abc import ABC, abstractmethod\n\nclass Model(ABC):\n    @abstractmethod\n    def predict(self, x):\n        pass\n\nclass Doubler(Model):\n    def predict(self, x):\n        return x * 2\n\nprint(Doubler().predict(21))\ntry:\n    Model()\nexcept TypeError:\n    print(\"Abstract class ka object nahi banta\")",
+     "42\nAbstract class ka object nahi banta"
+    ],
+    [
+     "warn",
+     "IQ trap: Encapsulation vs Abstraction. Encapsulation hides **data** (you can't change the balance directly). Abstraction hides **complexity** (you don't need to understand the engine to drive a car; just call `model.fit()`, don't look at the maths inside)."
+    ]
+   ]
+  },
+  {
+   "title": "Generators and Decorators — intro",
+   "blocks": [
+    [
+     "p",
+     "These two are favourite advanced IQ questions. People know the names but can't explain them. Make sure you understand both well."
+    ],
+    [
+     "p",
+     "**Generator** = give values **one by one**, don't build them all in memory at once. `yield` instead of `return`."
+    ],
+    [
+     "analogy",
+     "List = make 100 cups of tea in advance and keep them (takes space and effort). Generator = make one cup only when someone asks."
+    ],
+    [
+     "code",
+     "python",
+     "def count_up(n):\n    i = 1\n    while i <= n:\n        yield i\n        i += 1\n\nfor x in count_up(3):\n    print(x)",
+     "1\n2\n3"
+    ],
+    [
+     "code",
+     "python",
+     "def simple():\n    print(\"Start\")\n    yield 1\n    print(\"Beech\")\n    yield 2\n\ng = simple()\nprint(next(g))\nprint(next(g))\ntry:\n    next(g)\nexcept StopIteration:\n    print(\"Khatam\")",
+     "Start\n1\nBeech\n2\nKhatam"
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "return vs yield",
+      "left": {
+       "title": "return",
+       "items": [
+        "give value, function ends",
+        "next time from start",
+        "one value"
+       ]
+      },
+      "right": {
+       "title": "yield",
+       "items": [
+        "give value, function pauses",
+        "next time from there",
+        "many values, one by one"
+       ]
+      }
+     }
+    ],
+    [
+     "code",
+     "python",
+     "import sys\nlst = [x for x in range(100000)]\ngen = (x for x in range(100000))\nprint(sys.getsizeof(lst) > 100000, sys.getsizeof(gen) < 1000)\nprint(sum(gen))",
+     "True True\n4999950000"
+    ],
+    [
+     "p",
+     "The list took lakhs of bytes, the generator a few hundred bytes — same values. **In ML:** reading a big CSV/log file line by line, and feeding data in **batches** during training — both are done with generators."
+    ],
+    [
+     "code",
+     "python",
+     "def batches(data, size):\n    for i in range(0, len(data), size):\n        yield data[i:i + size]\n\nfor b in batches([1, 2, 3, 4, 5, 6, 7], 3):\n    print(b)",
+     "[1, 2, 3]\n[4, 5, 6]\n[7]"
+    ],
+    [
+     "warn",
+     "Common mistake: a generator runs **only once**. If you do `list(g)` again, you get an empty `[]`."
+    ],
+    [
+     "p",
+     "**Decorator** = a **wrapper (envelope)** around a function. Add extra work to the real function without changing it: logging, timing, login check, retry."
+    ],
+    [
+     "analogy",
+     "Gift wrap: the gift (function) is the same, we just put a wrapper on top that does extra work."
+    ],
+    [
+     "code",
+     "python",
+     "def log(func):\n    def wrapper(*args, **kwargs):\n        print(f\"Calling {func.__name__}{args}\")\n        result = func(*args, **kwargs)\n        print(f\"Done -> {result}\")\n        return result\n    return wrapper\n\n@log\ndef add(a, b):\n    return a + b\n\nadd(2, 3)",
+     "Calling add(2, 3)\nDone -> 5"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Inside @log",
+      "steps": [
+       "add(2, 3)",
+       "wrapper: before",
+       "real add",
+       "wrapper: after"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "Writing `@log` = the same as writing `add = log(add)`. A function is also a value; you can give it to another function and get a new function back."
+    ],
+    [
+     "code",
+     "python",
+     "import functools\n\ndef count_calls(func):\n    @functools.wraps(func)\n    def wrapper(*args, **kwargs):\n        wrapper.calls += 1\n        return func(*args, **kwargs)\n    wrapper.calls = 0\n    return wrapper\n\n@count_calls\ndef predict(x):\n    return x * 2\n\npredict(1); predict(2); predict(3)\nprint(predict.calls, predict.__name__)",
+     "3 predict"
+    ],
+    [
+     "tip",
+     "Add `@functools.wraps(func)` so the wrapped function does not lose its name and docstring. You will see these decorators every day: `@app.get(\"/\")` in FastAPI, `@property` and `@staticmethod` in classes."
+    ]
+   ]
+  }
+ ],
+ "teach": [
+  {
+   "say": "A variable's data is gone as soon as the program closes. To keep it for good, write it to a file: open, write or read, close.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "open",
+     "read/write",
+     "close"
+    ],
+    "dir": "h"
+   },
+   "code": "with open(\"report.txt\", \"w\") as f:\n    f.write(\"PASS\\n\")"
+  },
+  {
+   "say": "Remember three modes. r reads, w writes and wipes the old data, and a adds at the end. with closes the file by itself.",
+   "sketch": {
+    "k": "table",
+    "head": [
+     "Mode",
+     "Job"
+    ],
+    "rows": [
+     [
+      "r",
+      "read"
+     ],
+     [
+      "w",
+      "write, old gone"
+     ],
+     [
+      "a",
+      "append, old safe"
+     ]
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "JSON is text that looks just like a dict. dump and load work with a file, dumps and loads with a string. s means string.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "dict",
+     "json.dump",
+     "file.json",
+     "json.load",
+     "dict"
+    ],
+    "dir": "h"
+   },
+   "code": "obj = json.loads(text)"
+  },
+  {
+   "say": "A CSV is a table. DictReader turns each row into a dict. Just keep in mind, every value comes as a string.",
+   "sketch": {
+    "k": "table",
+    "head": [
+     "name",
+     "amount"
+    ],
+    "rows": [
+     [
+      "Rahul",
+      "\"50000\""
+     ],
+     [
+      "Neha",
+      "\"20000\""
+     ]
+    ]
+   },
+   "code": "for row in csv.DictReader(f):\n    total += int(row[\"amount\"])"
+  },
+  {
+   "say": "An error means the program crashes. Put risky work in try, handle it in except, else runs when all is fine, and finally always runs.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "try",
+     "except",
+     "else",
+     "finally"
+    ],
+    "dir": "v"
+   },
+   "code": "try:\n    x = int(s)\nexcept ValueError:\n    x = 0"
+  },
+  {
+   "say": "If you get a wrong value, raise an error yourself. You can also make your own error class by inheriting from Exception.",
+   "sketch": null,
+   "code": "class InvalidSize(Exception):\n    pass\n\nraise InvalidSize(\"7 sqmm galat\")"
+  },
+  {
+   "say": "A class is the map, the object is the real house. init runs as soon as the object is created, and self means this object here.",
+   "sketch": {
+    "k": "tree",
+    "root": {
+     "label": "class Cable",
+     "children": [
+      {
+       "label": "c1",
+       "children": []
+      },
+      {
+       "label": "c2",
+       "children": []
+      }
+     ]
+    }
+   },
+   "code": "class Cable:\n    def __init__(self, name):\n        self.name = name"
+  },
+  {
+   "say": "Dunder methods let an object work with built-in things: str for print, len for len.",
+   "sketch": {
+    "k": "boxes",
+    "items": [
+     {
+      "label": "__init__",
+      "value": "Cable(...)"
+     },
+     {
+      "label": "__str__",
+      "value": "print(obj)"
+     },
+     {
+      "label": "__len__",
+      "value": "len(obj)"
+     }
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "Four pillars, A PIE: Abstraction, Polymorphism, Inheritance, Encapsulation. Learn one example of each by heart.",
+   "sketch": {
+    "k": "table",
+    "head": [
+     "Pillar",
+     "Example"
+    ],
+    "rows": [
+     [
+      "Encapsulation",
+      "private balance"
+     ],
+     [
+      "Inheritance",
+      "Manager(Employee)"
+     ],
+     [
+      "Polymorphism",
+      "UPI/Card pay()"
+     ],
+     [
+      "Abstraction",
+      "ABC + predict()"
+     ]
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "A generator gives one value at a time with yield, saving memory. A decorator puts a wrapper around a function, without changing the function.",
+   "sketch": {
+    "k": "compare",
+    "left": {
+     "title": "Generator",
+     "items": [
+      "yield",
+      "pause + resume",
+      "runs only once"
+     ]
+    },
+    "right": {
+     "title": "Decorator",
+     "items": [
+      "@name",
+      "wrapper function",
+      "logging, timing"
+     ]
+    }
+   },
+   "code": "@log\ndef add(a, b):\n    return a + b"
+  }
+ ],
+ "practice": [
+  {
+   "q": "CSV report: write the given `rows` to `tests.csv` with `csv.DictWriter` (columns: drum, length, result). Then read the file with `csv.DictReader` and print:\nRows: 4\nPASS length: 1700\nFail drums: D2, D4",
+   "starter": "import csv\nrows = [\n    {\"drum\": \"D1\", \"length\": 500, \"result\": \"PASS\"},\n    {\"drum\": \"D2\", \"length\": 300, \"result\": \"FAIL\"},\n    {\"drum\": \"D3\", \"length\": 1200, \"result\": \"PASS\"},\n    {\"drum\": \"D4\", \"length\": 250, \"result\": \"FAIL\"},\n]\n# TODO: write to tests.csv (remember newline=\"\")\n\n# TODO: read it back; don't forget int() on length\n",
+   "hint": "with open(\"tests.csv\") as f: data = list(csv.DictReader(f))",
+   "solution": "import csv\nrows = [\n    {\"drum\": \"D1\", \"length\": 500, \"result\": \"PASS\"},\n    {\"drum\": \"D2\", \"length\": 300, \"result\": \"FAIL\"},\n    {\"drum\": \"D3\", \"length\": 1200, \"result\": \"PASS\"},\n    {\"drum\": \"D4\", \"length\": 250, \"result\": \"FAIL\"},\n]\nwith open(\"tests.csv\", \"w\", newline=\"\") as f:\n    w = csv.DictWriter(f, fieldnames=[\"drum\", \"length\", \"result\"])\n    w.writeheader()\n    w.writerows(rows)\nwith open(\"tests.csv\") as f:\n    data = list(csv.DictReader(f))\nprint(\"Rows:\", len(data))\nprint(\"PASS length:\", sum(int(r[\"length\"]) for r in data if r[\"result\"] == \"PASS\"))\nprint(\"Fail drums:\", \", \".join(r[\"drum\"] for r in data if r[\"result\"] == \"FAIL\"))",
+   "expect": "Rows: 4\nPASS length: 1700\nFail drums: D2, D4"
+  },
+  {
+   "q": "Data cleaning with errors. `raw` has sensor readings (as text). Convert each value to float. If the value is not a number (ValueError) or is negative (raise your own custom `NegativeReading` exception), skip it and increase the bad count. Print:\nClean: [12.5, 7.0, 3.25]\nBad: 3\nMean: 7.58",
+   "starter": "class NegativeReading(Exception):\n    pass\n\ndef parse(value):\n    # TODO: convert to float; if negative, raise NegativeReading\n    pass\n\nraw = [\"12.5\", \"abc\", \"7\", \"-4\", \"3.25\", \"\"]\nclean = []\nbad = 0\n# TODO: parse each value inside try/except\n\n# TODO: print Clean, Bad and Mean (round 2)\n",
+   "hint": "except (ValueError, NegativeReading): bad += 1   — you can catch both errors together.",
+   "solution": "class NegativeReading(Exception):\n    pass\n\ndef parse(value):\n    x = float(value)\n    if x < 0:\n        raise NegativeReading(value)\n    return x\n\nraw = [\"12.5\", \"abc\", \"7\", \"-4\", \"3.25\", \"\"]\nclean = []\nbad = 0\nfor v in raw:\n    try:\n        clean.append(parse(v))\n    except (ValueError, NegativeReading):\n        bad += 1\nprint(\"Clean:\", clean)\nprint(\"Bad:\", bad)\nprint(\"Mean:\", round(sum(clean) / len(clean), 2))",
+   "expect": "Clean: [12.5, 7.0, 3.25]\nBad: 3\nMean: 7.58"
+  },
+  {
+   "q": "Build a scikit-learn style class: `MinMaxScaler`. `fit(data)` should remember min and max (`self.min_`, `self.max_`) and return `self`. `transform(data)` should bring each value into 0-1 with `(x - min) / (max - min)` (round 2). `__str__` should return `MinMaxScaler(min=.., max=..)`. Print:\nMinMaxScaler(min=10, max=50)\n[0.0, 0.25, 0.5, 1.0]\n[0.75, 1.25]",
+   "starter": "class MinMaxScaler:\n    def fit(self, data):\n        # TODO: set self.min_ and self.max_, return self\n        pass\n\n    def transform(self, data):\n        # TODO: scale each x (round 2)\n        pass\n\n    def __str__(self):\n        # TODO\n        pass\n\nscaler = MinMaxScaler().fit([10, 20, 30, 50])\nprint(scaler)\nprint(scaler.transform([10, 20, 30, 50]))\nprint(scaler.transform([40, 60]))\n",
+   "hint": "span = self.max_ - self.min_; return [round((x - self.min_) / span, 2) for x in data]",
+   "solution": "class MinMaxScaler:\n    def fit(self, data):\n        self.min_ = min(data)\n        self.max_ = max(data)\n        return self\n\n    def transform(self, data):\n        span = self.max_ - self.min_\n        return [round((x - self.min_) / span, 2) for x in data]\n\n    def __str__(self):\n        return f\"MinMaxScaler(min={self.min_}, max={self.max_})\"\n\nscaler = MinMaxScaler().fit([10, 20, 30, 50])\nprint(scaler)\nprint(scaler.transform([10, 20, 30, 50]))\nprint(scaler.transform([40, 60]))",
+   "expect": "MinMaxScaler(min=10, max=50)\n[0.0, 0.25, 0.5, 1.0]\n[0.75, 1.25]"
+  }
+ ],
+ "quiz": [
+  {
+   "q": "What does `open(\"data.txt\", \"w\")` do to an existing file?",
+   "o": [
+    "Adds at the end",
+    "Wipes old data and writes new",
+    "Only reads",
+    "Gives an error"
+   ],
+   "a": 1,
+   "why": "\"w\" mode empties the file. To add, use \"a\"."
+  },
+  {
+   "q": "Biggest benefit of `with open(...) as f:`?",
+   "o": [
+    "Reads the file faster",
+    "Compresses the file",
+    "File closes by itself after the block, even on error",
+    "Only for JSON"
+   ],
+   "a": 2,
+   "why": "with is a context manager; as soon as the block ends (even with an error) the file is closed."
+  },
+  {
+   "q": "How do you turn a JSON string (text) into a Python dict?",
+   "o": [
+    "json.loads(text)",
+    "json.load(text)",
+    "json.dumps(text)",
+    "dict(text)"
+   ],
+   "a": 0,
+   "why": "s = string: `loads` reads from text, `load` reads from a file object."
+  },
+  {
+   "q": "What is the type of `row[\"amount\"]` from `csv.DictReader`?",
+   "o": [
+    "int",
+    "float",
+    "dict",
+    "str"
+   ],
+   "a": 3,
+   "why": "CSV is a text file; every value comes as a string, so for maths you need int()/float()."
+  },
+  {
+   "q": "In try/except/else/finally, when does `else` run?",
+   "o": [
+    "Always",
+    "When an error comes",
+    "When no error comes",
+    "Never"
+   ],
+   "a": 2,
+   "why": "else runs only when the try block finished without an exception."
+  },
+  {
+   "q": "Which error will `{\"a\": 1}[\"b\"]` give?",
+   "o": [
+    "KeyError",
+    "IndexError",
+    "ValueError",
+    "NameError"
+   ],
+   "a": 0,
+   "why": "Asking a dict for a key it does not have with `[ ]` gives KeyError."
+  },
+  {
+   "q": "What is `self` in a class method?",
+   "o": [
+    "Name of the class",
+    "Current object (instance)",
+    "Parent class",
+    "An optional keyword"
+   ],
+   "a": 1,
+   "why": "self points to the object the method was called on; Python passes it automatically."
+  },
+  {
+   "q": "Which method shows custom text on `print(obj)`?",
+   "o": [
+    "__init__",
+    "__len__",
+    "__print__",
+    "__str__"
+   ],
+   "a": 3,
+   "why": "Whatever string `__str__` returns is what print() shows."
+  },
+  {
+   "q": "How do you run the parent's constructor in a child class?",
+   "o": [
+    "parent()",
+    "super().__init__(...)",
+    "self.parent()",
+    "init.super()"
+   ],
+   "a": 1,
+   "why": "`super()` gives the parent class; calling its `__init__` sets the parent's attributes."
+  },
+  {
+   "q": "What is true about a generator?",
+   "o": [
+    "Builds all values in memory first",
+    "Is made with return",
+    "Gives one value at a time with yield and iterates only once",
+    "Can only be made inside a class"
+   ],
+   "a": 2,
+   "why": "yield pauses the function and gives one value; once a generator is finished it does not run again."
+  }
+ ],
+ "iq": [
+  {
+   "q": "What is the `with` statement and why is it used with files?",
+   "a": "`with` uses a context manager: it opens the resource when entering the block (`__enter__`) and closes it when leaving (`__exit__`), even if an exception happens. For files, DB connections and locks this prevents resource leaks. With `with open(\"a.txt\") as f:` you never have to write `f.close()`."
+  },
+  {
+   "q": "Difference between json.load and json.loads?",
+   "a": "`json.load(f)` reads JSON from a file object and gives a Python object. `json.loads(s)` does it from a JSON string. In the same way, `dump(obj, f)` writes to a file and `dumps(obj)` returns a string. loads is used to parse API response text."
+  },
+  {
+   "q": "try, except, else, finally — when does each one run?",
+   "a": "try holds the risky code. except runs when a matching exception comes. else runs when no exception came in try. finally always runs, so cleanup (closing a file/connection) is written there. You should catch specific exceptions, not a bare `except:`."
+  },
+  {
+   "q": "How do you create a custom exception, and why?",
+   "a": "By inheriting from `Exception`: `class InvalidInput(Exception): pass`, then `raise InvalidInput(\"msg\")`. The error's type itself tells what went wrong, and the caller can catch only that one without hiding other errors. Big projects create one base exception and its sub-classes."
+  },
+  {
+   "q": "Difference between class and object? What are `__init__` and `self`?",
+   "a": "A class is a blueprint, an object is an instance made from that blueprint. `__init__` is the constructor that runs as soon as the object is created and sets initial values. `self` is a reference to the current object, so each object keeps its own separate data: `self.name = name`."
+  },
+  {
+   "q": "Explain the 4 pillars of OOP with examples.",
+   "a": "Encapsulation: data + methods in one class, data private, like a balance that changes only through deposit/withdraw. Inheritance: the child takes the parent's features, like Manager(Employee). Polymorphism: the same method does different work in different objects, like pay() for UPI and Card. Abstraction: show only the needed interface, like an ABC where every model must create predict()."
+  },
+  {
+   "q": "What is the difference between Encapsulation and Abstraction?",
+   "a": "Encapsulation hides and protects data (private attributes, getters/property) so that no wrong value gets in. Abstraction hides the complexity of the implementation and gives only a simple interface (abstract classes, `model.fit()`). One is about 'what is hidden' (data), the other about 'how it works' (detail)."
+  },
+  {
+   "q": "Difference between a class attribute and an instance attribute?",
+   "a": "A class attribute is written in the class body and is shared by all objects (`company = \"GEEP\"`). An instance attribute is set with `self.x` in `__init__` and is separate for each object. A mutable class attribute (like a list) gets shared by all objects and causes bugs, so keep per-object data in instance attributes."
+  },
+  {
+   "q": "Difference between `__str__` and `__repr__`?",
+   "a": "`__str__` gives user-friendly text and is used by `print()` and `str()`. `__repr__` is an unambiguous representation for the developer, shown in the console and while debugging, ideally such that the object could be rebuilt from it: `Cable('5 Core', 4500)`. If there is no `__str__`, Python uses `__repr__`."
+  },
+  {
+   "q": "What is a generator, and yield vs return?",
+   "a": "A generator gives values lazily, one by one, with `yield`; it does not build the whole list in memory. `yield` pauses the function and gives a value, and next time resumes from the same place; `return` ends the function. Ideal for reading big files and feeding data batches in ML training. A generator can be iterated only once."
+  },
+  {
+   "q": "What is a decorator? Give one real use.",
+   "a": "A decorator is a function that takes another function, wraps it and returns a new function, without changing the original code. Writing `@timer` = `func = timer(func)`. Uses: logging, measuring execution time, auth check, retry, caching (`@functools.lru_cache`). `functools.wraps` keeps the original name/docstring."
+  },
+  {
+   "q": "How is scikit-learn's fit/predict design connected to OOP?",
+   "a": "Every model is a class; `model = LinearRegression()` creates an object. `fit(X, y)` stores the values learned from data in the object's attributes (`coef_`, `intercept_`), and `predict(X)` uses those same values. All models follow the same interface (polymorphism), so swapping one model for another is a one-line change."
+  }
+ ]
+}

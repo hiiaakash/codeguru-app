@@ -1,0 +1,1059 @@
+{
+ "n": 5,
+ "id": "aiml-05",
+ "title": "Files, Errors & OOP",
+ "goal": "Text, JSON aur CSV files padhna-likhna, errors ko try/except se sambhalna aur khud raise karna, class-object aur OOP ke 4 pillars se saaf code banana, aur generators-decorators ka basic use samajhna — sab ML ke data aur models ki nazar se.",
+ "lessons": [
+  {
+   "title": "File handling — data ko pakka save karna",
+   "blocks": [
+    [
+     "p",
+     "Variable mein rakha data **RAM** mein hota hai. Program band, data gayab. Data **permanently** rakhna ho (report, log, ML results) to **file** mein likhna padta hai."
+    ],
+    [
+     "list",
+     [
+      "**What:** Python se file padhna/likhna — text, JSON, CSV",
+      "**Why:** program band ho jaaye, data phir bhi rahe",
+      "**When:** logs, config load, data import/export, model ke results",
+      "**Where:** har real project — ERP data, ML training logs, reports"
+     ]
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "File ke saath 3 kaam",
+      "steps": [
+       "open (kholo)",
+       "read / write",
+       "close (band)"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "code",
+     "python",
+     "with open(\"report.txt\", \"w\") as f:\n    f.write(\"Cable 1: PASS\\n\")\n    f.write(\"Cable 2: FAIL\\n\")\n\nwith open(\"report.txt\", \"r\") as f:\n    data = f.read()\nprint(data)",
+     "Cable 1: PASS\nCable 2: FAIL"
+    ],
+    [
+     "p",
+     "Line samjho: `open(\"report.txt\", \"w\")` = file kholo **write mode** mein. `as f` = khuli file ko naam `f` do. `f.write(...)` = likho. `\\n` nayi line ke liye; yeh khud nahi lagta."
+    ],
+    [
+     "p",
+     "**`with` kyun?** `with` ka block khatam hote hi file **khud band** ho jaati hai, error aaye tab bhi. File band na ho to data poora save na ho, ya file lock rahe."
+    ],
+    [
+     "analogy",
+     "`with` ek automatic darwaza hai: andar gaye, kaam kiya, bahar nikle to darwaza khud band. Purane tareeke mein `f.close()` khud yaad rakhna padta tha — bhool gaye to darwaza khula."
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "File modes",
+      "head": [
+       "Mode",
+       "Kaam",
+       "Dhyan"
+      ],
+      "rows": [
+       [
+        "\"r\"",
+        "padhna (default)",
+        "file na ho to error"
+       ],
+       [
+        "\"w\"",
+        "likhna",
+        "purana sab mita deta!"
+       ],
+       [
+        "\"a\"",
+        "end mein jodna",
+        "purana safe"
+       ],
+       [
+        "\"rb\"/\"wb\"",
+        "binary",
+        "image, PDF, model"
+       ]
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "with open(\"report.txt\", \"w\") as f:\n    f.write(\"Cable 1: PASS\\n\")\n    f.write(\"Cable 2: FAIL\\n\")\nwith open(\"report.txt\", \"a\") as f:\n    f.write(\"Cable 3: PASS\\n\")\n\nwith open(\"report.txt\") as f:\n    for line in f:\n        print(line.strip())",
+     "Cable 1: PASS\nCable 2: FAIL\nCable 3: PASS"
+    ],
+    [
+     "tip",
+     "Badi file ko `for line in f` se line-by-line padho. Ek time pe sirf ek line memory mein aati hai, isliye 5 GB ki log file bhi chal jaati hai. `.strip()` aakhir ka `\\n` hata deta hai."
+    ],
+    [
+     "code",
+     "python",
+     "with open(\"report.txt\", \"w\") as f:\n    f.write(\"Cable 1: PASS\\nCable 2: FAIL\\nCable 3: PASS\\n\")\nwith open(\"report.txt\") as f:\n    lines = f.read().splitlines()\npassed = [l for l in lines if l.endswith(\"PASS\")]\nprint(len(lines), len(passed))",
+     "3 2"
+    ],
+    [
+     "warn",
+     "Common galti: `\"w\"` mode se kholi file ka purana data **turant** khatam ho jaata hai, bina kuch likhe bhi. Jodna ho to `\"a\"`. Aur `\"r\"` mein file na mili to **FileNotFoundError**."
+    ],
+    [
+     "code",
+     "python",
+     "import os\nprint(os.path.exists(\"report.txt\"))\nprint(os.path.exists(\"nahi_hai.txt\"))",
+     "True\nFalse"
+    ],
+    [
+     "tip",
+     "Hindi/special characters likhne ho to `open(path, \"w\", encoding=\"utf-8\")` likhna achhi aadat hai. Windows pe default encoding alag hoti hai aur error de sakti hai."
+    ]
+   ]
+  },
+  {
+   "title": "JSON aur CSV — AI/ML ka asli data",
+   "blocks": [
+    [
+     "p",
+     "**JSON** = text format jo bilkul Python dict/list jaisa dikhta hai. APIs, config files, LLM responses — sab JSON mein aate hain. AI/ML mein **sabse zyada** use hoga."
+    ],
+    [
+     "code",
+     "python",
+     "import json\ncable = {\"name\": \"5 Core\", \"price\": 4500, \"stock\": True, \"sizes\": [10, 16]}\n\nwith open(\"cable.json\", \"w\") as f:\n    json.dump(cable, f, indent=2)\n\nwith open(\"cable.json\") as f:\n    loaded = json.load(f)\nprint(loaded[\"name\"], loaded[\"sizes\"][1])\nprint(type(loaded))",
+     "5 Core 16\n<class 'dict'>"
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "json ke 4 function",
+      "left": {
+       "title": "File ke saath",
+       "items": [
+        "json.dump(d, f)",
+        "json.load(f)"
+       ]
+      },
+      "right": {
+       "title": "String ke saath",
+       "items": [
+        "json.dumps(d)",
+        "json.loads(text)"
+       ]
+      }
+     }
+    ],
+    [
+     "tip",
+     "Yaad rakhne ka tareeka: **s = string**. `dumps`/`loads` text ke saath, `dump`/`load` file ke saath."
+    ],
+    [
+     "code",
+     "python",
+     "import json\nresponse = '{\"status\": \"ok\", \"data\": [{\"id\": 1, \"score\": 0.91}, {\"id\": 2, \"score\": 0.47}]}'\nobj = json.loads(response)\nprint(obj[\"status\"])\ngood = [d[\"id\"] for d in obj[\"data\"] if d[\"score\"] > 0.5]\nprint(good)\nprint(json.dumps({\"ok\": True, \"n\": None}))",
+     "ok\n[1]\n{\"ok\": true, \"n\": null}"
+    ],
+    [
+     "p",
+     "Dhyan se dekh last line: Python `True` → JSON `true`, `None` → `null`. JSON mein keys hamesha **double quotes** mein hoti hain."
+    ],
+    [
+     "p",
+     "**CSV** = Comma Separated Values. Excel jaisi table, simple text mein. Har line ek row. Datasets (Kaggle wagairah) zyada tar CSV mein hote hain."
+    ],
+    [
+     "code",
+     "python",
+     "import csv\nrows = [[\"name\", \"city\", \"amount\"], [\"Rahul\", \"Delhi\", 50000], [\"Neha\", \"Jaipur\", 20000]]\nwith open(\"leads.csv\", \"w\", newline=\"\") as f:\n    writer = csv.writer(f)\n    writer.writerows(rows)\n\nwith open(\"leads.csv\") as f:\n    print(f.read().strip())",
+     "name,city,amount\nRahul,Delhi,50000\nNeha,Jaipur,20000"
+    ],
+    [
+     "code",
+     "python",
+     "import csv\nwith open(\"leads.csv\", \"w\", newline=\"\") as f:\n    w = csv.DictWriter(f, fieldnames=[\"name\", \"city\", \"amount\"])\n    w.writeheader()\n    w.writerow({\"name\": \"Rahul\", \"city\": \"Delhi\", \"amount\": 50000})\n    w.writerow({\"name\": \"Neha\", \"city\": \"Jaipur\", \"amount\": 20000})\n\ntotal = 0\nwith open(\"leads.csv\") as f:\n    for row in csv.DictReader(f):\n        print(row[\"name\"], row[\"city\"])\n        total += int(row[\"amount\"])\nprint(\"Total:\", total)",
+     "Rahul Delhi\nNeha Jaipur\nTotal: 70000"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "CSV se dataset",
+      "steps": [
+       "leads.csv",
+       "csv.DictReader",
+       "har row = dict",
+       "list of dicts"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "warn",
+     "Common galti: CSV se **har value string** aati hai, `\"50000\"` bhi. Hisaab se pehle `int()` / `float()` karo. Aur likhte waqt `newline=\"\"` do, warna Windows pe beech mein khali lines aa jaati hain."
+    ],
+    [
+     "p",
+     "Aage Stage 8 mein `pd.read_csv()` ek line mein yahi sab karega. Lekin andar kya ho raha hai woh ab tumhe pata hai — IQ mein yahi farak dikhta hai."
+    ]
+   ]
+  },
+  {
+   "title": "Errors — program ko crash hone se bachao",
+   "blocks": [
+    [
+     "p",
+     "Error aaya to program **wahin ruk jaata hai** (crash). Real app mein user galat input de sakta hai, file na mile, API band ho — poora server band nahi hona chahiye."
+    ],
+    [
+     "p",
+     "**try / except** = \"yeh try karo, galti hui to sambhal lo.\""
+    ],
+    [
+     "code",
+     "python",
+     "try:\n    n = int(\"abc\")\n    print(n)\nexcept ValueError:\n    print(\"Yeh number nahi hai\")\nprint(\"Program chalta raha\")",
+     "Yeh number nahi hai\nProgram chalta raha"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Poora structure",
+      "steps": [
+       "try: risky kaam",
+       "except: error aaya",
+       "else: error nahi",
+       "finally: hamesha"
+      ],
+      "dir": "v"
+     }
+    ],
+    [
+     "code",
+     "python",
+     "def divide(a, b):\n    try:\n        result = a / b\n    except ZeroDivisionError:\n        print(\"0 se divide nahi hota\")\n    else:\n        print(\"Result:\", result)\n    finally:\n        print(\"--- done ---\")\n\ndivide(10, 2)\ndivide(10, 0)",
+     "Result: 5.0\n--- done ---\n0 se divide nahi hota\n--- done ---"
+    ],
+    [
+     "p",
+     "`else` tab chalta hai jab **koi error nahi** aaya. `finally` **hamesha** chalta hai — isliye cleanup (file band, DB connection band) wahan likhte hain."
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Common errors",
+      "head": [
+       "Error",
+       "Kab aata hai"
+      ],
+      "rows": [
+       [
+        "ValueError",
+        "int(\"abc\")"
+       ],
+       [
+        "ZeroDivisionError",
+        "10 / 0"
+       ],
+       [
+        "KeyError",
+        "dict mein key nahi"
+       ],
+       [
+        "IndexError",
+        "list mein index nahi"
+       ],
+       [
+        "TypeError",
+        "\"5\" + 5"
+       ],
+       [
+        "FileNotFoundError",
+        "file nahi mili"
+       ]
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "tests = [lambda: [1, 2][5], lambda: {\"a\": 1}[\"b\"], lambda: \"5\" + 5, lambda: open(\"nahi.txt\")]\nfor t in tests:\n    try:\n        t()\n    except Exception as e:\n        print(type(e).__name__)",
+     "IndexError\nKeyError\nTypeError\nFileNotFoundError"
+    ],
+    [
+     "p",
+     "**raise** = khud error bhejna. Jab function ko galat value mile to chupchaap galat result dene se achha hai ki saaf error do."
+    ],
+    [
+     "code",
+     "python",
+     "def withdraw(amount, balance):\n    if amount > balance:\n        raise ValueError(\"Balance kam hai\")\n    return balance - amount\n\ntry:\n    withdraw(500, 100)\nexcept ValueError as e:\n    print(\"Error:\", e)",
+     "Error: Balance kam hai"
+    ],
+    [
+     "p",
+     "**Custom exception** = apni error class. `Exception` se inherit karo (inheritance agle lessons mein). Isse error ka naam hi bata deta hai ki kya galat hua."
+    ],
+    [
+     "code",
+     "python",
+     "class InvalidCableSize(Exception):\n    pass\n\ndef check_size(sqmm):\n    if sqmm not in (1.5, 2.5, 4, 6, 10, 16):\n        raise InvalidCableSize(f\"{sqmm} sqmm standard size nahi hai\")\n    return \"OK\"\n\nfor s in [16, 7]:\n    try:\n        print(check_size(s))\n    except InvalidCableSize as e:\n        print(\"Rejected:\", e)",
+     "OK\nRejected: 7 sqmm standard size nahi hai"
+    ],
+    [
+     "analogy",
+     "try/except ek safety net hai jaise circus mein trapeze ke neeche jaal. Girna (error) ho sakta hai, lekin show (program) chalta rehta hai."
+    ],
+    [
+     "warn",
+     "Common galti: `except:` ya `except Exception: pass` likh ke saare errors chupa dena. Bug kabhi pakda hi nahi jaayega. Sirf woh errors pakdo jo tum **sambhal sakte** ho, aur kam se kam message log karo."
+    ],
+    [
+     "tip",
+     "ML pipeline mein: kharab row pe poora training mat rokho. Us row ko `try/except` mein skip karo aur gin lo kitni rows kharab thi."
+    ]
+   ]
+  },
+  {
+   "title": "OOP — class aur object",
+   "blocks": [
+    [
+     "p",
+     "**Class** = naksha (blueprint). **Object** = us naksh se bani asli cheez. Ek naksh se kai objects, har ek ki apni values."
+    ],
+    [
+     "analogy",
+     "Ghar ka naksha kehta hai \"3 kamre, 1 kitchen\". Naksha khud ghar nahi hai. Us naksh se 10 ghar ban sakte hain — har ghar ka rang aur maalik alag. GEEP mein: \"Cable\" class naksha hai, har drum ki cable ek object."
+    ],
+    [
+     "sketch",
+     {
+      "k": "tree",
+      "title": "Ek class, kai objects",
+      "root": {
+       "label": "class Cable",
+       "children": [
+        {
+         "label": "c1: 5 Core",
+         "children": []
+        },
+        {
+         "label": "c2: 3 Core",
+         "children": []
+        },
+        {
+         "label": "c3: Fiber",
+         "children": []
+        }
+       ]
+      }
+     }
+    ],
+    [
+     "p",
+     "**Kyun?** Data (naam, size, price) aur us data pe kaam (price nikaalo, discount do) ek jagah bandh jaate hain. Bade projects saaf rehte hain. Aur ML libraries (scikit-learn, PyTorch) poori OOP pe bani hain: `model = LinearRegression()` ek object hai!"
+    ],
+    [
+     "code",
+     "python",
+     "class Cable:\n    def __init__(self, name, size, price):\n        self.name = name\n        self.size = size\n        self.price = price\n\nc1 = Cable(\"5 Core\", 16, 4500)\nc2 = Cable(\"3 Core\", 10, 2600)\nprint(c1.name, c1.price)\nprint(c2.name, c2.price)",
+     "5 Core 4500\n3 Core 2600"
+    ],
+    [
+     "p",
+     "`__init__` (do underscore aage, do peeche) = **constructor**. Jab bhi `Cable(...)` likhoge, yeh **khud** chal jaata hai aur naye object ki shuruaati values set karta hai."
+    ],
+    [
+     "p",
+     "**`self` = \"yeh wala object\".** `c1 = Cable(...)` likha to Python andar `__init__(c1, ...)` chalata hai, yaani `self = c1`. Isliye `self.name = name` ka matlab `c1.name = \"5 Core\"`. `self` tum khud pass nahi karte, Python karta hai."
+    ],
+    [
+     "sketch",
+     {
+      "k": "boxes",
+      "title": "Har object ke apne dibbe",
+      "items": [
+       {
+        "label": "c1.name",
+        "value": "\"5 Core\""
+       },
+       {
+        "label": "c1.price",
+        "value": "4500"
+       },
+       {
+        "label": "c2.name",
+        "value": "\"3 Core\""
+       },
+       {
+        "label": "c2.price",
+        "value": "2600"
+       }
+      ]
+     }
+    ],
+    [
+     "p",
+     "**Method** = class ke andar ka function. Object ke data pe kaam karta hai."
+    ],
+    [
+     "code",
+     "python",
+     "class Cable:\n    company = \"GEEP\"          # class attribute: sabka same\n\n    def __init__(self, name, price):\n        self.name = name      # instance attribute: har object ka alag\n        self.price = price\n\n    def discount(self, pct):\n        self.price = round(self.price * (1 - pct / 100))\n\n    def info(self):\n        return f\"{self.company} {self.name}: Rs {self.price}\"\n\nc1 = Cable(\"5 Core\", 4500)\nc2 = Cable(\"3 Core\", 2600)\nc1.discount(10)\nprint(c1.info())\nprint(c2.info())",
+     "GEEP 5 Core: Rs 4050\nGEEP 3 Core: Rs 2600"
+    ],
+    [
+     "tip",
+     "Dhyan se dekh: `c1.discount(10)` ne sirf c1 ki price badli, c2 pe koi asar nahi. Har object apni value khud rakhta hai."
+    ],
+    [
+     "p",
+     "**Dunder methods** (double underscore) = Python ke special methods. Inse tumhara object built-in cheezon ke saath kaam karne lagta hai: `print()`, `len()`, `+`, `==`."
+    ],
+    [
+     "code",
+     "python",
+     "class Batch:\n    def __init__(self, name, items):\n        self.name = name\n        self.items = items\n\n    def __str__(self):\n        return f\"Batch {self.name} ({len(self.items)} drums)\"\n\n    def __len__(self):\n        return len(self.items)\n\n    def __eq__(self, other):\n        return self.items == other.items\n\nb = Batch(\"B-101\", [\"D1\", \"D2\", \"D3\"])\nprint(b)\nprint(len(b))\nprint(b == Batch(\"B-102\", [\"D1\", \"D2\", \"D3\"]))",
+     "Batch B-101 (3 drums)\n3\nTrue"
+    ],
+    [
+     "warn",
+     "Common galti: method mein pehla parameter `self` likhna bhool jaana → `TypeError: takes 0 positional arguments but 1 was given`. Aur `__str__` mein `print` nahi, **return** karna hai."
+    ],
+    [
+     "p",
+     "**ML se connection:** scikit-learn ka har model `fit()` aur `predict()` wala object hai. Wahi pattern hum khud bana sakte hain:"
+    ],
+    [
+     "code",
+     "python",
+     "class MeanModel:\n    def fit(self, y):\n        self.mean_ = sum(y) / len(y)\n        return self\n\n    def predict(self, n):\n        return [self.mean_] * n\n\nmodel = MeanModel().fit([10, 20, 30])\nprint(model.mean_)\nprint(model.predict(2))",
+     "20.0\n[20.0, 20.0]"
+    ],
+    [
+     "tip",
+     "`fit` ke baad bani values ke naam ke end mein `_` (jaise `mean_`, `coef_`) — yeh scikit-learn ka convention hai. Stage 10 mein yahi dikhega."
+    ]
+   ]
+  },
+  {
+   "title": "OOP ke 4 pillars — A PIE",
+   "blocks": [
+    [
+     "p",
+     "IQ mein pakka aata hai: \"What are the four pillars of OOP?\" Sirf naam nahi, har ek ka **matlab + example** bolna hai. Yaad rakhne ka tareeka: **A PIE** — Abstraction, Polymorphism, Inheritance, Encapsulation."
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "4 Pillars",
+      "head": [
+       "Pillar",
+       "Ek line",
+       "Example"
+      ],
+      "rows": [
+       [
+        "Encapsulation",
+        "data chhupa, rules se badlo",
+        "balance"
+       ],
+       [
+        "Inheritance",
+        "parent se lena",
+        "Manager(Employee)"
+       ],
+       [
+        "Polymorphism",
+        "same naam, alag kaam",
+        "UPI/Card pay()"
+       ],
+       [
+        "Abstraction",
+        "sirf zaroori dikhao",
+        "ABC, car"
+       ]
+      ]
+     }
+    ],
+    [
+     "p",
+     "**1. Encapsulation** — data aur uske kaam ek class mein, aur data ko bahar se seedha badalne se rokna. Badlav sirf methods se, jo rules check karte hain."
+    ],
+    [
+     "analogy",
+     "ATM: tum machine ke andar ka paisa haath se nahi nikaal sakte. Sirf button (deposit, withdraw) se kaam hota hai, aur machine check karti hai ki balance hai ya nahi."
+    ],
+    [
+     "code",
+     "python",
+     "class Account:\n    def __init__(self, balance):\n        self.__balance = balance      # __ = private\n\n    def deposit(self, amount):\n        if amount <= 0:\n            raise ValueError(\"Invalid amount\")\n        self.__balance += amount\n\n    @property\n    def balance(self):\n        return self.__balance\n\nacc = Account(1000)\nacc.deposit(500)\nprint(acc.balance)\ntry:\n    print(acc.__balance)\nexcept AttributeError:\n    print(\"Private hai, bahar se nahi dikhta\")",
+     "1500\nPrivate hai, bahar se nahi dikhta"
+    ],
+    [
+     "tip",
+     "Naam ke rules: `name` = public. `_name` = \"andar ka hai, mat chhuo\" (sirf ishaara). `__name` = Python naam badal deta hai (name mangling), bahar se seedha access nahi. `@property` se attribute jaisa padh sakte ho, par set nahi kar sakte."
+    ],
+    [
+     "p",
+     "**2. Inheritance** — child class, parent class ki saari properties aur methods le leti hai, aur apni nayi jod sakti hai. Code dobara nahi likhna padta."
+    ],
+    [
+     "code",
+     "python",
+     "class Employee:\n    def __init__(self, name, salary):\n        self.name = name\n        self.salary = salary\n\n    def info(self):\n        return f\"{self.name} earns {self.salary}\"\n\nclass Manager(Employee):\n    def __init__(self, name, salary, team_size):\n        super().__init__(name, salary)\n        self.team_size = team_size\n\n    def team(self):\n        return f\"{self.name} manages {self.team_size} people\"\n\nm = Manager(\"Akash\", 50000, 5)\nprint(m.info())\nprint(m.team())\nprint(isinstance(m, Employee))",
+     "Akash earns 50000\nAkash manages 5 people\nTrue"
+    ],
+    [
+     "sketch",
+     {
+      "k": "tree",
+      "title": "Inheritance",
+      "root": {
+       "label": "Employee",
+       "children": [
+        {
+         "label": "Manager",
+         "children": []
+        },
+        {
+         "label": "Engineer",
+         "children": []
+        }
+       ]
+      }
+     }
+    ],
+    [
+     "p",
+     "`super()` = parent. `super().__init__(name, salary)` parent ka constructor chalata hai. **is-a test:** Manager is an Employee? Haan → inheritance sahi hai."
+    ],
+    [
+     "p",
+     "**3. Polymorphism** — poly = kai, morph = roop. **Same method naam, har object apne tareeke se** kaam kare. Child jab parent ka method dobara likhe to use **method overriding** kehte hain."
+    ],
+    [
+     "code",
+     "python",
+     "class Payment:\n    def pay(self, amount):\n        return f\"Paid {amount}\"\n\nclass UPI(Payment):\n    def pay(self, amount):\n        return f\"Paid {amount} via UPI\"\n\nclass Card(Payment):\n    def pay(self, amount):\n        return f\"Paid {amount} via Card\"\n\nfor p in [UPI(), Card(), Payment()]:\n    print(p.pay(500))\nprint(len(\"abc\"), len([1, 2]))",
+     "Paid 500 via UPI\nPaid 500 via Card\nPaid 500\n3 2"
+    ],
+    [
+     "analogy",
+     "Remote ka play button: TV pe dabao to channel, music system pe gaana. Button same, kaam device ke hisaab se. `len()` bhi string aur list dono pe chalta hai — yeh bhi polymorphism."
+    ],
+    [
+     "p",
+     "**4. Abstraction** — sirf zaroori cheez dikhao, andar ki complexity chhupao. Python mein **abstract class (ABC)** ek rule-book hai: \"har child ko yeh method banana hi padega\"."
+    ],
+    [
+     "code",
+     "python",
+     "from abc import ABC, abstractmethod\n\nclass Model(ABC):\n    @abstractmethod\n    def predict(self, x):\n        pass\n\nclass Doubler(Model):\n    def predict(self, x):\n        return x * 2\n\nprint(Doubler().predict(21))\ntry:\n    Model()\nexcept TypeError:\n    print(\"Abstract class ka object nahi banta\")",
+     "42\nAbstract class ka object nahi banta"
+    ],
+    [
+     "warn",
+     "IQ trap: Encapsulation vs Abstraction. Encapsulation **data** chhupata hai (balance seedha nahi badal sakte). Abstraction **complexity** chhupata hai (car chalane ke liye engine samajhna zaroori nahi; `model.fit()` bolo, andar ka maths mat dekho)."
+    ]
+   ]
+  },
+  {
+   "title": "Generators aur Decorators — intro",
+   "blocks": [
+    [
+     "p",
+     "Yeh dono IQ ke favourite advanced sawal hain. Log naam jaante hain par samjha nahi paate. Tum dono achhe se samjho."
+    ],
+    [
+     "p",
+     "**Generator** = values **ek-ek karke** do, sab ek saath memory mein mat banao. `return` ki jagah `yield`."
+    ],
+    [
+     "analogy",
+     "List = 100 cup chai pehle hi bana ke rakh do (jagah bhi, mehnat bhi). Generator = jab koi maange tab ek cup banao."
+    ],
+    [
+     "code",
+     "python",
+     "def count_up(n):\n    i = 1\n    while i <= n:\n        yield i\n        i += 1\n\nfor x in count_up(3):\n    print(x)",
+     "1\n2\n3"
+    ],
+    [
+     "code",
+     "python",
+     "def simple():\n    print(\"Start\")\n    yield 1\n    print(\"Beech\")\n    yield 2\n\ng = simple()\nprint(next(g))\nprint(next(g))\ntry:\n    next(g)\nexcept StopIteration:\n    print(\"Khatam\")",
+     "Start\n1\nBeech\n2\nKhatam"
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "return vs yield",
+      "left": {
+       "title": "return",
+       "items": [
+        "value do, function khatam",
+        "agli baar shuru se",
+        "ek value"
+       ]
+      },
+      "right": {
+       "title": "yield",
+       "items": [
+        "value do, function pause",
+        "agli baar wahin se",
+        "kai values, ek-ek"
+       ]
+      }
+     }
+    ],
+    [
+     "code",
+     "python",
+     "import sys\nlst = [x for x in range(100000)]\ngen = (x for x in range(100000))\nprint(sys.getsizeof(lst) > 100000, sys.getsizeof(gen) < 1000)\nprint(sum(gen))",
+     "True True\n4999950000"
+    ],
+    [
+     "p",
+     "List ne lakhs bytes liye, generator ne kuch sau bytes — values same. **ML mein:** badi CSV/log file line-by-line padhna, aur training mein data **batches** mein dena — dono generator se hote hain."
+    ],
+    [
+     "code",
+     "python",
+     "def batches(data, size):\n    for i in range(0, len(data), size):\n        yield data[i:i + size]\n\nfor b in batches([1, 2, 3, 4, 5, 6, 7], 3):\n    print(b)",
+     "[1, 2, 3]\n[4, 5, 6]\n[7]"
+    ],
+    [
+     "warn",
+     "Common galti: generator **sirf ek baar** chalta hai. `list(g)` dobara karoge to khali `[]` milega."
+    ],
+    [
+     "p",
+     "**Decorator** = function ke upar ek **wrapper (lifafa)**. Asli function badle bina usme extra kaam jod do: logging, timing, login check, retry."
+    ],
+    [
+     "analogy",
+     "Gift wrap: gift (function) wahi hai, bas upar ek lifafa chadha diya jo extra kaam karta hai."
+    ],
+    [
+     "code",
+     "python",
+     "def log(func):\n    def wrapper(*args, **kwargs):\n        print(f\"Calling {func.__name__}{args}\")\n        result = func(*args, **kwargs)\n        print(f\"Done -> {result}\")\n        return result\n    return wrapper\n\n@log\ndef add(a, b):\n    return a + b\n\nadd(2, 3)",
+     "Calling add(2, 3)\nDone -> 5"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "@log ke andar",
+      "steps": [
+       "add(2, 3)",
+       "wrapper: before",
+       "asli add",
+       "wrapper: after"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "`@log` likhna = `add = log(add)` likhne jaisa hai. Function bhi ek value hai, use doosre function ko de sakte ho aur naya function wapas le sakte ho."
+    ],
+    [
+     "code",
+     "python",
+     "import functools\n\ndef count_calls(func):\n    @functools.wraps(func)\n    def wrapper(*args, **kwargs):\n        wrapper.calls += 1\n        return func(*args, **kwargs)\n    wrapper.calls = 0\n    return wrapper\n\n@count_calls\ndef predict(x):\n    return x * 2\n\npredict(1); predict(2); predict(3)\nprint(predict.calls, predict.__name__)",
+     "3 predict"
+    ],
+    [
+     "tip",
+     "`@functools.wraps(func)` lagao taaki wrapped function ka naam aur docstring na khoye. Tum yeh decorators roz dekhoge: FastAPI mein `@app.get(\"/\")`, classes mein `@property`, `@staticmethod`."
+    ]
+   ]
+  }
+ ],
+ "teach": [
+  {
+   "say": "Variable ka data program band hote hi gayab. Pakka rakhna hai to file mein likho: kholo, likho ya padho, band karo.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "open",
+     "read/write",
+     "close"
+    ],
+    "dir": "h"
+   },
+   "code": "with open(\"report.txt\", \"w\") as f:\n    f.write(\"PASS\\n\")"
+  },
+  {
+   "say": "Teen mode yaad rakho. r padhna, w likhna jo purana mita deta hai, aur a jo end mein jodta hai. with file ko khud band kar deta hai.",
+   "sketch": {
+    "k": "table",
+    "head": [
+     "Mode",
+     "Kaam"
+    ],
+    "rows": [
+     [
+      "r",
+      "read"
+     ],
+     [
+      "w",
+      "write, purana gaya"
+     ],
+     [
+      "a",
+      "append, purana safe"
+     ]
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "JSON bilkul dict jaisa text hai. dump aur load file ke saath, dumps aur loads string ke saath. s matlab string.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "dict",
+     "json.dump",
+     "file.json",
+     "json.load",
+     "dict"
+    ],
+    "dir": "h"
+   },
+   "code": "obj = json.loads(text)"
+  },
+  {
+   "say": "CSV ek table hai. DictReader har row ko dict bana deta hai. Bas dhyan rahe, har value string aati hai.",
+   "sketch": {
+    "k": "table",
+    "head": [
+     "name",
+     "amount"
+    ],
+    "rows": [
+     [
+      "Rahul",
+      "\"50000\""
+     ],
+     [
+      "Neha",
+      "\"20000\""
+     ]
+    ]
+   },
+   "code": "for row in csv.DictReader(f):\n    total += int(row[\"amount\"])"
+  },
+  {
+   "say": "Error aaya to program crash. try mein risky kaam, except mein sambhalo, else jab sab theek, aur finally hamesha.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "try",
+     "except",
+     "else",
+     "finally"
+    ],
+    "dir": "v"
+   },
+   "code": "try:\n    x = int(s)\nexcept ValueError:\n    x = 0"
+  },
+  {
+   "say": "Galat value mile to khud raise karo. Aur apni error class bhi bana sakte ho, Exception se inherit karke.",
+   "sketch": null,
+   "code": "class InvalidSize(Exception):\n    pass\n\nraise InvalidSize(\"7 sqmm galat\")"
+  },
+  {
+   "say": "Class naksha hai, object asli ghar. init object bante hi chalta hai, aur self matlab yeh wala object.",
+   "sketch": {
+    "k": "tree",
+    "root": {
+     "label": "class Cable",
+     "children": [
+      {
+       "label": "c1",
+       "children": []
+      },
+      {
+       "label": "c2",
+       "children": []
+      }
+     ]
+    }
+   },
+   "code": "class Cable:\n    def __init__(self, name):\n        self.name = name"
+  },
+  {
+   "say": "Dunder methods se object built-in cheezon ke saath chalta hai: str se print, len se len.",
+   "sketch": {
+    "k": "boxes",
+    "items": [
+     {
+      "label": "__init__",
+      "value": "Cable(...)"
+     },
+     {
+      "label": "__str__",
+      "value": "print(obj)"
+     },
+     {
+      "label": "__len__",
+      "value": "len(obj)"
+     }
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "Chaar pillars, A PIE: Abstraction, Polymorphism, Inheritance, Encapsulation. Har ek ka ek example ratt lo.",
+   "sketch": {
+    "k": "table",
+    "head": [
+     "Pillar",
+     "Example"
+    ],
+    "rows": [
+     [
+      "Encapsulation",
+      "private balance"
+     ],
+     [
+      "Inheritance",
+      "Manager(Employee)"
+     ],
+     [
+      "Polymorphism",
+      "UPI/Card pay()"
+     ],
+     [
+      "Abstraction",
+      "ABC + predict()"
+     ]
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "Generator yield se ek-ek value deta hai, memory bachata hai. Decorator function pe lifafa chadhata hai, function badle bina.",
+   "sketch": {
+    "k": "compare",
+    "left": {
+     "title": "Generator",
+     "items": [
+      "yield",
+      "pause + resume",
+      "ek baar chalta"
+     ]
+    },
+    "right": {
+     "title": "Decorator",
+     "items": [
+      "@name",
+      "wrapper function",
+      "logging, timing"
+     ]
+    }
+   },
+   "code": "@log\ndef add(a, b):\n    return a + b"
+  }
+ ],
+ "practice": [
+  {
+   "q": "CSV report: diye gaye `rows` ko `tests.csv` mein `csv.DictWriter` se likho (columns: drum, length, result). Phir file ko `csv.DictReader` se padho aur print karo:\nRows: 4\nPASS length: 1700\nFail drums: D2, D4",
+   "starter": "import csv\nrows = [\n    {\"drum\": \"D1\", \"length\": 500, \"result\": \"PASS\"},\n    {\"drum\": \"D2\", \"length\": 300, \"result\": \"FAIL\"},\n    {\"drum\": \"D3\", \"length\": 1200, \"result\": \"PASS\"},\n    {\"drum\": \"D4\", \"length\": 250, \"result\": \"FAIL\"},\n]\n# TODO: tests.csv mein likho (newline=\"\" yaad rakhna)\n\n# TODO: wapas padho; length ko int() karna mat bhoolna\n",
+   "hint": "with open(\"tests.csv\") as f: data = list(csv.DictReader(f))",
+   "solution": "import csv\nrows = [\n    {\"drum\": \"D1\", \"length\": 500, \"result\": \"PASS\"},\n    {\"drum\": \"D2\", \"length\": 300, \"result\": \"FAIL\"},\n    {\"drum\": \"D3\", \"length\": 1200, \"result\": \"PASS\"},\n    {\"drum\": \"D4\", \"length\": 250, \"result\": \"FAIL\"},\n]\nwith open(\"tests.csv\", \"w\", newline=\"\") as f:\n    w = csv.DictWriter(f, fieldnames=[\"drum\", \"length\", \"result\"])\n    w.writeheader()\n    w.writerows(rows)\nwith open(\"tests.csv\") as f:\n    data = list(csv.DictReader(f))\nprint(\"Rows:\", len(data))\nprint(\"PASS length:\", sum(int(r[\"length\"]) for r in data if r[\"result\"] == \"PASS\"))\nprint(\"Fail drums:\", \", \".join(r[\"drum\"] for r in data if r[\"result\"] == \"FAIL\"))",
+   "expect": "Rows: 4\nPASS length: 1700\nFail drums: D2, D4"
+  },
+  {
+   "q": "Data cleaning with errors. `raw` mein sensor readings hain (text). Har value ko float mein badlo. Agar value number nahi hai (ValueError) ya negative hai (apna custom `NegativeReading` exception raise karo), to use skip karo aur bad count badhao. Print karo:\nClean: [12.5, 7.0, 3.25]\nBad: 3\nMean: 7.58",
+   "starter": "class NegativeReading(Exception):\n    pass\n\ndef parse(value):\n    # TODO: float banao; negative ho to NegativeReading raise karo\n    pass\n\nraw = [\"12.5\", \"abc\", \"7\", \"-4\", \"3.25\", \"\"]\nclean = []\nbad = 0\n# TODO: har value ko try/except mein parse karo\n\n# TODO: Clean, Bad aur Mean (round 2) print karo\n",
+   "hint": "except (ValueError, NegativeReading): bad += 1   — dono errors ek saath pakad sakte ho.",
+   "solution": "class NegativeReading(Exception):\n    pass\n\ndef parse(value):\n    x = float(value)\n    if x < 0:\n        raise NegativeReading(value)\n    return x\n\nraw = [\"12.5\", \"abc\", \"7\", \"-4\", \"3.25\", \"\"]\nclean = []\nbad = 0\nfor v in raw:\n    try:\n        clean.append(parse(v))\n    except (ValueError, NegativeReading):\n        bad += 1\nprint(\"Clean:\", clean)\nprint(\"Bad:\", bad)\nprint(\"Mean:\", round(sum(clean) / len(clean), 2))",
+   "expect": "Clean: [12.5, 7.0, 3.25]\nBad: 3\nMean: 7.58"
+  },
+  {
+   "q": "scikit-learn style class banao: `MinMaxScaler`. `fit(data)` min aur max yaad rakhe (`self.min_`, `self.max_`) aur `self` return kare. `transform(data)` har value ko `(x - min) / (max - min)` se 0-1 mein laaye (round 2). `__str__` return kare `MinMaxScaler(min=.., max=..)`. Print karo:\nMinMaxScaler(min=10, max=50)\n[0.0, 0.25, 0.5, 1.0]\n[0.75, 1.25]",
+   "starter": "class MinMaxScaler:\n    def fit(self, data):\n        # TODO: self.min_ aur self.max_ set karo, self return karo\n        pass\n\n    def transform(self, data):\n        # TODO: har x ko scale karo (round 2)\n        pass\n\n    def __str__(self):\n        # TODO\n        pass\n\nscaler = MinMaxScaler().fit([10, 20, 30, 50])\nprint(scaler)\nprint(scaler.transform([10, 20, 30, 50]))\nprint(scaler.transform([40, 60]))\n",
+   "hint": "span = self.max_ - self.min_; return [round((x - self.min_) / span, 2) for x in data]",
+   "solution": "class MinMaxScaler:\n    def fit(self, data):\n        self.min_ = min(data)\n        self.max_ = max(data)\n        return self\n\n    def transform(self, data):\n        span = self.max_ - self.min_\n        return [round((x - self.min_) / span, 2) for x in data]\n\n    def __str__(self):\n        return f\"MinMaxScaler(min={self.min_}, max={self.max_})\"\n\nscaler = MinMaxScaler().fit([10, 20, 30, 50])\nprint(scaler)\nprint(scaler.transform([10, 20, 30, 50]))\nprint(scaler.transform([40, 60]))",
+   "expect": "MinMaxScaler(min=10, max=50)\n[0.0, 0.25, 0.5, 1.0]\n[0.75, 1.25]"
+  }
+ ],
+ "quiz": [
+  {
+   "q": "`open(\"data.txt\", \"w\")` existing file ke saath kya karta hai?",
+   "o": [
+    "End mein jodta hai",
+    "Purana data mita ke naya likhta hai",
+    "Sirf padhta hai",
+    "Error deta hai"
+   ],
+   "a": 1,
+   "why": "\"w\" mode file ko khaali kar deta hai. Jodna ho to \"a\"."
+  },
+  {
+   "q": "`with open(...) as f:` ka sabse bada fayda?",
+   "o": [
+    "File fast padhta hai",
+    "File compress karta hai",
+    "Block ke baad file khud band, error mein bhi",
+    "Sirf JSON ke liye"
+   ],
+   "a": 2,
+   "why": "with context manager hai; block khatam hote hi (error ho tab bhi) file close ho jaati hai."
+  },
+  {
+   "q": "JSON string (text) ko Python dict mein kaise badlenge?",
+   "o": [
+    "json.loads(text)",
+    "json.load(text)",
+    "json.dumps(text)",
+    "dict(text)"
+   ],
+   "a": 0,
+   "why": "s = string: `loads` text se, `load` file object se padhta hai."
+  },
+  {
+   "q": "`csv.DictReader` se aayi `row[\"amount\"]` ka type?",
+   "o": [
+    "int",
+    "float",
+    "dict",
+    "str"
+   ],
+   "a": 3,
+   "why": "CSV text file hai; har value string aati hai, hisaab ke liye int()/float() karna padta hai."
+  },
+  {
+   "q": "try/except/else/finally mein `else` kab chalta hai?",
+   "o": [
+    "Hamesha",
+    "Jab error aaye",
+    "Jab koi error na aaye",
+    "Kabhi nahi"
+   ],
+   "a": 2,
+   "why": "else sirf tab chalta hai jab try block bina exception ke poora ho gaya."
+  },
+  {
+   "q": "`{\"a\": 1}[\"b\"]` kaunsa error dega?",
+   "o": [
+    "KeyError",
+    "IndexError",
+    "ValueError",
+    "NameError"
+   ],
+   "a": 0,
+   "why": "Dict mein jo key nahi hai use `[ ]` se maangne pe KeyError."
+  },
+  {
+   "q": "Class ke method mein `self` kya hai?",
+   "o": [
+    "Class ka naam",
+    "Current object (instance)",
+    "Parent class",
+    "Ek keyword jo optional hai"
+   ],
+   "a": 1,
+   "why": "self us object ko point karta hai jis pe method chala; Python use khud pass karta hai."
+  },
+  {
+   "q": "`print(obj)` pe custom text dikhane ke liye kaunsa method?",
+   "o": [
+    "__init__",
+    "__len__",
+    "__print__",
+    "__str__"
+   ],
+   "a": 3,
+   "why": "`__str__` jo string return kare wahi print() dikhata hai."
+  },
+  {
+   "q": "Child class mein parent ka constructor kaise chalayenge?",
+   "o": [
+    "parent()",
+    "super().__init__(...)",
+    "self.parent()",
+    "init.super()"
+   ],
+   "a": 1,
+   "why": "`super()` parent class deta hai; uska `__init__` call karke parent ke attributes set hote hain."
+  },
+  {
+   "q": "Generator ke baare mein kya sahi hai?",
+   "o": [
+    "Saari values pehle memory mein banata hai",
+    "return se banta hai",
+    "yield se ek-ek value deta hai aur ek hi baar iterate hota hai",
+    "Sirf class ke andar banta hai"
+   ],
+   "a": 2,
+   "why": "yield function ko pause karke ek value deta hai; generator khatam hone ke baad dobara nahi chalta."
+  }
+ ],
+ "iq": [
+  {
+   "q": "`with` statement kya hai aur file ke saath kyun use karte hain?",
+   "a": "`with` context manager use karta hai: block mein ghuste waqt resource kholta hai (`__enter__`) aur bahar nikalte waqt band karta hai (`__exit__`), chahe exception aaye. File, DB connection, lock ke liye isse resource leak nahi hota. `with open(\"a.txt\") as f:` mein `f.close()` likhna hi nahi padta."
+  },
+  {
+   "q": "json.load aur json.loads mein farak?",
+   "a": "`json.load(f)` file object se JSON padh ke Python object deta hai. `json.loads(s)` JSON string se. Waise hi `dump(obj, f)` file mein likhta hai aur `dumps(obj)` string return karta hai. API response text ko parse karne ke liye loads use hota hai."
+  },
+  {
+   "q": "try, except, else, finally — har ek kab chalta hai?",
+   "a": "try mein risky code. except tab chalta hai jab matching exception aaye. else tab jab try mein koi exception na aaye. finally hamesha chalta hai, isliye cleanup (file/connection band) wahan likhte hain. Specific exceptions pakadna chahiye, bare `except:` nahi."
+  },
+  {
+   "q": "Custom exception kaise banate hain aur kyun?",
+   "a": "`Exception` se inherit karke: `class InvalidInput(Exception): pass`, phir `raise InvalidInput(\"msg\")`. Isse error ka type khud batata hai ki kya galat hua, aur caller sirf usi ko pakad sakta hai bina doosre errors chupaye. Bade projects mein ek base exception aur uske sub-classes banate hain."
+  },
+  {
+   "q": "Class aur object mein farak? `__init__` aur `self` kya hain?",
+   "a": "Class blueprint hai, object us blueprint se bana instance. `__init__` constructor hai jo object bante hi chalta hai aur initial values set karta hai. `self` current object ka reference hai, jisse har object apna alag data rakhta hai: `self.name = name`."
+  },
+  {
+   "q": "OOP ke 4 pillars example ke saath batao.",
+   "a": "Encapsulation: data + methods ek class mein, data private, jaise balance sirf deposit/withdraw se badle. Inheritance: child parent ke features le, jaise Manager(Employee). Polymorphism: same method alag objects mein alag kaam, jaise UPI aur Card ka pay(). Abstraction: sirf zaroori interface dikhao, jaise ABC jisme har model ko predict() banana hi padega."
+  },
+  {
+   "q": "Encapsulation aur Abstraction mein kya farak hai?",
+   "a": "Encapsulation data ko chhupata aur protect karta hai (private attributes, getters/property), taaki galat value na aaye. Abstraction implementation ki complexity chhupata hai aur sirf simple interface deta hai (abstract classes, `model.fit()`). Ek 'kya chhupaya' (data) hai, doosra 'kaise kaam hota hai' (detail)."
+  },
+  {
+   "q": "Class attribute aur instance attribute mein farak?",
+   "a": "Class attribute class body mein likha hota hai aur saare objects mein shared hota hai (`company = \"GEEP\"`). Instance attribute `self.x` se `__init__` mein set hota hai aur har object ka alag. Mutable class attribute (jaise list) sab objects mein share hoke bugs deta hai, isliye per-object data instance attribute mein rakho."
+  },
+  {
+   "q": "`__str__` aur `__repr__` mein farak?",
+   "a": "`__str__` user-friendly text deta hai, `print()` aur `str()` use karte hain. `__repr__` developer ke liye unambiguous representation, jo console aur debugging mein dikhta hai, ideally aisa ki usse object dobara ban sake: `Cable('5 Core', 4500)`. `__str__` na ho to Python `__repr__` use karta hai."
+  },
+  {
+   "q": "Generator kya hai aur yield vs return?",
+   "a": "Generator `yield` se ek-ek value lazily deta hai, poori list memory mein nahi banata. `yield` function ko pause karke value deta hai aur agli baar wahin se resume karta hai; `return` function khatam kar deta hai. Badi files padhne aur ML training mein data batches dene ke liye ideal. Generator sirf ek baar iterate hota hai."
+  },
+  {
+   "q": "Decorator kya hai? Ek real use batao.",
+   "a": "Decorator ek function hai jo doosre function ko leke uske upar wrapper lagata hai aur naya function return karta hai, asli code badle bina. `@timer` likhna = `func = timer(func)`. Use: logging, execution time naapna, auth check, retry, caching (`@functools.lru_cache`). `functools.wraps` se original naam/docstring bachte hain."
+  },
+  {
+   "q": "scikit-learn ka fit/predict design OOP se kaise juda hai?",
+   "a": "Har model ek class hai; `model = LinearRegression()` object banata hai. `fit(X, y)` data se seekhi values object ke attributes mein store karta hai (`coef_`, `intercept_`), aur `predict(X)` unhi ko use karta hai. Sab models same interface follow karte hain (polymorphism), isliye ek model ko doosre se badalna ek line ka kaam hai."
+  }
+ ]
+}

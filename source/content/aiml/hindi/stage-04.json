@@ -1,0 +1,1061 @@
+{
+ "n": 4,
+ "id": "aiml-04",
+ "title": "List, Tuple, Set और Dict",
+ "goal": "List, tuple, set और dict में data रखना, बदलना, ढूँढना और गिनना सीखोगे; list of dicts को mini dataset की तरह filter/group करोगे, comprehensions लिखोगे, और समझोगे कि कौन सा डिब्बा कब और क्यों fast है।",
+ "lessons": [
+  {
+   "title": "List — एक डिब्बा, कई चीज़ें",
+   "blocks": [
+    [
+     "p",
+     "अब तक एक variable में **एक value** थी। लेकिन GEEP के 50 cable products के नाम रखने हों तो 50 variables बनाओगे? नहीं। इसके लिए **list** है।"
+    ],
+    [
+     "p",
+     "**List** = items का **ordered collection**। Ordered मतलब जिस order में डाला, उसी order में रहता है। Square bracket `[ ]` और items के बीच comma।"
+    ],
+    [
+     "analogy",
+     "List एक train जैसी है: हर डिब्बे (item) का एक नंबर है, और डिब्बे लाइन में जुड़े हैं। नया डिब्बा पीछे जोड़ सकते हो, बीच से निकाल भी सकते हो।"
+    ],
+    [
+     "code",
+     "python",
+     "cables = [\"5 Core\", \"3 Core\", \"Fiber\", \"XLPE\"]\nprint(cables[0])\nprint(cables[-1])\nprint(len(cables))",
+     "5 Core\nXLPE\n4"
+    ],
+    [
+     "sketch",
+     {
+      "k": "array",
+      "title": "cables की indexing",
+      "items": [
+       "5 Core",
+       "3 Core",
+       "Fiber",
+       "XLPE"
+      ],
+      "index": true
+     }
+    ],
+    [
+     "p",
+     "Index **0 से** शुरू होता है। Negative index पीछे से गिनता है: `-1` = आख़िरी, `-2` = second last। 0 से क्यों? क्योंकि index का मतलब है \"शुरू से कितना दूर\"; पहला item 0 दूर है।"
+    ],
+    [
+     "p",
+     "**Slicing** = list का एक टुकड़ा। `list[start:stop]` — start शामिल, stop **शामिल नहीं**।"
+    ],
+    [
+     "code",
+     "python",
+     "nums = [10, 20, 30, 40, 50]\nprint(nums[1:3])\nprint(nums[:2])\nprint(nums[2:])\nprint(nums[::-1])",
+     "[20, 30]\n[10, 20]\n[30, 40, 50]\n[50, 40, 30, 20, 10]"
+    ],
+    [
+     "tip",
+     "ध्यान से देखो: `nums[1:3]` में index 1 और 2 आए, 3 नहीं। `[::-1]` = पूरी list उल्टी। IQ में यह trick बहुत पूछते हैं।"
+    ],
+    [
+     "p",
+     "**Mutable** = बदल सकती है। String में `s[0] = \"x\"` error देता था, list में चलता है।"
+    ],
+    [
+     "code",
+     "python",
+     "cables = [\"5 Core\", \"3 Core\", \"Fiber\"]\ncables[1] = \"4 Core\"\ncables.append(\"PVC\")\ncables.insert(0, \"2 Core\")\nprint(cables)\ncables.remove(\"Fiber\")\nlast = cables.pop()\nprint(last)\nprint(cables)",
+     "['2 Core', '5 Core', '4 Core', 'Fiber', 'PVC']\nPVC\n['2 Core', '5 Core', '4 Core']"
+    ],
+    [
+     "list",
+     [
+      "`append(x)` = end में एक item",
+      "`insert(i, x)` = index i पर item",
+      "`extend([..])` = end में कई items अलग-अलग",
+      "`remove(x)` = value से पहला match हटाओ",
+      "`pop()` / `pop(i)` = index से हटाओ और item वापस दो"
+     ]
+    ],
+    [
+     "code",
+     "python",
+     "a = [1, 2]\na.append([3, 4])\nprint(a)\nb = [1, 2]\nb.extend([3, 4])\nprint(b)",
+     "[1, 2, [3, 4]]\n[1, 2, 3, 4]"
+    ],
+    [
+     "warn",
+     "आम गलती (IQ trap): `append([3, 4])` पूरी list को **एक item** बना देता है। अलग-अलग जोड़ना हो तो `extend`।"
+    ],
+    [
+     "code",
+     "python",
+     "nums = [5, 1, 4, 1]\nprint(nums.count(1), nums.index(4), 4 in nums)\nnew = sorted(nums)\nprint(new, nums)\nx = nums.sort()\nprint(x, nums)",
+     "2 2 True\n[1, 1, 4, 5] [5, 1, 4, 1]\nNone [1, 1, 4, 5]"
+    ],
+    [
+     "warn",
+     "आम गलती: `x = nums.sort()` लिखा तो `x` में **None** आएगा। `.sort()` original list को ही बदल देता है और कुछ return नहीं करता। नई list चाहिए तो `sorted(nums)`।"
+    ],
+    [
+     "code",
+     "python",
+     "prices = [100, 250, 400]\nfor i, p in enumerate(prices):\n    print(i, p)\nprint(\"Total:\", sum(prices))",
+     "0 100\n1 250\n2 400\nTotal: 750"
+    ],
+    [
+     "code",
+     "python",
+     "a = [1, 2, 3]\nb = a\nb.append(4)\nprint(a)\nc = a.copy()\nc.append(99)\nprint(a, c)",
+     "[1, 2, 3, 4]\n[1, 2, 3, 4] [1, 2, 3, 4, 99]"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "b = a copy नहीं है",
+      "steps": [
+       "a",
+       "वही list [1,2,3]",
+       "b"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "tip",
+     "`b = a` नया डिब्बा नहीं बनाता, सिर्फ़ **उसी list का दूसरा नाम** रखता है (जैसे एक घर के दो address)। असली copy: `a.copy()`, `a[:]` या `list(a)`।"
+    ]
+   ]
+  },
+  {
+   "title": "Tuple और Set — fix data और unique data",
+   "blocks": [
+    [
+     "p",
+     "**Tuple** = list जैसा ordered collection, लेकिन **immutable** — एक बार बना, फिर बदल नहीं सकता। गोल bracket `( )`।"
+    ],
+    [
+     "analogy",
+     "Tuple = पक्की छपी हुई marksheet। पढ़ सकते हो, लेकिन नंबर बदल नहीं सकते। List = pencil से लिखा rough page।"
+    ],
+    [
+     "code",
+     "python",
+     "point = (10, 20)\nprint(point[0])\ntry:\n    point[0] = 50\nexcept TypeError as e:\n    print(\"Error:\", e)",
+     "10\nError: 'tuple' object does not support item assignment"
+    ],
+    [
+     "p",
+     "**क्यों चाहिए?** जो data बदलना ही नहीं चाहिए (GPS coordinates, RGB color, database की एक row, config) उसे tuple में रखो। गलती से बदलेगा ही नहीं। Tuple थोड़ा **fast** और कम memory वाला भी है, और **dict की key** बन सकता है (list नहीं बन सकती)।"
+    ],
+    [
+     "code",
+     "python",
+     "x = (5)\ny = (5,)\nprint(type(x), type(y))",
+     "<class 'int'> <class 'tuple'>"
+    ],
+    [
+     "warn",
+     "आम गलती: एक item का tuple बनाना हो तो **comma ज़रूरी** है: `(5,)`। सिर्फ़ `(5)` तो बस नंबर 5 है।"
+    ],
+    [
+     "p",
+     "**Unpacking** = tuple की values सीधे अलग variables में। यह Python में हर जगह दिखेगा, ML code में भी (`X_train, X_test = ...`)।"
+    ],
+    [
+     "code",
+     "python",
+     "point = (10, 20)\nx, y = point\nprint(x, y)\na, b = 1, 2\na, b = b, a\nprint(a, b)\n\ndef min_max(nums):\n    return min(nums), max(nums)\n\nlow, high = min_max([4, 9, 2])\nprint(low, high)",
+     "10 20\n2 1\n2 9"
+    ],
+    [
+     "tip",
+     "Function जब `return a, b` करता है तो असल में एक **tuple** return होता है, और हम उसे unpack कर लेते हैं। Swap `a, b = b, a` भी tuple unpacking ही है।"
+    ],
+    [
+     "p",
+     "**Set** = सिर्फ़ **unique** items का collection, **कोई order नहीं**। Curly bracket `{ }`। Duplicates अपने आप हट जाते हैं।"
+    ],
+    [
+     "code",
+     "python",
+     "codes = [101, 102, 101, 103, 102]\nunique = set(codes)\nprint(unique)\nprint(len(unique))\nunique.add(104)\nunique.discard(101)\nprint(sorted(unique))",
+     "{101, 102, 103}\n3\n[102, 103, 104]"
+    ],
+    [
+     "p",
+     "Set के maths वाले काम — \"किन customers ने दोनों महीने order किया?\" जैसे सवाल एक line में:"
+    ],
+    [
+     "code",
+     "python",
+     "jan = {\"Rahul\", \"Neha\", \"Amit\"}\nfeb = {\"Neha\", \"Amit\", \"Priya\"}\nprint(sorted(jan & feb))\nprint(sorted(jan | feb))\nprint(sorted(feb - jan))\nprint(sorted(jan ^ feb))",
+     "['Amit', 'Neha']\n['Amit', 'Neha', 'Priya', 'Rahul']\n['Priya']\n['Priya', 'Rahul']"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Set operations",
+      "head": [
+       "Op",
+       "मतलब",
+       "Result"
+      ],
+      "rows": [
+       [
+        "a & b",
+        "दोनों में common",
+        "Neha, Amit"
+       ],
+       [
+        "a | b",
+        "दोनों के सब",
+        "4 नाम"
+       ],
+       [
+        "b - a",
+        "b में, a में नहीं",
+        "Priya"
+       ],
+       [
+        "a ^ b",
+        "सिर्फ़ एक में",
+        "Rahul, Priya"
+       ]
+      ]
+     }
+    ],
+    [
+     "tip",
+     "ध्यान से देखो: मैंने set को `sorted()` करके print किया। Set का order fix नहीं होता, इसलिए text वाले set का print order हर बार अलग आ सकता है।"
+    ],
+    [
+     "warn",
+     "आम गलती: `x = {}` **खाली set नहीं**, खाली **dict** है। खाली set: `set()`। और set में index नहीं होता: `s[0]` error देगा।"
+    ],
+    [
+     "p",
+     "**Where (ML में):** एक column की unique categories निकालना (`set(cities)`), duplicate rows हटाना, दो datasets के common IDs ढूँढना, vocabulary बनाना (unique words)।"
+    ]
+   ]
+  },
+  {
+   "title": "Dictionary — नाम से value ढूँढो",
+   "blocks": [
+    [
+     "p",
+     "List में index से ढूँढते हो: `cables[47]`। लेकिन याद कैसे रखोगे कि 47 पर क्या है? **Dictionary** में **नाम (key)** से ढूँढते हो।"
+    ],
+    [
+     "analogy",
+     "Phone की contact list: \"Anna\" search करो, नंबर मिल गया। यह याद नहीं रखना कि Anna contact नंबर 47 पर है। या GEEP का item code: code बोलो, पूरी cable की detail मिल जाए।"
+    ],
+    [
+     "p",
+     "**Dictionary (dict)** = `key: value` pairs का collection। Keys **unique** होती हैं। Python 3.7+ में dict insertion order याद रखता है।"
+    ],
+    [
+     "code",
+     "python",
+     "cable = {\n    \"name\": \"5 Core Cable\",\n    \"size\": \"16 sqmm\",\n    \"price\": 4500,\n    \"in_stock\": True\n}\nprint(cable[\"name\"])\nprint(cable[\"price\"])\nprint(len(cable))",
+     "5 Core Cable\n4500\n4"
+    ],
+    [
+     "sketch",
+     {
+      "k": "boxes",
+      "title": "dict = key → value",
+      "items": [
+       {
+        "label": "name",
+        "value": "\"5 Core Cable\""
+       },
+       {
+        "label": "size",
+        "value": "\"16 sqmm\""
+       },
+       {
+        "label": "price",
+        "value": "4500"
+       },
+       {
+        "label": "in_stock",
+        "value": "True"
+       }
+      ]
+     }
+    ],
+    [
+     "p",
+     "**CRUD** = Create, Read, Update, Delete। Dict में चारों एक-एक line के हैं:"
+    ],
+    [
+     "code",
+     "python",
+     "user = {\"name\": \"Akash\", \"age\": 25, \"city\": \"Bhiwadi\"}\nuser[\"email\"] = \"a@x.com\"   # नई key = add\nuser[\"age\"] = 26            # पुरानी key = update\ndel user[\"city\"]            # delete\nremoved = user.pop(\"email\")\nprint(user)\nprint(removed)",
+     "{'name': 'Akash', 'age': 26}\na@x.com"
+    ],
+    [
+     "p",
+     "जो key है ही नहीं, उसे `[ ]` से माँगोगे तो **KeyError** और program crash। Safe तरीका `.get()`:"
+    ],
+    [
+     "code",
+     "python",
+     "user = {\"name\": \"Akash\"}\nprint(user.get(\"phone\"))\nprint(user.get(\"phone\", \"N/A\"))\nprint(\"name\" in user, \"phone\" in user)",
+     "None\nN/A\nTrue False"
+    ],
+    [
+     "tip",
+     "Real code में, जहाँ key हो भी सकती है और नहीं भी (जैसे API का JSON), `.get(key, default)` use करो। `in` सिर्फ़ **keys** check करता है, values नहीं।"
+    ],
+    [
+     "code",
+     "python",
+     "cable = {\"name\": \"5 Core\", \"price\": 4500, \"stock\": 12}\nfor key in cable:\n    print(key)\nfor key, value in cable.items():\n    print(f\"{key}: {value}\")\nprint(list(cable.values()))",
+     "name\nprice\nstock\nname: 5 Core\nprice: 4500\nstock: 12\n['5 Core', 4500, 12]"
+    ],
+    [
+     "p",
+     "`.keys()` = सिर्फ़ keys, `.values()` = सिर्फ़ values, `.items()` = दोनों (key, value) tuple बनकर।"
+    ],
+    [
+     "p",
+     "**IQ का सबसे famous सवाल: counting।** \"हर word कितनी बार आया?\" — NLP और ML में यही पहला step होता है (word frequency)।"
+    ],
+    [
+     "code",
+     "python",
+     "text = \"cable pass cable fail cable pass\"\ncount = {}\nfor word in text.split():\n    count[word] = count.get(word, 0) + 1\nprint(count)",
+     "{'cable': 3, 'pass': 2, 'fail': 1}"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "count.get(word, 0) + 1",
+      "head": [
+       "word",
+       "पहले",
+       "बाद"
+      ],
+      "rows": [
+       [
+        "cable",
+        "0",
+        "1"
+       ],
+       [
+        "pass",
+        "0",
+        "1"
+       ],
+       [
+        "cable",
+        "1",
+        "2"
+       ],
+       [
+        "fail",
+        "0",
+        "1"
+       ],
+       [
+        "cable",
+        "2",
+        "3"
+       ],
+       [
+        "pass",
+        "1",
+        "2"
+       ]
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "from collections import Counter\nc = Counter(\"cable pass cable fail cable pass\".split())\nprint(c.most_common(2))",
+     "[('cable', 3), ('pass', 2)]"
+    ],
+    [
+     "warn",
+     "आम गलती: dict की key **mutable नहीं** हो सकती। `{[1, 2]: \"x\"}` TypeError (unhashable type: list) देगा। Key के लिए str, int या tuple use करो।"
+    ],
+    [
+     "code",
+     "python",
+     "try:\n    d = {[1, 2]: \"x\"}\nexcept TypeError as e:\n    print(type(e).__name__)\nd = {(28.2, 76.8): \"Bhiwadi\"}\nprint(d[(28.2, 76.8)])",
+     "TypeError\nBhiwadi"
+    ]
+   ]
+  },
+  {
+   "title": "Nested data और comprehensions — mini dataset",
+   "blocks": [
+    [
+     "p",
+     "असली दुनिया का data (API, database, CSV) अक्सर **list of dicts** बनकर आता है। हर dict = एक **row**, हर key = एक **column**। यही एक mini dataset है — आगे Pandas DataFrame भी इसी तरह सोचा जाता है।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "List of dicts = table",
+      "head": [
+       "name",
+       "city",
+       "amount"
+      ],
+      "rows": [
+       [
+        "Rahul",
+        "Delhi",
+        "50000"
+       ],
+       [
+        "Neha",
+        "Jaipur",
+        "20000"
+       ],
+       [
+        "Amit",
+        "Delhi",
+        "35000"
+       ]
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "leads = [\n    {\"name\": \"Rahul\", \"city\": \"Delhi\", \"amount\": 50000},\n    {\"name\": \"Neha\", \"city\": \"Jaipur\", \"amount\": 20000},\n    {\"name\": \"Amit\", \"city\": \"Delhi\", \"amount\": 35000},\n]\nprint(leads[0][\"name\"])\nprint(len(leads))\nfor lead in leads:\n    if lead[\"city\"] == \"Delhi\":\n        print(lead[\"name\"], lead[\"amount\"])",
+     "Rahul\n3\nRahul 50000\nAmit 35000"
+    ],
+    [
+     "tip",
+     "ध्यान से देखो: `leads[0]` = पहली row (dict), फिर `[\"name\"]` = उस row का column। बाहर से अंदर की तरफ़ पढ़ो।"
+    ],
+    [
+     "p",
+     "**Group by** — हर city का total amount। Pandas का `groupby` भी अंदर यही करता है:"
+    ],
+    [
+     "code",
+     "python",
+     "leads = [\n    {\"name\": \"Rahul\", \"city\": \"Delhi\", \"amount\": 50000},\n    {\"name\": \"Neha\", \"city\": \"Jaipur\", \"amount\": 20000},\n    {\"name\": \"Amit\", \"city\": \"Delhi\", \"amount\": 35000},\n]\ntotal_by_city = {}\nfor lead in leads:\n    city = lead[\"city\"]\n    total_by_city[city] = total_by_city.get(city, 0) + lead[\"amount\"]\nprint(total_by_city)\nbiggest = max(leads, key=lambda l: l[\"amount\"])\nprint(biggest[\"name\"])\nby_amount = sorted(leads, key=lambda l: l[\"amount\"], reverse=True)\nprint([l[\"name\"] for l in by_amount])",
+     "{'Delhi': 85000, 'Jaipur': 20000}\nRahul\n['Rahul', 'Amit', 'Neha']"
+    ],
+    [
+     "p",
+     "`key=lambda l: l[\"amount\"]` का मतलब: \"हर row को उसके amount से compare करो\"। `lambda` एक छोटा बिना-नाम का function है (Stage 3 याद करो)।"
+    ],
+    [
+     "p",
+     "**List comprehension** = loop + append को एक line में लिखना। ऐसे पढ़ो: \"**यह करो**, **हर x के लिए** जो list में है, **अगर** condition सही हो\"।"
+    ],
+    [
+     "code",
+     "python",
+     "squares = []\nfor x in range(5):\n    squares.append(x * x)\nprint(squares)\n\nsquares = [x * x for x in range(5)]\nprint(squares)\nevens = [x for x in range(10) if x % 2 == 0]\nprint(evens)\nlabels = [\"PASS\" if v >= 500 else \"FAIL\" for v in [520, 480, 610]]\nprint(labels)",
+     "[0, 1, 4, 9, 16]\n[0, 1, 4, 9, 16]\n[0, 2, 4, 6, 8]\n['PASS', 'FAIL', 'PASS']"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Comprehension पढ़ने का तरीका",
+      "steps": [
+       "x * x (यह करो)",
+       "for x in nums",
+       "if x > 0 (filter)"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "**Dict comprehension** और **set comprehension** भी होते हैं:"
+    ],
+    [
+     "code",
+     "python",
+     "names = [\"Rahul\", \"Neha\", \"Amit\"]\nlengths = {n: len(n) for n in names}\nprint(lengths)\nprices = {\"5 Core\": 4500, \"3 Core\": 3000}\nwith_gst = {k: round(v * 1.18) for k, v in prices.items()}\nprint(with_gst)\ncities = {l for l in [\"Delhi\", \"Jaipur\", \"Delhi\"]}\nprint(len(cities))",
+     "{'Rahul': 5, 'Neha': 4, 'Amit': 4}\n{'5 Core': 5310, '3 Core': 3540}\n2"
+    ],
+    [
+     "p",
+     "**ML से connection:** model को numbers चाहिए। List of dicts से एक column निकालना या features की list बनाना — सब comprehension से होता है:"
+    ],
+    [
+     "code",
+     "python",
+     "rows = [\n    {\"size\": 16, \"cores\": 5, \"price\": 4500},\n    {\"size\": 10, \"cores\": 3, \"price\": 2600},\n]\nX = [[r[\"size\"], r[\"cores\"]] for r in rows]\ny = [r[\"price\"] for r in rows]\nprint(X)\nprint(y)",
+     "[[16, 5], [10, 3]]\n[4500, 2600]"
+    ],
+    [
+     "warn",
+     "आम गलती: बहुत लंबी, 3-3 `for` वाली comprehension मत लिखो। पढ़ने में मुश्किल हो जाए तो normal `for` loop ही बेहतर है। Code इंसान के लिए भी लिखते हैं।"
+    ]
+   ]
+  },
+  {
+   "title": "सही डिब्बा चुनो + Big-O की समझ",
+   "blocks": [
+    [
+     "p",
+     "चारों डिब्बों का फ़र्क एक table में (book से):"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "List vs Tuple vs Set vs Dict",
+      "head": [
+       "",
+       "Order",
+       "Duplicate",
+       "बदलाव"
+      ],
+      "rows": [
+       [
+        "List [ ]",
+        "हाँ",
+        "हाँ",
+        "हाँ"
+       ],
+       [
+        "Tuple ( )",
+        "हाँ",
+        "हाँ",
+        "नहीं"
+       ],
+       [
+        "Set { }",
+        "नहीं",
+        "नहीं",
+        "हाँ"
+       ],
+       [
+        "Dict {k:v}",
+        "हाँ",
+        "Key नहीं",
+        "हाँ"
+       ]
+      ]
+     }
+    ],
+    [
+     "list",
+     [
+      "Items की line चाहिए, order ज़रूरी → **List**",
+      "नाम/ID से ढूँढना है → **Dict**",
+      "Duplicates हटाने हैं, या तेज़ 'है या नहीं' check → **Set**",
+      "Data fix रहना चाहिए, या dict key चाहिए → **Tuple**"
+     ]
+    ],
+    [
+     "p",
+     "अब एक गहरी बात जो IQ में पूछी जाती है: **list में ढूँढना slow क्यों, और set/dict में fast क्यों?**"
+    ],
+    [
+     "analogy",
+     "List = बिना register वाली दुकान। \"5 Core cable है?\" — दुकानदार एक-एक shelf देखेगा। 10 लाख items हों तो 10 लाख shelf। Set/Dict = register वाली दुकान: code देखा, सीधा shelf नंबर पता, एक second में जवाब।"
+    ],
+    [
+     "p",
+     "**Big-O** बताता है कि data बढ़ने पर काम कितना बढ़ता है। List में `x in list` = **O(n)** (n items तो n तक check)। Set/dict में `x in set` = average **O(1)** (constant), क्योंकि वे **hashing** use करते हैं: key से एक नंबर (hash) बनता है जो सीधा उसकी जगह बताता है।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "chart",
+      "title": "Lookup का काम vs data size",
+      "type": "line",
+      "points": [
+       [
+        1,
+        1
+       ],
+       [
+        2,
+        2
+       ],
+       [
+        3,
+        3
+       ],
+       [
+        4,
+        4
+       ],
+       [
+        5,
+        5
+       ]
+      ],
+      "line": [
+       [
+        0,
+        1
+       ],
+       [
+        5,
+        1
+       ]
+      ],
+      "xl": "items (n)",
+      "yl": "steps"
+     }
+    ],
+    [
+     "p",
+     "ऊपर chart में points = list (सीधी line ऊपर जाती है, O(n)); flat line = set/dict (O(1))।"
+    ],
+    [
+     "code",
+     "python",
+     "print(hash(\"5 Core\") == hash(\"5 Core\"))\nprint(hash(42))",
+     "True\n42"
+    ],
+    [
+     "p",
+     "Same value का hash हमेशा same होता है, इसलिए set/dict सीधा उस जगह पर पहुँच जाते हैं। इसी वजह से **key immutable** होनी चाहिए — बदल गई तो hash बदल जाएगा और dict उसे ढूँढ ही नहीं पाएगा।"
+    ],
+    [
+     "code",
+     "python",
+     "import time\nbig_list = list(range(1_000_000))\nbig_set = set(big_list)\nt = time.perf_counter(); _ = 999_999 in big_list; t_list = time.perf_counter() - t\nt = time.perf_counter(); _ = 999_999 in big_set; t_set = time.perf_counter() - t\nprint(f\"list: {t_list:.6f}s, set: {t_set:.6f}s\")",
+     ""
+    ],
+    [
+     "p",
+     "इसे चलाओ तो list वाला time set से **हज़ारों गुना ज़्यादा** आएगा (exact नंबर हर machine पर अलग होता है, इसलिए output यहाँ नहीं लिखा)।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Common Big-O",
+      "head": [
+       "काम",
+       "List",
+       "Set/Dict"
+      ],
+      "rows": [
+       [
+        "x in ...",
+        "O(n)",
+        "O(1)"
+       ],
+       [
+        "index/key से लेना",
+        "O(1)",
+        "O(1)"
+       ],
+       [
+        "end में add",
+        "O(1)",
+        "O(1)"
+       ],
+       [
+        "शुरू में insert",
+        "O(n)",
+        "-"
+       ]
+      ]
+     }
+    ],
+    [
+     "tip",
+     "Real tip: अगर loop के अंदर बार-बार `if x in badi_list` लिख रहे हो, तो पहले `badi_set = set(badi_list)` बना लो। Code तुरंत तेज़ हो जाएगा। IQ में यह optimization बोलना बहुत impress करता है।"
+    ],
+    [
+     "code",
+     "python",
+     "blocked = [\"u7\", \"u9\", \"u3\"]\nusers = [\"u1\", \"u3\", \"u5\", \"u9\"]\nblocked_set = set(blocked)\nallowed = [u for u in users if u not in blocked_set]\nprint(allowed)",
+     "['u1', 'u5']"
+    ],
+    [
+     "warn",
+     "आम गलती: set का order मान के चलना। Order चाहिए तो list रखो या `sorted(set)` करो। और `list(set(nums))` duplicates तो हटा देगा, लेकिन order बिगड़ सकता है; order बचाना हो तो `list(dict.fromkeys(nums))`।"
+    ],
+    [
+     "code",
+     "python",
+     "nums = [3, 1, 3, 2, 1]\nprint(list(dict.fromkeys(nums)))",
+     "[3, 1, 2]"
+    ]
+   ]
+  }
+ ],
+ "teach": [
+  {
+   "say": "सोचो 50 cables के नाम रखने हैं। 50 variables? नहीं। एक list बनाओ — एक train जिसमें हर डिब्बा एक item।",
+   "sketch": {
+    "k": "array",
+    "items": [
+     "5 Core",
+     "3 Core",
+     "Fiber",
+     "XLPE"
+    ],
+    "index": true
+   },
+   "code": "cables = [\"5 Core\", \"3 Core\", \"Fiber\", \"XLPE\"]"
+  },
+  {
+   "say": "Index zero से शुरू। Minus one मतलब आख़िरी। और slicing में stop वाला index शामिल नहीं होता।",
+   "sketch": {
+    "k": "array",
+    "items": [
+     "10",
+     "20",
+     "30",
+     "40",
+     "50"
+    ],
+    "index": true
+   },
+   "code": "nums[1:3]  # [20, 30]\nnums[-1]   # 50"
+  },
+  {
+   "say": "List बदल सकती है: append end में जोड़ता है, pop end से निकालता है। लेकिन ध्यान: b = a copy नहीं, उसी list का दूसरा नाम है।",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "a",
+     "[1, 2, 3]",
+     "b"
+    ],
+    "dir": "h"
+   },
+   "code": "b = a        # वही list\nc = a.copy() # असली copy"
+  },
+  {
+   "say": "Tuple list जैसा है पर पक्का लिखा हुआ — बदल नहीं सकते। Fix data के लिए, और unpacking में बहुत काम आता है।",
+   "sketch": {
+    "k": "compare",
+    "left": {
+     "title": "List",
+     "items": [
+      "[ ]",
+      "बदल सकते",
+      "dict key नहीं"
+     ]
+    },
+    "right": {
+     "title": "Tuple",
+     "items": [
+      "( )",
+      "बदल नहीं सकते",
+      "dict key बन सकता"
+     ]
+    }
+   },
+   "code": "x, y = (10, 20)\na, b = b, a"
+  },
+  {
+   "say": "Set सिर्फ़ unique चीज़ें रखता है। Duplicate अपने आप गायब। और common निकालना हो तो and वाला निशान।",
+   "sketch": {
+    "k": "table",
+    "head": [
+     "Op",
+     "मतलब"
+    ],
+    "rows": [
+     [
+      "a & b",
+      "common"
+     ],
+     [
+      "a | b",
+      "सब"
+     ],
+     [
+      "a - b",
+      "सिर्फ़ a में"
+     ]
+    ]
+   },
+   "code": "set([1, 1, 2])  # {1, 2}\njan & feb"
+  },
+  {
+   "say": "Dictionary में index नहीं, नाम से ढूँढते हैं। Key बोलो, value लो। बिल्कुल phone contact जैसा।",
+   "sketch": {
+    "k": "boxes",
+    "items": [
+     {
+      "label": "name",
+      "value": "\"Akash\""
+     },
+     {
+      "label": "age",
+      "value": "25"
+     },
+     {
+      "label": "city",
+      "value": "\"Bhiwadi\""
+     }
+    ]
+   },
+   "code": "user[\"name\"]\nuser.get(\"phone\", \"N/A\")"
+  },
+  {
+   "say": "Counting का pattern याद कर लो: अभी तक की गिनती दो, नहीं है तो zero, फिर plus one। IQ में पक्का आता है।",
+   "sketch": {
+    "k": "cycle",
+    "steps": [
+     "word लो",
+     "get(word, 0)",
+     "+1 करके रखो"
+    ]
+   },
+   "code": "count[w] = count.get(w, 0) + 1"
+  },
+  {
+   "say": "Real data list of dicts होता है: हर dict एक row, हर key एक column। यही तुम्हारा पहला mini dataset है।",
+   "sketch": {
+    "k": "table",
+    "head": [
+     "name",
+     "city",
+     "amount"
+    ],
+    "rows": [
+     [
+      "Rahul",
+      "Delhi",
+      "50000"
+     ],
+     [
+      "Neha",
+      "Jaipur",
+      "20000"
+     ]
+    ]
+   },
+   "code": "for row in leads:\n    print(row[\"name\"])"
+  },
+  {
+   "say": "Comprehension मतलब loop और append एक line में: यह करो, हर x के लिए, अगर condition सही हो।",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "x * x",
+     "for x in nums",
+     "if x > 0"
+    ],
+    "dir": "h"
+   },
+   "code": "[x * x for x in nums if x > 0]"
+  },
+  {
+   "say": "आख़िरी बात: list में ढूँढना एक-एक shelf देखना है, O(n)। Set और dict register जैसे हैं, सीधा जगह पर, O(1)। बड़ी list में बार-बार ढूँढना हो तो set बनाओ।",
+   "sketch": {
+    "k": "compare",
+    "left": {
+     "title": "List lookup",
+     "items": [
+      "O(n)",
+      "एक-एक check",
+      "बड़े data पर slow"
+     ]
+    },
+    "right": {
+     "title": "Set/Dict lookup",
+     "items": [
+      "O(1) average",
+      "hashing",
+      "बहुत fast"
+     ]
+    }
+   },
+   "code": null
+  }
+ ],
+ "practice": [
+  {
+   "q": "Word frequency counter (NLP का पहला step)। दिए गए `text` में हर word कितनी बार आया, dict में गिनो। फिर सबसे ज़्यादा आने वाले top 3 words `word: count` format में print करो (ज़्यादा count पहले; count बराबर हो तो alphabetical order)।",
+   "starter": "text = \"the cable is good the cable is cheap the price is good\"\ncount = {}\n# TODO: हर word को split करके count.get(word, 0) + 1 से गिनो\n\n# TODO: items को (-count, word) से sort करो और top 3 print करो\n",
+   "hint": "sorted(count.items(), key=lambda kv: (-kv[1], kv[0]))[:3]",
+   "solution": "text = \"the cable is good the cable is cheap the price is good\"\ncount = {}\nfor word in text.split():\n    count[word] = count.get(word, 0) + 1\ntop = sorted(count.items(), key=lambda kv: (-kv[1], kv[0]))[:3]\nfor word, c in top:\n    print(f\"{word}: {c}\")",
+   "expect": "is: 3\nthe: 3\ncable: 2"
+  },
+  {
+   "q": "Mini dataset: `employees` एक list of dicts है। हर city की **average salary** निकालो (group by) और city के alphabetical order में `city: avg` print करो (avg को round करके int)। आख़िरी line में सबसे ज़्यादा salary वाले का नाम print करो।",
+   "starter": "employees = [\n    {\"name\": \"Rahul\", \"city\": \"Delhi\", \"salary\": 40000},\n    {\"name\": \"Neha\", \"city\": \"Jaipur\", \"salary\": 35000},\n    {\"name\": \"Amit\", \"city\": \"Delhi\", \"salary\": 52000},\n    {\"name\": \"Priya\", \"city\": \"Bhiwadi\", \"salary\": 30000},\n    {\"name\": \"Karan\", \"city\": \"Jaipur\", \"salary\": 41000},\n]\ntotals = {}\ncounts = {}\n# TODO: हर employee के लिए city का total और count बढ़ाओ\n\n# TODO: sorted(totals) पर loop करके average print करो\n\n# TODO: max(..., key=lambda e: e[\"salary\"]) से top earner\n",
+   "hint": "totals[c] = totals.get(c, 0) + e[\"salary\"]; counts[c] = counts.get(c, 0) + 1; avg = round(totals[c] / counts[c])",
+   "solution": "employees = [\n    {\"name\": \"Rahul\", \"city\": \"Delhi\", \"salary\": 40000},\n    {\"name\": \"Neha\", \"city\": \"Jaipur\", \"salary\": 35000},\n    {\"name\": \"Amit\", \"city\": \"Delhi\", \"salary\": 52000},\n    {\"name\": \"Priya\", \"city\": \"Bhiwadi\", \"salary\": 30000},\n    {\"name\": \"Karan\", \"city\": \"Jaipur\", \"salary\": 41000},\n]\ntotals = {}\ncounts = {}\nfor e in employees:\n    c = e[\"city\"]\n    totals[c] = totals.get(c, 0) + e[\"salary\"]\n    counts[c] = counts.get(c, 0) + 1\nfor c in sorted(totals):\n    print(f\"{c}: {round(totals[c] / counts[c])}\")\ntop = max(employees, key=lambda e: e[\"salary\"])\nprint(\"Top:\", top[\"name\"])",
+   "expect": "Bhiwadi: 30000\nDelhi: 46000\nJaipur: 38000\nTop: Amit"
+  },
+  {
+   "q": "Sets के साथ customer analysis। `jan` और `feb` में orders की customer IDs हैं (duplicates भी)। Print करो (हर line sorted list):\n1. Jan के unique customers की गिनती\n2. दोनों महीने वाले customers\n3. Feb के नए customers (जो Jan में नहीं थे)\n4. जो Jan में थे पर Feb में नहीं आए (churn)",
+   "starter": "jan = [\"c1\", \"c2\", \"c3\", \"c2\", \"c4\", \"c1\"]\nfeb = [\"c2\", \"c4\", \"c5\", \"c6\", \"c5\"]\n# TODO: दोनों को set में बदलो\n\n# TODO: len, &, और - use करके 4 lines print करो\n",
+   "hint": "a = set(jan); b = set(feb); print(sorted(a & b))",
+   "solution": "jan = [\"c1\", \"c2\", \"c3\", \"c2\", \"c4\", \"c1\"]\nfeb = [\"c2\", \"c4\", \"c5\", \"c6\", \"c5\"]\na = set(jan)\nb = set(feb)\nprint(len(a))\nprint(sorted(a & b))\nprint(sorted(b - a))\nprint(sorted(a - b))",
+   "expect": "4\n['c2', 'c4']\n['c5', 'c6']\n['c1', 'c3']"
+  }
+ ],
+ "quiz": [
+  {
+   "q": "`nums = [10, 20, 30, 40]` हो तो `nums[1:3]` क्या देगा?",
+   "o": [
+    "[10, 20, 30]",
+    "[20, 30]",
+    "[20, 30, 40]",
+    "[10, 20]"
+   ],
+   "a": 1,
+   "why": "Start index 1 शामिल, stop index 3 शामिल नहीं: index 1 और 2 = [20, 30]।"
+  },
+  {
+   "q": "`a = [1, 2]; b = a; b.append(3); print(a)` का output?",
+   "o": [
+    "[1, 2]",
+    "[3]",
+    "Error",
+    "[1, 2, 3]"
+   ],
+   "a": 3,
+   "why": "`b = a` copy नहीं बनाता; दोनों उसी list को point करते हैं, इसलिए a भी बदल गई।"
+  },
+  {
+   "q": "`x = nums.sort()` के बाद `x` में क्या होगा?",
+   "o": [
+    "None",
+    "Sorted list",
+    "Original list",
+    "Error"
+   ],
+   "a": 0,
+   "why": "`.sort()` list को in-place बदलता है और None return करता है। नई list के लिए `sorted()`।"
+  },
+  {
+   "q": "एक item का tuple कैसे बनेगा?",
+   "o": [
+    "(5)",
+    "[5]",
+    "(5,)",
+    "{5}"
+   ],
+   "a": 2,
+   "why": "Comma से tuple बनता है; `(5)` सिर्फ़ नंबर 5 है।"
+  },
+  {
+   "q": "`{}` क्या बनाता है?",
+   "o": [
+    "खाली set",
+    "खाली dict",
+    "खाली tuple",
+    "Error"
+   ],
+   "a": 1,
+   "why": "खाली curly brackets = dict। खाली set के लिए `set()`।"
+  },
+  {
+   "q": "`{1, 2, 3} & {2, 3, 4}` का result?",
+   "o": [
+    "{1, 2, 3, 4}",
+    "{1, 4}",
+    "{1}",
+    "{2, 3}"
+   ],
+   "a": 3,
+   "why": "`&` intersection है: दोनों में common items।"
+  },
+  {
+   "q": "Dict में missing key safe तरीके से कैसे पढ़ेंगे?",
+   "o": [
+    "d.get(\"k\", 0)",
+    "d[\"k\"]",
+    "d.find(\"k\")",
+    "d.key(\"k\")"
+   ],
+   "a": 0,
+   "why": "`.get()` key न हो तो error की जगह None या दिया हुआ default देता है।"
+  },
+  {
+   "q": "इनमें से कौन सा dict की key **नहीं** बन सकता?",
+   "o": [
+    "\"name\"",
+    "42",
+    "[1, 2]",
+    "(1, 2)"
+   ],
+   "a": 2,
+   "why": "List mutable है, इसलिए unhashable; dict key immutable (hashable) होनी चाहिए।"
+  },
+  {
+   "q": "`[x * 2 for x in range(4) if x % 2 == 1]` का result?",
+   "o": [
+    "[0, 2, 4, 6]",
+    "[2, 6]",
+    "[1, 3]",
+    "[0, 4]"
+   ],
+   "a": 1,
+   "why": "Odd x = 1 और 3; double करके [2, 6]।"
+  },
+  {
+   "q": "10 लाख IDs में बार-बार 'यह ID है या नहीं' check करना है। सबसे तेज़ क्या?",
+   "o": [
+    "List",
+    "Tuple",
+    "Set",
+    "String"
+   ],
+   "a": 2,
+   "why": "Set hashing use करता है: membership check average O(1), list में O(n)।"
+  }
+ ],
+ "iq": [
+  {
+   "q": "List और tuple में क्या फ़र्क है? कब क्या use करोगे?",
+   "a": "List mutable है (बदल सकते हो), tuple immutable। Tuple थोड़ा fast और कम memory वाला है, और hashable होने की वजह से dict key या set item बन सकता है। बदलने वाला data list में (products की list), fix data tuple में (coordinates, DB row, function से multiple return values)।"
+  },
+  {
+   "q": "Python list, set और dict में lookup की time complexity क्या है और क्यों?",
+   "a": "`x in list` O(n) है क्योंकि एक-एक item check होता है। Set और dict hash table पर बने हैं, इसलिए `x in set` और `d[key]` average O(1) हैं: key का hash सीधा उसकी जगह बताता है। Worst case (बहुत collisions) O(n) हो सकता है, पर practically rare है।"
+  },
+  {
+   "q": "append और extend में क्या फ़र्क है?",
+   "a": "`append(x)` x को एक single item की तरह end में जोड़ता है, चाहे x list ही क्यों न हो: `[1,2].append([3,4])` → `[1, 2, [3, 4]]`। `extend(iterable)` हर item अलग-अलग जोड़ता है → `[1, 2, 3, 4]`।"
+  },
+  {
+   "q": "sort() और sorted() में फ़र्क?",
+   "a": "`list.sort()` original list को in-place sort करता है और None return करता है; सिर्फ़ list पर चलता है। `sorted(iterable)` नई sorted list return करता है, original वैसी ही रहती है, और किसी भी iterable (tuple, set, dict keys) पर चलता है। दोनों `key=` और `reverse=` लेते हैं।"
+  },
+  {
+   "q": "Shallow copy और deep copy क्या है?",
+   "a": "`b = a` copy ही नहीं, उसी object का नया नाम है। `a.copy()` या `a[:]` shallow copy है: बाहर की list नई, लेकिन अंदर की nested lists वही objects। `copy.deepcopy(a)` अंदर तक सब नया बनाता है। Nested data (list of lists/dicts) में deepcopy चाहिए ताकि original न बदले।"
+  },
+  {
+   "q": "Dict की key mutable क्यों नहीं हो सकती?",
+   "a": "Dict key का hash निकालकर value की जगह तय करता है। अगर key बदल जाए तो hash बदल जाएगा और dict उसे ढूँढ नहीं पाएगा। इसलिए key hashable (immutable) होनी चाहिए: str, int, float, tuple (अगर अंदर भी immutable हो)। List या dict key देने पर `TypeError: unhashable type`।"
+  },
+  {
+   "q": "List से duplicates कैसे हटाओगे, order बचाते हुए?",
+   "a": "Order ज़रूरी नहीं: `list(set(nums))`। Order बचाना हो: `list(dict.fromkeys(nums))`, क्योंकि dict insertion order याद रखता है और keys unique होती हैं। या एक `seen` set के साथ loop चलाकर।"
+  },
+  {
+   "q": "String में हर character/word की frequency कैसे निकालोगे?",
+   "a": "Dict के साथ: `for w in words: count[w] = count.get(w, 0) + 1`। या `collections.Counter(words)`, जो `most_common(n)` भी देता है। यह NLP में bag-of-words और vocabulary बनाने का base है।"
+  },
+  {
+   "q": "List comprehension क्या है, और कब use नहीं करनी चाहिए?",
+   "a": "एक line में loop + optional filter से नई list बनाना: `[x*x for x in nums if x > 0]`। Normal loop + append से छोटा और थोड़ा fast है। लेकिन जब logic complex हो, nested loops 2 से ज़्यादा हों, या side effects (print, file write) हों, तब normal loop ज़्यादा readable है।"
+  },
+  {
+   "q": "Generator expression और list comprehension में क्या फ़र्क है?",
+   "a": "`[x*x for x in nums]` पूरी list memory में तुरंत बनाता है। `(x*x for x in nums)` generator है जो एक-एक value माँगने पर बनाता है, इसलिए बड़े data पर memory बचती है। `sum(x*x for x in nums)` जैसा लिखना common है। Generator सिर्फ़ एक बार iterate होता है।"
+  },
+  {
+   "q": "ML में raw data को list of dicts से features (X) और labels (y) में कैसे बदलोगे?",
+   "a": "हर row dict है, तो comprehension से: `X = [[r[\"size\"], r[\"cores\"]] for r in rows]` और `y = [r[\"price\"] for r in rows]`। X एक 2D list (rows x features) बन जाता है जो बाद में NumPy array या Pandas DataFrame में जाता है। Missing values के लिए `r.get(\"size\", 0)` जैसा default।"
+  }
+ ]
+}

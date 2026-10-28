@@ -1,0 +1,1068 @@
+{
+ "n": 8,
+ "id": "aiml-08",
+ "title": "NumPy & Pandas",
+ "goal": "You will learn fast maths with NumPy arrays (shape, indexing, broadcasting) and how to load, filter, clean, group and merge CSV data with Pandas, which is the first job in every ML project.",
+ "lessons": [
+  {
+   "title": "Why NumPy? List vs Array",
+   "blocks": [
+    [
+     "p",
+     "So far we have used Python's **list**. A list is fine, but when you have to do maths on **lakhs of numbers**, a list is **slow**. In AI/ML the data is always big: one photo = lakhs of pixels, one dataset = thousands of rows."
+    ],
+    [
+     "p",
+     "**NumPy** (Numerical Python) is a library that keeps numbers in an **array**. Arrays are built in the C language, so they are **50-100 times faster** than lists."
+    ],
+    [
+     "analogy",
+     "List = goods in separate bags, you open each bag and check it. NumPy array = a factory conveyor belt, all the same kind of goods in one line, and the machine works on all of them at once."
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "List vs NumPy array",
+      "left": {
+       "title": "List",
+       "items": [
+        "any types mixed",
+        "needs a loop",
+        "slow",
+        "not made for math"
+       ]
+      },
+      "right": {
+       "title": "NumPy array",
+       "items": [
+        "one type only",
+        "no loop",
+        "very fast",
+        "made for math"
+       ]
+      }
+     }
+    ],
+    [
+     "p",
+     "The biggest point: **vectorization**. It means one operation on the whole array in a single line, **without a loop**. Look carefully at the difference between a list and an array:"
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\nprices = [100, 200, 300]\nprint([p * 2 for p in prices])   # list: we needed a loop\n\narr = np.array([100, 200, 300])\nprint(arr * 2)                    # numpy: direct",
+     "[200, 400, 600]\n[200 400 600]"
+    ],
+    [
+     "warn",
+     "Common mistake: if you do `prices * 2` on a list, the list gets **repeated twice** `[100, 200, 300, 100, 200, 300]`, it is not multiplied. Multiplication only happens on a NumPy array."
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\nprint([1, 2, 3] * 2)\nprint(np.array([1, 2, 3]) * 2)",
+     "[1, 2, 3, 1, 2, 3]\n[2 4 6]"
+    ],
+    [
+     "p",
+     "A small speed test. Squaring one million numbers, list vs NumPy:"
+    ],
+    [
+     "code",
+     "python",
+     "import time\nimport numpy as np\n\nnums = list(range(1_000_000))\nt = time.time(); [x * x for x in nums]; print(\"list:\", time.time() - t)\n\narr = np.arange(1_000_000)\nt = time.time(); arr * arr; print(\"numpy:\", time.time() - t)",
+     ""
+    ],
+    [
+     "p",
+     "The time will be different on every computer, but NumPy usually comes out **many times faster** (for example list 0.05 sec, NumPy 0.002 sec)."
+    ],
+    [
+     "p",
+     "**Ways to create an array** (always import with `import numpy as np`):"
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\nprint(np.array([1, 2, 3]))\nprint(np.zeros(3))\nprint(np.ones(3))\nprint(np.arange(0, 10, 2))\nprint(np.linspace(0, 1, 5))",
+     "[1 2 3]\n[0. 0. 0.]\n[1. 1. 1.]\n[0 2 4 6 8]\n[0.   0.25 0.5  0.75 1.  ]"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Tools to create arrays",
+      "head": [
+       "Function",
+       "What it gives"
+      ],
+      "rows": [
+       [
+        "np.array(list)",
+        "array from a list"
+       ],
+       [
+        "np.zeros(n)",
+        "all 0"
+       ],
+       [
+        "np.ones(n)",
+        "all 1"
+       ],
+       [
+        "np.arange(a,b,s)",
+        "like range"
+       ],
+       [
+        "np.linspace(a,b,n)",
+        "n equal points"
+       ]
+      ]
+     }
+    ],
+    [
+     "p",
+     "Every array has a **dtype** (what type of numbers are inside). In one array everything has the same type, and that is why it is fast."
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\na = np.array([1, 2, 3])\nb = np.array([1.5, 2, 3])\nprint(a.dtype)\nprint(b.dtype)\nprint(b)",
+     "int64\nfloat64\n[1.5 2.  3. ]"
+    ],
+    [
+     "tip",
+     "Look carefully: even one decimal made the whole array float (`2` → `2.`). NumPy converts everything to one type."
+    ],
+    [
+     "p",
+     "Why does it matter? In `model.fit(X, y)`, X and y are NumPy arrays. Images are arrays, embeddings are arrays. **No NumPy = no ML.**"
+    ]
+   ]
+  },
+  {
+   "title": "Shape, indexing, broadcasting",
+   "blocks": [
+    [
+     "p",
+     "**shape** tells you how big an array is: how many rows, how many columns. In ML this is the **most checked** thing."
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\na = np.array([10, 20, 30, 40])\nb = np.array([[1, 2, 3],\n              [4, 5, 6]])\nprint(a.shape)\nprint(b.shape)\nprint(b.ndim)\nprint(b.size)",
+     "(4,)\n(2, 3)\n2\n6"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "shape of b (2, 3)",
+      "head": [
+       "",
+       "col 0",
+       "col 1",
+       "col 2"
+      ],
+      "rows": [
+       [
+        "row 0",
+        "1",
+        "2",
+        "3"
+       ],
+       [
+        "row 1",
+        "4",
+        "5",
+        "6"
+       ]
+      ]
+     }
+    ],
+    [
+     "p",
+     "`(4,)` = 1D array, 4 elements. `(2, 3)` = 2 rows, 3 columns. `ndim` = how many dimensions, `size` = total elements."
+    ],
+    [
+     "p",
+     "**reshape** = same data, only the shape changes. Like 12 laddoos in one line, or in 3 boxes of 4 each. `-1` means: \"NumPy, work it out yourself\" (12 elements, 2 rows → 6 columns)."
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\nc = np.arange(12)\nprint(c.reshape(3, 4))\nprint(c.reshape(2, -1).shape)",
+     "[[ 0  1  2  3]\n [ 4  5  6  7]\n [ 8  9 10 11]]\n(2, 6)"
+    ],
+    [
+     "warn",
+     "Common mistake: `np.arange(12).reshape(5, 3)` gives an error, because 5 x 3 = 15, while there are only 12 elements. The total size must stay the same."
+    ],
+    [
+     "p",
+     "**Indexing and slicing** work just like a list, in 2D you use `[row, col]`:"
+    ],
+    [
+     "sketch",
+     {
+      "k": "array",
+      "title": "a = [10, 20, 30, 40, 50]",
+      "items": [
+       "10",
+       "20",
+       "30",
+       "40",
+       "50"
+      ],
+      "index": true
+     }
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\na = np.array([10, 20, 30, 40, 50])\nprint(a[0], a[-1])\nprint(a[1:4])\n\nm = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])\nprint(m[1, 2])\nprint(m[:, 0])    # all rows, column 0\nprint(m[0, :])    # row 0, all columns",
+     "10 50\n[20 30 40]\n6\n[1 4 7]\n[1 2 3]"
+    ],
+    [
+     "p",
+     "**Boolean mask** = filtering with a condition. First every element gets True/False, then only the True ones come out. The same trick works in Pandas too."
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\nmarks = np.array([15, 82, 43, 91, 67])\nprint(marks > 50)\nprint(marks[marks > 50])\nprint(marks[(marks > 40) & (marks < 90)])",
+     "[False  True False  True  True]\n[82 91 67]\n[82 43 67]"
+    ],
+    [
+     "warn",
+     "Common mistake: for two conditions use `&`, not `and`, and put each condition in brackets."
+    ],
+    [
+     "p",
+     "**Broadcasting** = a small array automatically \"spreads\" to the size of the big array. This way the maths happens on every row at once."
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\nm = np.array([[1, 2, 3],\n              [4, 5, 6]])\nprint(m + 10)\nprint(m * np.array([1, 10, 100]))",
+     "[[11 12 13]\n [14 15 16]]\n[[  1  20 300]\n [  4  50 600]]"
+    ],
+    [
+     "analogy",
+     "Like when the teacher says \"5 bonus marks for everyone\", nobody has to tell each student separately. One number applied to the whole class, that is broadcasting."
+    ],
+    [
+     "p",
+     "**Aggregates** = one summary number for the whole data. `axis=0` = column-wise (top to bottom), `axis=1` = row-wise (left to right)."
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\nm = np.array([[1, 2, 3],\n              [4, 5, 6]])\nprint(m.sum())\nprint(m.sum(axis=0))\nprint(m.sum(axis=1))\nprint(m.mean(), m.max(), m.min())\nprint(np.array([3, 9, 4]).argmax())",
+     "21\n[5 7 9]\n[ 6 15]\n3.5 6 1\n1"
+    ],
+    [
+     "tip",
+     "`argmax` gives the **index** of the max value, not the value. In ML a model gives probabilities for 3 classes `[0.1, 0.7, 0.2]`, so `argmax` = 1 = predicted class."
+    ],
+    [
+     "p",
+     "**Random numbers with seed**: in ML, the data split and the weights are all random. Fix the **seed** and you get the same random numbers every time, so the result can be repeated."
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\nrng = np.random.default_rng(42)\nprint(rng.integers(1, 7, size=5))   # roll a dice 5 times\n\nrng = np.random.default_rng(42)\nprint(rng.integers(1, 7, size=5))   # same seed = same numbers",
+     "[1 5 4 3 3]\n[1 5 4 3 3]"
+    ]
+   ]
+  },
+  {
+   "title": "Pandas: Series, DataFrame, CSV",
+   "blocks": [
+    [
+     "p",
+     "NumPy is for numbers. But real data also has names, cities and dates, and we need column names too. For that we use **Pandas**."
+    ],
+    [
+     "analogy",
+     "Pandas = **Excel** inside Python. DataFrame = an Excel sheet (rows + columns). Series = one column of the sheet."
+    ],
+    [
+     "sketch",
+     {
+      "k": "tree",
+      "title": "Pandas' 2 main boxes",
+      "root": {
+       "label": "Pandas",
+       "children": [
+        {
+         "label": "Series (1 column)",
+         "children": []
+        },
+        {
+         "label": "DataFrame (table)",
+         "children": []
+        }
+       ]
+      }
+     }
+    ],
+    [
+     "code",
+     "python",
+     "import pandas as pd\n\ns = pd.Series([30000, 45000, 40000], index=[\"Akash\", \"Ravi\", \"Neha\"])\nprint(s[\"Ravi\"])\nprint(s.mean())\nprint(s.tolist())",
+     "45000\n38333.333333333336\n[30000, 45000, 40000]"
+    ],
+    [
+     "p",
+     "Series = values + **index** (labels). You can get a value directly by its index, like getting a value by key in a dict."
+    ],
+    [
+     "p",
+     "A **DataFrame** is made from a dict: key = column name, value = list."
+    ],
+    [
+     "code",
+     "python",
+     "import pandas as pd\n\ndata = {\n    \"name\": [\"Akash\", \"Ravi\", \"Neha\"],\n    \"age\": [25, 30, 28],\n    \"salary\": [30000, 45000, 40000],\n}\ndf = pd.DataFrame(data)\nprint(df.shape)\nprint(df.columns.tolist())\nprint(df[\"salary\"].sum())",
+     "(3, 3)\n['name', 'age', 'salary']\n115000"
+    ],
+    [
+     "p",
+     "In real work data comes from a **CSV file**: `pd.read_csv(\"data.csv\")`. We have no file here, so we turn text into something **like a file** with `io.StringIO`. It works exactly the same."
+    ],
+    [
+     "code",
+     "python",
+     "import io\nimport pandas as pd\n\ncsv_text = \"\"\"name,age,city,salary\nAkash,25,Bhiwadi,30000\nRavi,30,Delhi,45000\nNeha,28,Jaipur,40000\nSimran,35,Delhi,60000\n\"\"\"\ndf = pd.read_csv(io.StringIO(csv_text))\nprint(df.shape)\nprint(df.columns.tolist())\nprint(df[\"age\"].mean())",
+     "(4, 4)\n['name', 'age', 'city', 'salary']\n29.5"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "df (from CSV)",
+      "head": [
+       "name",
+       "age",
+       "city",
+       "salary"
+      ],
+      "rows": [
+       [
+        "Akash",
+        "25",
+        "Bhiwadi",
+        "30000"
+       ],
+       [
+        "Ravi",
+        "30",
+        "Delhi",
+        "45000"
+       ],
+       [
+        "Neha",
+        "28",
+        "Jaipur",
+        "40000"
+       ],
+       [
+        "Simran",
+        "35",
+        "Delhi",
+        "60000"
+       ]
+      ]
+     }
+    ],
+    [
+     "p",
+     "**When you get new data, first run these commands** (their output is a table, so here we only give the list):"
+    ],
+    [
+     "list",
+     [
+      "`df.shape` → how many rows, how many columns",
+      "`df.head()` → see the first 5 rows",
+      "`df.info()` → columns, types, null count",
+      "`df.describe()` → mean, std, min, max in one shot",
+      "`df.isna().sum()` → how many missing in each column",
+      "`df.dtypes` → type of each column"
+     ]
+    ],
+    [
+     "p",
+     "**Choosing columns**: one column = `df[\"col\"]` (Series), several columns = `df[[\"a\", \"b\"]]` (DataFrame, double bracket)."
+    ],
+    [
+     "code",
+     "python",
+     "import io\nimport pandas as pd\n\ncsv_text = \"\"\"name,age,city,salary\nAkash,25,Bhiwadi,30000\nRavi,30,Delhi,45000\nNeha,28,Jaipur,40000\nSimran,35,Delhi,60000\n\"\"\"\ndf = pd.read_csv(io.StringIO(csv_text))\nprint(df[\"name\"].tolist())\nprint(df[[\"name\", \"city\"]].shape)",
+     "['Akash', 'Ravi', 'Neha', 'Simran']\n(4, 2)"
+    ],
+    [
+     "warn",
+     "Common mistake: `df[\"name\", \"city\"]` (single bracket) gives an error. For several columns pass a list: `df[[\"name\", \"city\"]]`."
+    ],
+    [
+     "p",
+     "**loc vs iloc** — a favourite IQ question:"
+    ],
+    [
+     "sketch",
+     {
+      "k": "compare",
+      "title": "loc vs iloc",
+      "left": {
+       "title": "loc",
+       "items": [
+        "by label / name",
+        "df.loc[0, \"name\"]",
+        "slice end included"
+       ]
+      },
+      "right": {
+       "title": "iloc",
+       "items": [
+        "by position number",
+        "df.iloc[0, 0]",
+        "slice end excluded"
+       ]
+      }
+     }
+    ],
+    [
+     "code",
+     "python",
+     "import io\nimport pandas as pd\n\ncsv_text = \"\"\"name,age,city,salary\nAkash,25,Bhiwadi,30000\nRavi,30,Delhi,45000\nNeha,28,Jaipur,40000\nSimran,35,Delhi,60000\n\"\"\"\ndf = pd.read_csv(io.StringIO(csv_text))\nprint(df.loc[1, \"name\"])\nprint(df.iloc[1, 0])\nprint(df.loc[0:2, \"name\"].tolist())   # 0,1,2 all three\nprint(df.iloc[0:2, 0].tolist())       # only 0,1",
+     "Ravi\nRavi\n['Akash', 'Ravi', 'Neha']\n['Akash', 'Ravi']"
+    ],
+    [
+     "tip",
+     "Look carefully: `loc[0:2]` also gave 2, `iloc[0:2]` did not. `iloc` works like a Python list, `loc` works like labels."
+    ],
+    [
+     "p",
+     "**Filtering** is just the NumPy boolean mask:"
+    ],
+    [
+     "code",
+     "python",
+     "import io\nimport pandas as pd\n\ncsv_text = \"\"\"name,age,city,salary\nAkash,25,Bhiwadi,30000\nRavi,30,Delhi,45000\nNeha,28,Jaipur,40000\nSimran,35,Delhi,60000\n\"\"\"\ndf = pd.read_csv(io.StringIO(csv_text))\nprint(df[df[\"age\"] > 27][\"name\"].tolist())\nprint(df[df[\"city\"] == \"Delhi\"][\"salary\"].sum())\nprint(df[(df[\"age\"] > 26) & (df[\"salary\"] < 50000)][\"name\"].tolist())",
+     "['Ravi', 'Neha', 'Simran']\n105000\n['Ravi', 'Neha']"
+    ],
+    [
+     "tip",
+     "To filter by several values use `isin`: `df[df[\"city\"].isin([\"Delhi\", \"Jaipur\"])]`."
+    ]
+   ]
+  },
+  {
+   "title": "Missing values and data cleaning",
+   "blocks": [
+    [
+     "p",
+     "Real data is **dirty**: empty cells, duplicate rows, wrong spellings, extra spaces. In ML **80% of the time** goes into cleaning data. Dirty data = dirty model (**garbage in, garbage out**)."
+    ],
+    [
+     "analogy",
+     "Like copper is cleaned before making a cable. If dirt is left, the whole cable is bad. Data cleaning is that same cleaning."
+    ],
+    [
+     "p",
+     "In the data below, Ravi's salary is empty, Neha's age is empty, Ravi appears twice, and Simran's dept is ` ai ` (space + lowercase)."
+    ],
+    [
+     "code",
+     "python",
+     "import io\nimport pandas as pd\n\ncsv_text = \"\"\"name,dept,salary,age\nAkash,AI,30000,25\nRavi,Backend,,30\nNeha,AI,40000,\nRavi,Backend,,30\nSimran, ai ,60000,35\n\"\"\"\ndf = pd.read_csv(io.StringIO(csv_text))\nprint(df.shape)\nprint(df.isna().sum().to_dict())",
+     "(5, 4)\n{'name': 0, 'dept': 0, 'salary': 2, 'age': 1}"
+    ],
+    [
+     "p",
+     "An empty cell becomes **NaN** (Not a Number) in Pandas. `isna()` gives True/False for every cell, and `.sum()` counts the Trues."
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Treating missing values",
+      "steps": [
+       "isna().sum()",
+       "understand why",
+       "fillna or dropna",
+       "check again"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "**Two ways**: (1) `dropna()` = remove the rows that have NaN. (2) `fillna(value)` = put some value in place of NaN (mean, median, 0, \"Unknown\")."
+    ],
+    [
+     "code",
+     "python",
+     "import io\nimport pandas as pd\n\ncsv_text = \"\"\"name,dept,salary,age\nAkash,AI,30000,25\nRavi,Backend,,30\nNeha,AI,40000,\nRavi,Backend,,30\nSimran, ai ,60000,35\n\"\"\"\ndf = pd.read_csv(io.StringIO(csv_text))\nprint(len(df.dropna()))\nprint(len(df.dropna(subset=[\"salary\"])))\n\ndf[\"age\"] = df[\"age\"].fillna(df[\"age\"].median())\nprint(df[\"age\"].tolist())",
+     "2\n3\n[25.0, 30.0, 30.0, 30.0, 35.0]"
+    ],
+    [
+     "tip",
+     "Which one when? If very few rows have NaN, drop them. If many do, fill them, or too little data will be left. For numbers the median is safe, because one big outlier pulls the mean."
+    ],
+    [
+     "warn",
+     "Common mistake: `df[\"age\"].fillna(0, inplace=True)` does not change the original df in new Pandas. Always assign it back: `df[\"age\"] = df[\"age\"].fillna(0)`."
+    ],
+    [
+     "p",
+     "Remove **duplicates**:"
+    ],
+    [
+     "code",
+     "python",
+     "import io\nimport pandas as pd\n\ncsv_text = \"\"\"name,dept,salary,age\nAkash,AI,30000,25\nRavi,Backend,,30\nNeha,AI,40000,\nRavi,Backend,,30\nSimran, ai ,60000,35\n\"\"\"\ndf = pd.read_csv(io.StringIO(csv_text))\nprint(df.duplicated().sum())\ndf = df.drop_duplicates()\nprint(len(df))",
+     "1\n4"
+    ],
+    [
+     "p",
+     "**Clean the text**: with `.str` a string function is applied to every value."
+    ],
+    [
+     "code",
+     "python",
+     "import io\nimport pandas as pd\n\ncsv_text = \"\"\"name,dept,salary,age\nAkash,AI,30000,25\nRavi,Backend,,30\nNeha,AI,40000,\nRavi,Backend,,30\nSimran, ai ,60000,35\n\"\"\"\ndf = pd.read_csv(io.StringIO(csv_text))\ndf[\"dept\"] = df[\"dept\"].str.strip().str.upper()\nprint(df[\"dept\"].unique().tolist())",
+     "['AI', 'BACKEND']"
+    ],
+    [
+     "p",
+     "Making **new columns** is vectorized, no loop:"
+    ],
+    [
+     "code",
+     "python",
+     "import io\nimport pandas as pd\n\ncsv_text = \"\"\"name,dept,salary,age\nAkash,AI,30000,25\nRavi,Backend,,30\nNeha,AI,40000,\nRavi,Backend,,30\nSimran, ai ,60000,35\n\"\"\"\ndf = pd.read_csv(io.StringIO(csv_text))\ndf[\"salary\"] = df[\"salary\"].fillna(0)\ndf[\"bonus\"] = df[\"salary\"] * 0.10\nprint(df[\"bonus\"].tolist())",
+     "[3000.0, 0.0, 4000.0, 0.0, 6000.0]"
+    ],
+    [
+     "p",
+     "**apply** = run your own function on every value. Use it when simple maths cannot do the job."
+    ],
+    [
+     "code",
+     "python",
+     "import io\nimport pandas as pd\n\ncsv_text = \"\"\"name,dept,salary,age\nAkash,AI,30000,25\nRavi,Backend,,30\nNeha,AI,40000,\nRavi,Backend,,30\nSimran, ai ,60000,35\n\"\"\"\ndf = pd.read_csv(io.StringIO(csv_text))\ndf[\"age\"] = df[\"age\"].fillna(28)\ndf[\"level\"] = df[\"age\"].apply(lambda a: \"Senior\" if a >= 30 else \"Junior\")\nprint(df[\"level\"].tolist())",
+     "['Junior', 'Senior', 'Junior', 'Senior', 'Senior']"
+    ],
+    [
+     "tip",
+     "First think of the vectorized way (`df[\"a\"] * 2`), it is fast. `apply` is a loop inside, so it is slow; use it only when needed."
+    ],
+    [
+     "p",
+     "**Changing type**: `df[\"age\"] = df[\"age\"].astype(int)` (only after filling NaN, otherwise error)."
+    ]
+   ]
+  },
+  {
+   "title": "groupby, merge, sort and the full workflow",
+   "blocks": [
+    [
+     "p",
+     "**groupby** = a summary by category. \"What is the average salary of each department?\" Same as SQL's `GROUP BY` (remember Stage 6)."
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "What groupby does inside",
+      "steps": [
+       "Split (by dept)",
+       "Apply (mean)",
+       "Combine (result)"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "code",
+     "python",
+     "import pandas as pd\n\ndf = pd.DataFrame({\n    \"name\": [\"Akash\", \"Ravi\", \"Neha\", \"Simran\", \"Aman\"],\n    \"dept\": [\"AI\", \"Backend\", \"AI\", \"Backend\", \"AI\"],\n    \"salary\": [30000, 45000, 40000, 60000, 50000],\n})\nprint(df.groupby(\"dept\")[\"salary\"].mean().to_dict())\nprint(df.groupby(\"dept\")[\"name\"].count().to_dict())",
+     "{'AI': 40000.0, 'Backend': 52500.0}\n{'AI': 3, 'Backend': 2}"
+    ],
+    [
+     "analogy",
+     "Like sorting a shop's goods into separate boxes (Split), counting the total of each box (Apply), then writing it all in one register (Combine)."
+    ],
+    [
+     "p",
+     "Many summaries at once with **agg**:"
+    ],
+    [
+     "code",
+     "python",
+     "import pandas as pd\n\ndf = pd.DataFrame({\n    \"name\": [\"Akash\", \"Ravi\", \"Neha\", \"Simran\", \"Aman\"],\n    \"dept\": [\"AI\", \"Backend\", \"AI\", \"Backend\", \"AI\"],\n    \"salary\": [30000, 45000, 40000, 60000, 50000],\n})\nres = df.groupby(\"dept\")[\"salary\"].agg([\"mean\", \"max\", \"count\"])\nprint(res.loc[\"AI\", \"mean\"])\nprint(res.loc[\"Backend\", \"max\"])\nprint(res.shape)",
+     "40000.0\n60000\n(2, 3)"
+    ],
+    [
+     "p",
+     "**value_counts** = how many times each value appears. Used a lot in classification to check class balance."
+    ],
+    [
+     "code",
+     "python",
+     "import pandas as pd\n\ndf = pd.DataFrame({\n    \"name\": [\"Akash\", \"Ravi\", \"Neha\", \"Simran\", \"Aman\"],\n    \"dept\": [\"AI\", \"Backend\", \"AI\", \"Backend\", \"AI\"],\n    \"salary\": [30000, 45000, 40000, 60000, 50000],\n})\nprint(df[\"dept\"].value_counts().to_dict())",
+     "{'AI': 3, 'Backend': 2}"
+    ],
+    [
+     "p",
+     "**Sorting**:"
+    ],
+    [
+     "code",
+     "python",
+     "import pandas as pd\n\ndf = pd.DataFrame({\n    \"name\": [\"Akash\", \"Ravi\", \"Neha\", \"Simran\", \"Aman\"],\n    \"dept\": [\"AI\", \"Backend\", \"AI\", \"Backend\", \"AI\"],\n    \"salary\": [30000, 45000, 40000, 60000, 50000],\n})\ntop = df.sort_values(\"salary\", ascending=False)\nprint(top[\"name\"].tolist())\nprint(df.nlargest(2, \"salary\")[\"name\"].tolist())",
+     "['Simran', 'Aman', 'Ravi', 'Neha', 'Akash']\n['Simran', 'Aman']"
+    ],
+    [
+     "p",
+     "**merge** = joining two tables by a common column, exactly like SQL JOIN."
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Meaning of how=",
+      "head": [
+       "how",
+       "What it keeps"
+      ],
+      "rows": [
+       [
+        "inner",
+        "only matches in both"
+       ],
+       [
+        "left",
+        "all rows of left"
+       ],
+       [
+        "right",
+        "all rows of right"
+       ],
+       [
+        "outer",
+        "everything"
+       ]
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "import pandas as pd\n\nemp = pd.DataFrame({\"name\": [\"A\", \"B\", \"C\"], \"dept_id\": [101, 102, 104]})\ndept = pd.DataFrame({\"dept_id\": [101, 102, 103], \"dept_name\": [\"AI\", \"Backend\", \"HR\"]})\n\ninner = pd.merge(emp, dept, on=\"dept_id\", how=\"inner\")\nleft = pd.merge(emp, dept, on=\"dept_id\", how=\"left\")\nprint(len(inner), len(left))\nprint(left[\"dept_name\"].isna().sum())",
+     "2 3\n1"
+    ],
+    [
+     "tip",
+     "In the left join, C's dept 104 is not in the dept table, so its `dept_name` came out as NaN. After a merge always check `len()` and NaN."
+    ],
+    [
+     "p",
+     "**Saving**: `df.to_csv(\"clean.csv\", index=False)`. If you skip `index=False`, an extra column of row numbers is created."
+    ],
+    [
+     "p",
+     "**The full cleaning workflow** (follow this order whenever you get a new dataset):"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Data cleaning workflow",
+      "steps": [
+       "Load",
+       "Inspect",
+       "Clean NaN/dup",
+       "Fix types/text",
+       "Features",
+       "Save"
+      ],
+      "dir": "v"
+     }
+    ],
+    [
+     "code",
+     "python",
+     "import io\nimport pandas as pd\n\ncsv_text = \"\"\"item,qty,price\nCable,10,250\nWire,,100\nCable,10,250\nSwitch,5,\n\"\"\"\ndf = pd.read_csv(io.StringIO(csv_text))      # 1. load\nprint(df.shape, df.isna().sum().sum())         # 2. inspect\ndf = df.drop_duplicates()                      # 3. duplicates\ndf[\"qty\"] = df[\"qty\"].fillna(0).astype(int)    # 4. NaN + type\ndf[\"price\"] = df[\"price\"].fillna(df[\"price\"].median())\ndf[\"total\"] = df[\"qty\"] * df[\"price\"]          # 5. feature\nprint(df.shape, df[\"total\"].sum())",
+     "(4, 3) 2\n(3, 4) 3375.0"
+    ],
+    [
+     "tip",
+     "This workflow is the direct answer to the IQ question \"how do you clean data?\": load → inspect → missing → duplicates → types → features → save."
+    ]
+   ]
+  }
+ ],
+ "teach": [
+  {
+   "say": "Imagine you have to do maths on a million numbers. With a list loop it will take time. A NumPy array is built in C and works on the whole array at once.",
+   "sketch": {
+    "k": "compare",
+    "left": {
+     "title": "List",
+     "items": [
+      "loop",
+      "slow"
+     ]
+    },
+    "right": {
+     "title": "NumPy",
+     "items": [
+      "vectorized",
+      "fast"
+     ]
+    }
+   },
+   "code": "arr * 2"
+  },
+  {
+   "say": "The shape of an array tells its size. (2, 3) means 2 rows and 3 columns. In ML, always print the shape before giving data to a model.",
+   "sketch": {
+    "k": "table",
+    "head": [
+     "",
+     "c0",
+     "c1",
+     "c2"
+    ],
+    "rows": [
+     [
+      "r0",
+      "1",
+      "2",
+      "3"
+     ],
+     [
+      "r1",
+      "4",
+      "5",
+      "6"
+     ]
+    ]
+   },
+   "code": "print(m.shape)  # (2, 3)"
+  },
+  {
+   "say": "In reshape the data stays the same, only the boxes change. Turn 12 elements into 3 x 4. The total must stay the same.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "12 in a line",
+     "reshape(3, 4)",
+     "3 rows x 4"
+    ],
+    "dir": "h"
+   },
+   "code": "np.arange(12).reshape(3, 4)"
+  },
+  {
+   "say": "A boolean mask for filtering. First True or False for every element, then only the True ones come out.",
+   "sketch": {
+    "k": "array",
+    "items": [
+     "15 F",
+     "82 T",
+     "43 F",
+     "91 T"
+    ],
+    "index": true
+   },
+   "code": "marks[marks > 50]"
+  },
+  {
+   "say": "Broadcasting: a small number or row spreads over the whole array automatically. No loop for each row.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "[[1,2],[3,4]]",
+     "+ 10",
+     "[[11,12],[13,14]]"
+    ],
+    "dir": "h"
+   },
+   "code": "m + 10"
+  },
+  {
+   "say": "Now Pandas. A DataFrame means an Excel sheet inside Python. Every column is a Series.",
+   "sketch": {
+    "k": "table",
+    "head": [
+     "name",
+     "age",
+     "salary"
+    ],
+    "rows": [
+     [
+      "Akash",
+      "25",
+      "30000"
+     ],
+     [
+      "Ravi",
+      "30",
+      "45000"
+     ]
+    ]
+   },
+   "code": "df = pd.read_csv(\"data.csv\")"
+  },
+  {
+   "say": "loc by name, iloc by number. In a loc slice the end is included, in iloc it is not.",
+   "sketch": {
+    "k": "compare",
+    "left": {
+     "title": "loc",
+     "items": [
+      "label",
+      "end included"
+     ]
+    },
+    "right": {
+     "title": "iloc",
+     "items": [
+      "position",
+      "end excluded"
+     ]
+    }
+   },
+   "code": "df.loc[0, \"name\"]\ndf.iloc[0, 0]"
+  },
+  {
+   "say": "Dirty data, dirty model. First count how many are missing, then either remove the row or fill the value.",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "isna().sum()",
+     "dropna / fillna",
+     "check again"
+    ],
+    "dir": "h"
+   },
+   "code": "df[\"age\"] = df[\"age\"].fillna(df[\"age\"].median())"
+  },
+  {
+   "say": "groupby does three jobs: split, apply, combine. Split by department, find the mean of each group, join the results.",
+   "sketch": {
+    "k": "cycle",
+    "steps": [
+     "Split",
+     "Apply",
+     "Combine"
+    ]
+   },
+   "code": "df.groupby(\"dept\")[\"salary\"].mean()"
+  },
+  {
+   "say": "And merge joins two tables by a common column, like SQL JOIN. That's it, now go practice!",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "emp",
+     "+ dept on dept_id",
+     "merged"
+    ],
+    "dir": "h"
+   },
+   "code": "pd.merge(emp, dept, on=\"dept_id\", how=\"left\")"
+  }
+ ],
+ "practice": [
+  {
+   "q": "There is no NumPy on the phone, so do the vectorization job with a list comprehension. In `prices = [100, 250, 400]` add 18% GST to every price (rounded to int), print the list, then print the total and the average (2 decimals):\n[118, 295, 472]\n885\n295.00",
+   "starter": "prices = [100, 250, 400]\n# TODO: each price * 1.18, rounded to int\nwith_gst = []\nprint(with_gst)\n# TODO: print total and average\n",
+   "hint": "with_gst = [round(p * 1.18) for p in prices]; for the average use f\"{x:.2f}\"",
+   "solution": "prices = [100, 250, 400]\nwith_gst = [round(p * 1.18) for p in prices]\nprint(with_gst)\ntotal = sum(with_gst)\nprint(total)\nprint(f\"{total / len(with_gst):.2f}\")",
+   "expect": "[118, 295, 472]\n885\n295.00"
+  },
+  {
+   "q": "Build Pandas' groupby by hand. Read the CSV text with the `csv` module and find the total salary of each dept (print dept names in alphabetical order):\nAI 70000\nBackend 105000",
+   "starter": "import csv, io\n\ntext = \"\"\"name,dept,salary\nAkash,AI,30000\nRavi,Backend,45000\nNeha,AI,40000\nSimran,Backend,60000\n\"\"\"\ntotals = {}\nfor row in csv.DictReader(io.StringIO(text)):\n    # TODO: add salary into totals[dept] (convert to int)\n    pass\n# TODO: print in sorted order\n",
+   "hint": "totals[d] = totals.get(d, 0) + int(row[\"salary\"])",
+   "solution": "import csv, io\n\ntext = \"\"\"name,dept,salary\nAkash,AI,30000\nRavi,Backend,45000\nNeha,AI,40000\nSimran,Backend,60000\n\"\"\"\ntotals = {}\nfor row in csv.DictReader(io.StringIO(text)):\n    d = row[\"dept\"]\n    totals[d] = totals.get(d, 0) + int(row[\"salary\"])\nfor d in sorted(totals):\n    print(d, totals[d])",
+   "expect": "AI 70000\nBackend 105000"
+  },
+  {
+   "q": "Do fillna by hand. In `ages = [25, None, 30, None, 35]` first count the missing ones, then fill None with the mean of the other values:\nmissing: 2\nmean: 30.0\n[25, 30.0, 30, 30.0, 35]",
+   "starter": "ages = [25, None, 30, None, 35]\n# TODO: missing count\n# TODO: mean without None\n# TODO: new list with mean in place of None\n",
+   "hint": "known = [a for a in ages if a is not None]",
+   "solution": "ages = [25, None, 30, None, 35]\nprint(\"missing:\", ages.count(None))\nknown = [a for a in ages if a is not None]\nmean = sum(known) / len(known)\nprint(\"mean:\", mean)\nfilled = [mean if a is None else a for a in ages]\nprint(filled)",
+   "expect": "missing: 2\nmean: 30.0\n[25, 30.0, 30, 30.0, 35]"
+  }
+ ],
+ "quiz": [
+  {
+   "q": "Output of `np.array([1, 2, 3]) * 2`?",
+   "o": [
+    "[1, 2, 3, 1, 2, 3]",
+    "[2 4 6]",
+    "Error",
+    "6"
+   ],
+   "a": 1,
+   "why": "NumPy multiplies element-wise. A list would be repeated."
+  },
+  {
+   "q": "Shape of `np.arange(12).reshape(3, -1)`?",
+   "o": [
+    "(3, 4)",
+    "(4, 3)",
+    "(3, 12)",
+    "Error"
+   ],
+   "a": 0,
+   "why": "-1 means NumPy works it out itself: 12 / 3 = 4."
+  },
+  {
+   "q": "Array `m` has shape (2, 3). What is the shape of `m.sum(axis=0)`?",
+   "o": [
+    "(2,)",
+    "()",
+    "(2, 3)",
+    "(3,)"
+   ],
+   "a": 3,
+   "why": "axis=0 adds top to bottom, one number per column: 3 values."
+  },
+  {
+   "q": "What does `np.array([0.1, 0.7, 0.2]).argmax()` give?",
+   "o": [
+    "0.7",
+    "1",
+    "2",
+    "0"
+   ],
+   "a": 1,
+   "why": "argmax gives the index of the largest value; 0.7 is at index 1."
+  },
+  {
+   "q": "The correct way to combine two conditions in NumPy?",
+   "o": [
+    "a > 1 and a < 5",
+    "(a > 1) and (a < 5)",
+    "(a > 1) & (a < 5)",
+    "a > 1 & a < 5"
+   ],
+   "a": 2,
+   "why": "Arrays use `&`, and each condition goes in brackets, otherwise operator precedence messes things up."
+  },
+  {
+   "q": "How many rows do `df.loc[0:2]` and `df.iloc[0:2]` (default index) give?",
+   "o": [
+    "3 and 2",
+    "2 and 2",
+    "3 and 3",
+    "2 and 3"
+   ],
+   "a": 0,
+   "why": "loc includes the end in a label slice (0,1,2); iloc does not in a position slice (0,1)."
+  },
+  {
+   "q": "How will you see how many missing values each column has?",
+   "o": [
+    "df.count()",
+    "df.isna().sum()",
+    "df.dropna()",
+    "df.describe()"
+   ],
+   "a": 1,
+   "why": "isna() gives True/False, and sum() counts the Trues in each column."
+  },
+  {
+   "q": "The safe way to fill NaN in new Pandas?",
+   "o": [
+    "df[\"a\"].fillna(0, inplace=True)",
+    "df.fillna[\"a\"] = 0",
+    "df[\"a\"] == df[\"a\"].fillna(0)",
+    "df[\"a\"] = df[\"a\"].fillna(0)"
+   ],
+   "a": 3,
+   "why": "inplace on a column does not change the original in new Pandas (copy-on-write); assign the result back."
+  },
+  {
+   "q": "What is `df.groupby(\"dept\")[\"salary\"].mean()` like in SQL?",
+   "o": [
+    "WHERE",
+    "JOIN",
+    "GROUP BY + AVG",
+    "ORDER BY"
+   ],
+   "a": 2,
+   "why": "Split by category and take the average of each group: GROUP BY dept, AVG(salary)."
+  },
+  {
+   "q": "What does `pd.merge(a, b, on=\"id\", how=\"left\")` keep?",
+   "o": [
+    "all rows of a",
+    "only matching rows",
+    "all rows of b",
+    "all rows of both"
+   ],
+   "a": 0,
+   "why": "A left join keeps every row of the left table; if no match is found, NaN."
+  }
+ ],
+ "iq": [
+  {
+   "q": "Why is a NumPy array faster than a Python list?",
+   "a": "In an array all elements have the same type and are stored together in memory (contiguous). Operations run as loops written in C (vectorization), so there is no Python per-element overhead. That is why it is 10-100x faster on big data."
+  },
+  {
+   "q": "What is vectorization?",
+   "a": "One operation on the whole array, without a Python loop: `arr * 2`, `a + b`. The code is short, clean to read, and very fast. In ML code we always prefer vectorized operations over loops."
+  },
+  {
+   "q": "Explain broadcasting.",
+   "a": "When two arrays have different shapes, NumPy virtually stretches the smaller one to the size of the bigger one (without copying). Rule: the trailing dimensions must be equal or one of them must be 1. Example: (3, 4) array + (4,) row = that row is added to every row."
+  },
+  {
+   "q": "Difference between `*` and `@` in NumPy?",
+   "a": "`*` is element-wise multiply (items at the same position are multiplied). `@` is matrix multiplication (dot product of row x column). Neural networks use `X @ W`, not `X * W`."
+  },
+  {
+   "q": "What does -1 mean in reshape?",
+   "a": "NumPy calculates that one dimension itself. `arr.reshape(-1, 1)` turns a 1D array into a 2D array with one column, which is common in scikit-learn for passing a single feature."
+  },
+  {
+   "q": "What is the difference between loc and iloc?",
+   "a": "`loc` selects by label/name and includes the end in a slice. `iloc` selects by integer position and excludes the slice end, like a Python list. Example: `df.loc[0, \"name\"]` vs `df.iloc[0, 0]`."
+  },
+  {
+   "q": "How do you handle missing values?",
+   "a": "First count them with `df.isna().sum()` and understand why they are missing. If few rows, `dropna()`. If many, `fillna()`: median/mean for numeric, mode or \"Unknown\" for categories. Sometimes we also make a \"was_missing\" flag column, and we take the fill value only from the train data so there is no leakage."
+  },
+  {
+   "q": "Difference between Series and DataFrame?",
+   "a": "A Series is a 1D labelled array (one column + index). A DataFrame is a 2D table in which many Series share one common index as columns. `df[\"col\"]` gives a Series, `df[[\"col\"]]` gives a DataFrame."
+  },
+  {
+   "q": "How does groupby work?",
+   "a": "Split-Apply-Combine: split the data into groups by a key, apply a function to each group (mean, sum, count), then combine the results into one table. `df.groupby(\"dept\")[\"salary\"].agg([\"mean\", \"count\"])`."
+  },
+  {
+   "q": "Name the types of merge.",
+   "a": "inner = only rows that match in both; left = all rows of left; right = all rows of right; outer = all rows of both, NaN where there is no match. Just like SQL JOIN. Checking the row count and NaN after a merge is a good habit, because duplicate keys can increase the rows."
+  },
+  {
+   "q": "When will you use apply and when not?",
+   "a": "When the logic cannot be done with simple arithmetic (like custom if-else, text parsing). But apply is a Python loop inside, so it is slow. First try vectorized ops, `np.where`, or `.str` methods."
+  },
+  {
+   "q": "What do you do first when you get a new dataset?",
+   "a": "`df.shape`, `df.head()`, `df.info()`, `df.describe()`, `df.isna().sum()`, `df.duplicated().sum()`, and `value_counts()` of the target column. This gives an idea of size, types, missing values, outliers and class balance, and then the cleaning plan is made."
+  }
+ ]
+}

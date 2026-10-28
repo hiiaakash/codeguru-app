@@ -1,0 +1,1127 @@
+{
+ "n": 11,
+ "id": "aiml-11",
+ "title": "Deep Learning और Neural Networks",
+ "goal": "Neuron से लेकर transformer तक समझोगे: forward pass, loss, gradient descent, backprop, CNN/RNN/attention, PyTorch का training loop, और Hugging Face से pre-trained models इस्तेमाल करना।",
+ "lessons": [
+  {
+   "title": "Neuron — deep learning की ईंट",
+   "blocks": [
+    [
+     "p",
+     "Stage 10 में models को features हम **हाथ से** देते थे। **Deep Learning** में **Neural Network** खुद features सीखता है, सीधे raw data (फोटो के pixels, text, आवाज़) से। इसलिए ChatGPT, face unlock, voice assistant सब deep learning पर चलते हैं।"
+    ],
+    [
+     "p",
+     "Neural network की सबसे छोटी ईंट = **neuron** (या **perceptron**)। काम सिर्फ 3 step का:"
+    ],
+    [
+     "list",
+     [
+      "हर input को उसके **weight** से गुणा करो (weight = input कितना ज़रूरी है)।",
+      "सब जोड़ो और एक **bias** add करो: `z = w1*x1 + w2*x2 + ... + b`।",
+      "`z` को **activation function** से गुज़ारो: `output = f(z)`।"
+     ]
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "एक neuron",
+      "steps": [
+       "Inputs x",
+       "× weights w",
+       "जोड़ + bias",
+       "Activation",
+       "Output"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "analogy",
+     "चाय पर जाऊँ या नहीं? Inputs: थकान (x1), दोस्त आ रहे हैं (x2), बारिश (x3)। हर चीज़ का अलग वज़न: दोस्त = बहुत ज़रूरी (w2 बड़ा), बारिश = उल्टा असर (w3 negative)। Bias = तुम्हारा आदत वाला चाय का शौक। सब जोड़कर threshold पार हुआ तो \"हाँ, चाय!\"। Neuron बिल्कुल ऐसे ही फैसला करता है।"
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\nx = np.array([2.0, 3.0])      # inputs\nw = np.array([0.5, -0.2])     # weights\nb = 0.1                       # bias\n\nz = np.dot(w, x) + b          # 0.5*2 + (-0.2)*3 + 0.1\nout = 1 / (1 + np.exp(-z))    # sigmoid activation\nprint(\"z =\", round(z, 2))\nprint(\"output =\", round(out, 4))",
+     "z = 0.5\noutput = 0.6225"
+    ],
+    [
+     "p",
+     "बस इतना ही! `np.dot` = गुणा करके जोड़ना। Output 0.62 मतलब neuron **62% हाँ** बोल रहा है।"
+    ],
+    [
+     "tip",
+     "ध्यान से देखो: **weights और bias** ही model के **parameters** हैं। Training का मतलब: इन numbers को धीरे-धीरे ऐसे बदलना कि output सही आने लगे। GPT जैसे models में ऐसे **अरबों** parameters होते हैं।"
+    ],
+    [
+     "p",
+     "**Bias क्यों?** बिना bias के, सारे inputs 0 हों तो `z` हमेशा 0। Bias line को ऊपर-नीचे खिसकाने की आज़ादी देता है, जैसे `y = mx + c` में `c`।"
+    ],
+    [
+     "p",
+     "पुराना **perceptron** step function इस्तेमाल करता था: `z > 0` तो 1, वरना 0। देखो, सही weights के साथ एक neuron **AND gate** बन जाता है:"
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\nw = np.array([1.0, 1.0])\nb = -1.5\nfor x1 in [0, 1]:\n    for x2 in [0, 1]:\n        z = w @ np.array([x1, x2]) + b\n        print(x1, x2, \"->\", int(z > 0))",
+     "0 0 -> 0\n0 1 -> 0\n1 0 -> 0\n1 1 -> 1"
+    ],
+    [
+     "warn",
+     "आम गलती: सोचना कि एक neuron सब कुछ सीख सकता है। एक neuron सिर्फ **सीधी line** से data बाँट सकता है। XOR जैसा pattern (1 तब जब दोनों अलग हों) एक line से नहीं बँट सकता। इसके लिए **कई neurons की layers** चाहिए: यही \"deep\" network है।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "layers",
+      "title": "Neural Network",
+      "layers": [
+       3,
+       4,
+       4,
+       2
+      ],
+      "labels": [
+       "Input",
+       "Hidden 1",
+       "Hidden 2",
+       "Output"
+      ]
+     }
+    ],
+    [
+     "p",
+     "**Input layer** = data आता है। **Hidden layers** = बीच में pattern सीखती हैं (पहली layer छोटी चीज़ें जैसे lines, अगली layer बड़े pattern जैसे आँख, चेहरा)। **Output layer** = final जवाब। जितनी ज़्यादा hidden layers, उतना **deep**।"
+    ]
+   ]
+  },
+  {
+   "title": "Activation functions और forward pass",
+   "blocks": [
+    [
+     "p",
+     "Activation function neuron के output को **मोड़** देता है। यह न हो तो 10 layers भी मिलकर एक सीधी line ही रहेंगी (line के ऊपर line = line)। Activation **non-linearity** लाता है, जिससे network टेढ़े-मेढ़े pattern सीख पाता है।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Activation functions",
+      "head": [
+       "नाम",
+       "Range",
+       "कहाँ"
+      ],
+      "rows": [
+       [
+        "Sigmoid",
+        "0 से 1",
+        "binary output"
+       ],
+       [
+        "Tanh",
+        "-1 से 1",
+        "RNN, पुराने NN"
+       ],
+       [
+        "ReLU",
+        "0 से ∞",
+        "hidden layers"
+       ],
+       [
+        "Softmax",
+        "सब का sum 1",
+        "multi-class output"
+       ]
+      ]
+     }
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\nz = np.array([-2.0, 0.0, 3.0])\n\nsigmoid = 1 / (1 + np.exp(-z))\nrelu = np.maximum(0, z)\ntanh = np.tanh(z)\nprint(\"sigmoid:\", sigmoid.round(3))\nprint(\"relu:   \", relu)\nprint(\"tanh:   \", tanh.round(3))",
+     "sigmoid: [0.119 0.5   0.953]\nrelu:    [0. 0. 3.]\ntanh:    [-0.964  0.     0.995]"
+    ],
+    [
+     "list",
+     [
+      "**Sigmoid** — किसी भी number को 0-1 में दबा देता है। Probability के लिए बढ़िया (spam है या नहीं)। कमी: बहुत बड़े/छोटे z पर slope ~0, training अटक जाती है (**vanishing gradient**)।",
+      "**ReLU** — `max(0, z)`। Negative = 0, positive = वैसा ही। बहुत simple और fast, इसलिए hidden layers में **default**।",
+      "**Tanh** — sigmoid जैसा, पर -1 से 1, center 0 पर।",
+      "**Softmax** — कई scores को **probabilities** में बदलता है जिनका total 1 हो। Multi-class output layer में (cat/dog/horse)।"
+     ]
+    ],
+    [
+     "sketch",
+     {
+      "k": "chart",
+      "title": "ReLU",
+      "type": "line",
+      "points": [
+       [
+        -3,
+        0
+       ],
+       [
+        -2,
+        0
+       ],
+       [
+        -1,
+        0
+       ],
+       [
+        0,
+        0
+       ],
+       [
+        1,
+        1
+       ],
+       [
+        2,
+        2
+       ],
+       [
+        3,
+        3
+       ]
+      ],
+      "xl": "z",
+      "yl": "ReLU(z)"
+     }
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\nscores = np.array([2.0, 1.0, 0.1])     # cat, dog, horse (raw scores = logits)\nexp = np.exp(scores - scores.max())     # stable trick\nprobs = exp / exp.sum()\nprint(probs.round(3))\nprint(\"total:\", round(probs.sum(), 3))\nprint(\"answer:\", [\"cat\", \"dog\", \"horse\"][probs.argmax()])",
+     "[0.659 0.242 0.099]\ntotal: 1.0\nanswer: cat"
+    ],
+    [
+     "tip",
+     "ध्यान से देखो: softmax से पहले के raw scores को **logits** कहते हैं। `scores.max()` घटाने से answer नहीं बदलता, बस बहुत बड़े numbers पर `exp` overflow नहीं होता। LLMs भी अगला word इसी softmax से चुनते हैं।"
+    ],
+    [
+     "p",
+     "**Forward pass** = input को layer-by-layer आगे भेजना जब तक output न आ जाए। हर layer एक **matrix multiply + bias + activation** है।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Forward pass",
+      "steps": [
+       "x",
+       "W1·x + b1",
+       "ReLU",
+       "W2·h + b2",
+       "Softmax",
+       "Probs"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\nx = np.array([1.0, 2.0])                     # 2 inputs\nW1 = np.array([[0.5, -0.3], [0.8, 0.2], [-0.5, 0.4]])  # 3 hidden neurons\nb1 = np.array([0.0, 0.1, 0.0])\nW2 = np.array([[1.0, -1.0, 0.5], [-0.5, 1.0, 1.0]])    # 2 outputs\nb2 = np.array([0.0, 0.0])\n\nh = np.maximum(0, W1 @ x + b1)               # hidden layer + ReLU\nlogits = W2 @ h + b2\nprobs = np.exp(logits) / np.exp(logits).sum()\nprint(\"hidden:\", h.round(2))\nprint(\"probs:\", probs.round(3))",
+     "hidden: [0.  1.3 0.3]\nprobs: [0.06 0.94]"
+    ],
+    [
+     "p",
+     "Hidden layer में पहले neuron की value negative थी, ReLU ने उसे 0 कर दिया। यह network अभी **random weights** वाला है, इसलिए जवाब का कोई मतलब नहीं। अगला lesson: weights **सीखे** कैसे जाते हैं।"
+    ],
+    [
+     "warn",
+     "आम गलती: shapes का mismatch। `W1` की shape (neurons, inputs) = (3, 2), और `x` की (2,)। Matrix multiply में बीच वाले numbers मिलने चाहिए। Deep learning के आधे errors **shape errors** होते हैं, इसलिए हर step पर `.shape` print करो।"
+    ]
+   ]
+  },
+  {
+   "title": "Network सीखता कैसे है — loss, gradient descent, backprop",
+   "blocks": [
+    [
+     "p",
+     "Training का loop हर बार यही 4 काम करता है:"
+    ],
+    [
+     "sketch",
+     {
+      "k": "cycle",
+      "title": "Training loop",
+      "steps": [
+       "Forward pass",
+       "Loss निकालो",
+       "Backprop: gradient",
+       "Weights update"
+      ]
+     }
+    ],
+    [
+     "p",
+     "**Loss function** = गलती का एक number। जितना छोटा, उतना अच्छा। Training का पूरा goal: **loss को minimum करना**।"
+    ],
+    [
+     "list",
+     [
+      "**MSE** (Mean Squared Error) — regression के लिए (price, temperature)।",
+      "**Binary Cross-Entropy** — 2 class (spam/not spam), sigmoid output के साथ।",
+      "**Categorical Cross-Entropy** — कई class, softmax के साथ। सही class की probability कम हो तो भारी सज़ा: `loss = -log(p_sahi)`।"
+     ]
+    ],
+    [
+     "code",
+     "python",
+     "import math\n\n# probability of the correct class -> cross-entropy loss\nfor p in [0.9, 0.5, 0.1]:\n    print(p, \"->\", round(-math.log(p), 3))",
+     "0.9 -> 0.105\n0.5 -> 0.693\n0.1 -> 2.303"
+    ],
+    [
+     "p",
+     "Model 90% sure और सही = loss छोटा (0.105)। सही class को सिर्फ 10% दिया = loss बड़ा (2.303)। गलत और confident होने की सबसे बड़ी सज़ा।"
+    ],
+    [
+     "p",
+     "**Gradient Descent** = loss को नीचे लाने का तरीका। Gradient बताता है: weight थोड़ा बढ़ाने पर loss बढ़ेगा या घटेगा, और कितना। हम **उल्टी दिशा** में छोटा कदम लेते हैं: `w = w - learning_rate * gradient`।"
+    ],
+    [
+     "analogy",
+     "अंधेरे में पहाड़ से नीचे उतरना है। कुछ दिखता नहीं, पर पैर से ढलान महसूस होती है। हर बार ढलान की तरफ एक छोटा कदम। धीरे-धीरे घाटी (minimum loss) तक पहुँच जाओगे। कदम का size = **learning rate**।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "chart",
+      "title": "Loss का पहाड़",
+      "type": "line",
+      "points": [
+       [
+        0,
+        4
+       ],
+       [
+        0.5,
+        2.25
+       ],
+       [
+        1,
+        1
+       ],
+       [
+        1.5,
+        0.25
+       ],
+       [
+        2,
+        0
+       ],
+       [
+        2.5,
+        0.25
+       ],
+       [
+        3,
+        1
+       ],
+       [
+        3.5,
+        2.25
+       ],
+       [
+        4,
+        4
+       ]
+      ],
+      "xl": "weight w",
+      "yl": "loss"
+     }
+    ],
+    [
+     "code",
+     "python",
+     "# data: y = 2x. Model: y_pred = w * x. Will w learn 2 by itself?\nxs = [1.0, 2.0, 3.0]\nys = [2.0, 4.0, 6.0]\nw = 0.0\nlr = 0.05\n\nfor epoch in range(1, 21):\n    grad = 0.0\n    loss = 0.0\n    for x, y in zip(xs, ys):\n        err = w * x - y\n        loss += err ** 2 / len(xs)\n        grad += 2 * err * x / len(xs)   # d(loss)/dw\n    w = w - lr * grad\n    if epoch in (1, 5, 10, 20):\n        print(f\"epoch {epoch}: w={w:.4f} loss={loss:.4f}\")",
+     "epoch 1: w=0.9333 loss=18.6667\nepoch 5: w=1.9137 loss=0.1222\nepoch 10: w=1.9963 loss=0.0002\nepoch 20: w=2.0000 loss=0.0000"
+    ],
+    [
+     "p",
+     "देखो: w 0 से शुरू हुआ और खुद **2** के पास पहुँच गया, loss लगभग 0। किसी ने 2 नहीं बताया, data से सीखा। यही learning है।"
+    ],
+    [
+     "p",
+     "**Backpropagation** = deep network में हर weight का gradient निकालने का तरीका। Output पर गलती दिखती है; **chain rule** से वह गलती पीछे की layers तक बाँट दी जाती है: किस weight ने गलती में कितना हिस्सा डाला। PyTorch/TensorFlow यह **खुद** कर देते हैं (`loss.backward()`)।"
+    ],
+    [
+     "analogy",
+     "Factory में cable reject हुई। Quality manager पीछे जाता है: packing → sheathing → insulation → drawing machine। जिस stage की जितनी गलती थी, उस machine की setting उतनी ही सुधारी। Backprop भी गलती को पीछे की layers तक भेजता है।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "Training के शब्द",
+      "head": [
+       "शब्द",
+       "मतलब"
+      ],
+      "rows": [
+       [
+        "Epoch",
+        "पूरा data एक बार"
+       ],
+       [
+        "Batch",
+        "एक बार में कितनी rows"
+       ],
+       [
+        "Iteration",
+        "एक batch = 1 update"
+       ],
+       [
+        "Learning rate",
+        "कदम का size"
+       ]
+      ]
+     }
+    ],
+    [
+     "p",
+     "1000 rows, batch size 100 → 1 epoch = 10 iterations। **Mini-batch** से memory कम लगती है और training तेज़ होती है। **Learning rate** बहुत बड़ा = minimum के ऊपर से कूद जाओगे (loss ऊपर-नीचे होगा या फट जाएगा); बहुत छोटा = training सालों चलेगी। आम शुरुआत: 0.001 (Adam optimizer के साथ)।"
+    ],
+    [
+     "p",
+     "**Overfitting का इलाज (deep learning version):**"
+    ],
+    [
+     "list",
+     [
+      "**Dropout** — training में हर step पर कुछ neurons को random बंद कर दो (जैसे 20%)। Network किसी एक neuron पर निर्भर नहीं रहता।",
+      "**Early stopping** — validation loss बढ़ना शुरू हो तो training रोक दो, best weights रख लो।",
+      "**Weight decay (L2)** — बड़े weights पर सज़ा।",
+      "**Data augmentation** — फोटो को घुमा/flip करके ज़्यादा data बनाओ।",
+      "**Batch normalization** — layers के बीच values को normal रखता है, training stable रहती है।"
+     ]
+    ],
+    [
+     "warn",
+     "आम गलती: सिर्फ training loss देखते रहना। हमेशा **validation loss** भी देखो। Training loss गिर रहा और validation loss बढ़ रहा = overfitting शुरू, यहीं early stopping करो।"
+    ]
+   ]
+  },
+  {
+   "title": "CNN, RNN/LSTM और Transformer — कौन सा data, कौन सा network",
+   "blocks": [
+    [
+     "p",
+     "Simple network (हर neuron अगली layer के हर neuron से जुड़ा = **Dense / Fully Connected**) table data के लिए ठीक है। लेकिन फोटो, text, आवाज़ के लिए खास designs बने हैं।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "कौन सा network कहाँ",
+      "head": [
+       "Network",
+       "Data",
+       "Example"
+      ],
+      "rows": [
+       [
+        "Dense/MLP",
+        "table",
+        "loan approve"
+       ],
+       [
+        "CNN",
+        "image",
+        "defect detect"
+       ],
+       [
+        "RNN/LSTM",
+        "sequence",
+        "sensor, time"
+       ],
+       [
+        "Transformer",
+        "text, सब",
+        "ChatGPT, BERT"
+       ]
+      ]
+     }
+    ],
+    [
+     "p",
+     "**CNN (Convolutional Neural Network)** — फोटो के ऊपर एक छोटा **filter** (जैसे 3x3) slide करता है और pattern ढूँढता है: पहले edges, फिर shapes, फिर पूरी चीज़। Same filter पूरी फोटो पर चलता है, तो parameters कम, और चीज़ कहीं भी हो, पकड़ लेता है।"
+    ],
+    [
+     "analogy",
+     "Cable की surface check करने वाला inspector magnifying glass लेकर एक-एक inch आगे बढ़ता है। Glass एक ही है, पूरी cable पर घूमता है। CNN का filter भी यही magnifying glass है।"
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\n# 1D signal: a sudden jump (edge) in the middle\nsignal = np.array([0, 0, 0, 5, 5, 5])\nkernel = np.array([-1, 1])        # edge detector filter\n\nout = [int(signal[i:i+2] @ kernel) for i in range(len(signal) - 1)]\nprint(out)",
+     "[0, 0, 5, 0, 0]"
+    ],
+    [
+     "p",
+     "Filter ने सिर्फ उस जगह बड़ा number दिया जहाँ jump (edge) है। CNN यही काम 2D image पर हज़ारों filters से करता है, और filters के numbers **खुद सीखता** है।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "CNN",
+      "steps": [
+       "Image",
+       "Conv + ReLU",
+       "Pooling",
+       "Conv + Pool",
+       "Dense",
+       "Class"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "**Pooling** (जैसे MaxPool 2x2) image को छोटा करता है, हर 2x2 में से सबसे बड़ी value रखकर। Size कम, ज़रूरी जानकारी बची।"
+    ],
+    [
+     "p",
+     "**RNN (Recurrent Neural Network)** — sequence (शब्द, दिन-ब-दिन sales, sensor readings) एक-एक करके पढ़ता है और एक **memory (hidden state)** आगे ले जाता है। Problem: लंबे sequence में शुरू की बात भूल जाता है।"
+    ],
+    [
+     "p",
+     "**LSTM** — RNN का सुधरा रूप। इसमें **gates** हैं (forget, input, output) जो तय करते हैं क्या याद रखना है, क्या भूलना है। लंबी memory के लिए। GRU इसका छोटा भाई है।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "RNN: एक-एक word",
+      "steps": [
+       "\"मैं\"",
+       "\"चाय\"",
+       "\"पीता\"",
+       "\"हूँ\"",
+       "memory → output"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "p",
+     "**Transformer** (2017, \"Attention is all you need\") — sequence को एक-एक करके नहीं, **एक साथ** पढ़ता है। हर word बाकी हर word को देखकर तय करता है कौन कितना ज़रूरी है: इसे **attention** कहते हैं। Parallel चलता है (GPU पर तेज़) और लंबी बात याद रखता है। GPT, BERT, Claude सब transformer हैं।"
+    ],
+    [
+     "analogy",
+     "\"Akash ने cable check की क्योंकि **वह** खराब थी।\" यहाँ **वह** कौन? Cable। पढ़ते वक्त तुम्हारा दिमाग \"वह\" पर रुककर पीछे \"cable\" पर ज़्यादा ध्यान देता है। Attention यही करता है: हर word के लिए बाकी words पर weight।"
+    ],
+    [
+     "code",
+     "python",
+     "import numpy as np\n\n# small vectors for 3 words (toy example)\nQ = np.array([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])   # Query: what am I looking for\nK = Q.copy()                                          # Key: what am I\nV = np.array([[10.0, 0.0], [0.0, 10.0], [5.0, 5.0]])  # Value: my information\n\nscores = Q @ K.T / np.sqrt(2)          # every word vs every word\nw = np.exp(scores) / np.exp(scores).sum(axis=1, keepdims=True)  # softmax\nprint(\"attention weights:\")\nprint(w.round(2))\nprint(\"output:\")\nprint((w @ V).round(2))",
+     "attention weights:\n[[0.4  0.2  0.4 ]\n [0.2  0.4  0.4 ]\n [0.25 0.25 0.5 ]]\noutput:\n[[6.02 3.98]\n [3.98 6.02]\n [5.   5.  ]]"
+    ],
+    [
+     "tip",
+     "ध्यान से देखो: attention formula = `softmax(Q·Kᵀ / √d) · V`। हर row के weights का total 1 है। पहला word अपने जैसे words (खुद + तीसरा) पर 0.4-0.4 ध्यान देता है, दूसरे पर सिर्फ 0.2। तीसरा word (जो दोनों जैसा है) सब पर ध्यान देता है, इसलिए उसका output दोनों का mix `[5, 5]` बना। असली transformer में Q, K, V सीखे हुए weight matrices से बनते हैं, और ऐसे कई **heads** साथ चलते हैं (multi-head attention)।"
+    ],
+    [
+     "warn",
+     "आम गलती: IQ में बोलना \"RNN पुराना है, बेकार है\"। छोटे time-series या कम resource वाले device पर LSTM/GRU अब भी काम के हैं। बोलो: transformer parallel और long-range में बेहतर है, पर compute ज़्यादा माँगता है।"
+    ]
+   ]
+  },
+  {
+   "title": "PyTorch basics + sklearn का छोटा neural network",
+   "blocks": [
+    [
+     "p",
+     "असली deep learning के लिए **PyTorch** (सबसे popular, research + industry) या **TensorFlow/Keras** इस्तेमाल होता है। दोनों GPU पर चलते हैं और backprop खुद करते हैं। Phone app में ये install नहीं हैं, इसलिए नीचे के code का output नहीं दिया; laptop पर `pip install torch` करके चलाना।"
+    ],
+    [
+     "p",
+     "**Tensor** = NumPy array जैसा, पर GPU पर चल सकता है और अपना gradient याद रखता है।"
+    ],
+    [
+     "code",
+     "python",
+     "import torch\n\nx = torch.tensor([1.0, 2.0, 3.0])\nw = torch.tensor(0.5, requires_grad=True)   # this is what we learn\nloss = ((w * x - 2 * x) ** 2).mean()\nloss.backward()                            # backprop, gradient automatically\nprint(w.grad)                              # d(loss)/dw\nprint(torch.cuda.is_available())           # is there a GPU?",
+     ""
+    ],
+    [
+     "p",
+     "`requires_grad=True` = PyTorch इस variable पर होने वाला हर हिसाब note करता है। `loss.backward()` chain rule लगाकर `w.grad` भर देता है। Lesson 3 में जो gradient हाथ से निकाला था, वह यहाँ एक line में।"
+    ],
+    [
+     "p",
+     "**Model बनाना** — `nn.Module` class से। `__init__` में layers, `forward` में data का रास्ता:"
+    ],
+    [
+     "code",
+     "python",
+     "import torch\nfrom torch import nn\n\nclass Net(nn.Module):\n    def __init__(self):\n        super().__init__()\n        self.layers = nn.Sequential(\n            nn.Linear(4, 16),   # 4 inputs -> 16 hidden\n            nn.ReLU(),\n            nn.Dropout(0.2),\n            nn.Linear(16, 3),   # 3 classes (logits)\n        )\n\n    def forward(self, x):\n        return self.layers(x)\n\nmodel = Net()\nprint(model)",
+     ""
+    ],
+    [
+     "p",
+     "**Training loop** — हर PyTorch project का दिल यही 5 lines हैं:"
+    ],
+    [
+     "code",
+     "python",
+     "loss_fn = nn.CrossEntropyLoss()          # softmax + cross-entropy together\noptimizer = torch.optim.Adam(model.parameters(), lr=0.001)\n\nfor epoch in range(50):\n    model.train()\n    for xb, yb in train_loader:          # mini-batches from DataLoader\n        pred = model(xb)                 # 1. forward\n        loss = loss_fn(pred, yb)         # 2. loss\n        optimizer.zero_grad()            # 3. clear old gradients\n        loss.backward()                  # 4. backprop\n        optimizer.step()                 # 5. weights update\n\n    model.eval()\n    with torch.no_grad():                # no gradients needed for testing\n        val_loss = loss_fn(model(X_val), y_val)\n    print(epoch, loss.item(), val_loss.item())",
+     ""
+    ],
+    [
+     "p",
+     "हर epoch में training loss और validation loss print होते हैं। दोनों गिरें तो अच्छा; validation बढ़ने लगे तो early stopping।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "stack",
+      "title": "Training step",
+      "items": [
+       "model(xb) → pred",
+       "loss_fn(pred, yb)",
+       "zero_grad()",
+       "loss.backward()",
+       "optimizer.step()"
+      ]
+     }
+    ],
+    [
+     "warn",
+     "आम गलती: `optimizer.zero_grad()` भूल जाना। PyTorch gradients **जोड़ता** रहता है, तो हर batch पर पुराने gradient मिलकर गलत update देते हैं। दूसरी गलती: test से पहले `model.eval()` न करना, जिससे dropout testing में भी चलता रहता है।"
+    ],
+    [
+     "tip",
+     "ध्यान से देखो: `nn.CrossEntropyLoss` को **raw logits** दो, खुद softmax मत लगाओ। वह अंदर ही softmax करता है। दो बार softmax = गलत loss।"
+    ],
+    [
+     "p",
+     "बिना PyTorch के भी छोटा neural network सीखना हो तो sklearn का **MLPClassifier** (Multi-Layer Perceptron) है। यह phone पर नहीं, laptop पर चलेगा:"
+    ],
+    [
+     "code",
+     "python",
+     "from sklearn.datasets import load_iris\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.pipeline import make_pipeline\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.neural_network import MLPClassifier\n\nX, y = load_iris(return_X_y=True)\nX_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.2, random_state=42, stratify=y)\n\nnet = make_pipeline(\n    StandardScaler(),\n    MLPClassifier(hidden_layer_sizes=(16, 8), activation=\"relu\",\n                  max_iter=2000, random_state=42))\nnet.fit(X_train, y_train)\nprint(\"test accuracy:\", round(net.score(X_test, y_test), 3))\nprint(\"layers:\", net[-1].n_layers_)",
+     "test accuracy: 0.967\nlayers: 4"
+    ],
+    [
+     "p",
+     "`hidden_layer_sizes=(16, 8)` = 2 hidden layers, 16 और 8 neurons। `n_layers_` = 4 (input + 2 hidden + output)। Neural network को हमेशा **scaled** data दो, वरना training धीमी हो जाती है या अटक जाती है।"
+    ]
+   ]
+  },
+  {
+   "title": "Transfer learning और Hugging Face",
+   "blocks": [
+    [
+     "p",
+     "बड़ा model zero से train करना = हफ्ते, लाखों photos/text, महंगे GPU। इसका shortcut: **Transfer Learning**। किसी ने पहले ही बड़े data पर model train कर दिया (**pre-trained**), तुम उसे लेकर अपने छोटे data पर थोड़ा और सिखाओ (**fine-tune**)।"
+    ],
+    [
+     "analogy",
+     "Experienced electrician को cable factory में रखा। बिजली का ज्ञान उसे पहले से है, बस तुम्हारी machines और IS standards एक हफ्ते में सिखाने हैं। नए लड़के को zero से सिखाने में साल लगता। Pre-trained model = experienced electrician।"
+    ],
+    [
+     "sketch",
+     {
+      "k": "flow",
+      "title": "Transfer learning",
+      "steps": [
+       "Pre-trained model",
+       "पुरानी layers freeze",
+       "नई output layer",
+       "अपने data पर train"
+      ],
+      "dir": "h"
+     }
+    ],
+    [
+     "list",
+     [
+      "**Feature extraction** — pre-trained layers **freeze** करो (बदलो मत), सिर्फ आखिरी layer नई लगाओ और train करो। बहुत कम data में भी चलता है।",
+      "**Fine-tuning** — पूरा model (या ऊपर की कुछ layers) छोटे learning rate से थोड़ा और train करो। ज़्यादा data हो तो बेहतर result।",
+      "Example: ImageNet पर trained **ResNet** लो, आखिरी layer को 2 class (सही cable / defect cable) वाली layer से बदलो, 500 photos पर train करो।"
+     ]
+    ],
+    [
+     "code",
+     "python",
+     "import torch\nfrom torch import nn\nfrom torchvision import models\n\nmodel = models.resnet18(weights=\"IMAGENET1K_V1\")   # pre-trained\nfor p in model.parameters():\n    p.requires_grad = False                         # freeze\nmodel.fc = nn.Linear(model.fc.in_features, 2)       # new layer: ok / defect\n# now only model.fc will train",
+     ""
+    ],
+    [
+     "p",
+     "यहाँ सिर्फ आखिरी layer (`fc`) के weights सीखे जाएँगे, बाकी ResNet का ज्ञान वैसा ही रहेगा।"
+    ],
+    [
+     "p",
+     "**Hugging Face** = pre-trained AI models का **GitHub**। Hub पर 5 लाख से ज़्यादा free models: sentiment, translation, summary, NER, image classification, speech। `pipeline()` से 2 line में इस्तेमाल करो।"
+    ],
+    [
+     "code",
+     "python",
+     "from transformers import pipeline\n\nclassifier = pipeline(\"sentiment-analysis\")\nprint(classifier(\"I love this product!\"))\n\nzsc = pipeline(\"zero-shot-classification\")\nr = zsc(\"Stock market crashed 500 points\",\n        candidate_labels=[\"finance\", \"sports\", \"technology\"])\nprint(r[\"labels\"][0])",
+     ""
+    ],
+    [
+     "p",
+     "पहली बार model internet से download होता है। Output कुछ ऐसा आता है: `[{'label': 'POSITIVE', 'score': 0.9998}]` और zero-shot का जवाब `finance`। **Zero-shot** = बिना training के, सिर्फ labels देकर classify!"
+    ],
+    [
+     "sketch",
+     {
+      "k": "table",
+      "title": "pipeline() tasks",
+      "head": [
+       "Task",
+       "काम"
+      ],
+      "rows": [
+       [
+        "sentiment-analysis",
+        "positive/negative"
+       ],
+       [
+        "ner",
+        "नाम, जगह, company"
+       ],
+       [
+        "summarization",
+        "लंबा text छोटा"
+       ],
+       [
+        "question-answering",
+        "context से जवाब"
+       ],
+       [
+        "text-generation",
+        "आगे लिखना"
+       ],
+       [
+        "translation",
+        "भाषा बदलो"
+       ]
+      ]
+     }
+    ],
+    [
+     "p",
+     "**Tokenizer** — model text नहीं, **numbers** समझता है। Tokenizer text को tokens (word के टुकड़े) और उनके IDs में बदलता है:"
+    ],
+    [
+     "code",
+     "python",
+     "from transformers import AutoTokenizer, AutoModel\nimport torch\n\ntok = AutoTokenizer.from_pretrained(\"bert-base-uncased\")\nmodel = AutoModel.from_pretrained(\"bert-base-uncased\")\n\ninputs = tok(\"Machine learning is great\", return_tensors=\"pt\")\nprint(inputs[\"input_ids\"])\nwith torch.no_grad():\n    out = model(**inputs)\nprint(out.last_hidden_state.shape)",
+     ""
+    ],
+    [
+     "p",
+     "पहला print token IDs दिखाता है, शुरू में `101` ([CLS]) और आखिर में `102` ([SEP])। दूसरा print shape `torch.Size([1, 6, 768])` जैसा: 1 sentence, 6 tokens, हर token का 768 numbers का vector (**embedding**)। यही embeddings Stage 12 में RAG और search के काम आएँगे।"
+    ],
+    [
+     "tip",
+     "ध्यान से देखो: model चुनने के लिए Hub पर task से filter करो, downloads और likes देखो, **model card** पढ़ो (किस data पर trained, license, limits)। `pipeline(\"task\", model=\"naam\")` से specific model दो; default पर मत छोड़ो, production में version fix रखो।"
+    ],
+    [
+     "warn",
+     "आम गलती: inference में `torch.no_grad()` और `model.eval()` भूलना (memory ज़्यादा, dropout on)। दूसरी: model के साथ **उसी का tokenizer** न लेना। BERT का model + GPT-2 का tokenizer = कचरा output।"
+    ]
+   ]
+  }
+ ],
+ "teach": [
+  {
+   "say": "एक neuron क्या करता है? हर input को weight से गुणा, सब जोड़ो, bias डालो, फिर activation से गुज़ारो। बस।",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "x",
+     "× w",
+     "+ b",
+     "f(z)",
+     "output"
+    ],
+    "dir": "h"
+   },
+   "code": "z = w1*x1 + w2*x2 + b\nout = sigmoid(z)"
+  },
+  {
+   "say": "एक neuron सिर्फ सीधी line खींच सकता है। बहुत सारे neurons की layers लगाओ, तो network टेढ़े pattern भी सीख लेता है। यही deep learning है।",
+   "sketch": {
+    "k": "layers",
+    "layers": [
+     3,
+     5,
+     5,
+     2
+    ],
+    "labels": [
+     "Input",
+     "Hidden",
+     "Hidden",
+     "Output"
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "Activation non-linearity लाता है। Hidden layers में ReLU, binary output पर sigmoid, multi-class output पर softmax।",
+   "sketch": {
+    "k": "table",
+    "head": [
+     "नाम",
+     "काम"
+    ],
+    "rows": [
+     [
+      "ReLU",
+      "max(0, z)"
+     ],
+     [
+      "Sigmoid",
+      "0 से 1"
+     ],
+     [
+      "Softmax",
+      "probs, sum 1"
+     ]
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "Training का loop: forward pass, loss निकालो, backprop से gradient, weights update। और यह हज़ारों बार।",
+   "sketch": {
+    "k": "cycle",
+    "steps": [
+     "Forward",
+     "Loss",
+     "Backprop",
+     "Update"
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "Gradient descent: loss के पहाड़ पर ढलान की तरफ छोटा कदम। कदम का size है learning rate। बहुत बड़ा तो कूद जाओगे, बहुत छोटा तो सालों लगेंगे।",
+   "sketch": {
+    "k": "chart",
+    "type": "line",
+    "points": [
+     [
+      0,
+      4
+     ],
+     [
+      1,
+      1
+     ],
+     [
+      2,
+      0
+     ],
+     [
+      3,
+      1
+     ],
+     [
+      4,
+      4
+     ]
+    ],
+    "xl": "weight",
+    "yl": "loss"
+   },
+   "code": "w = w - lr * grad"
+  },
+  {
+   "say": "Epoch मतलब पूरा data एक बार। Batch मतलब एक बार में कितनी rows। हर batch पर एक update।",
+   "sketch": {
+    "k": "boxes",
+    "items": [
+     {
+      "label": "rows",
+      "value": "1000"
+     },
+     {
+      "label": "batch",
+      "value": "100"
+     },
+     {
+      "label": "updates/epoch",
+      "value": "10"
+     }
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "Overfitting रोकने के लिए dropout, early stopping, weight decay और data augmentation। Validation loss पर हमेशा नज़र रखो।",
+   "sketch": {
+    "k": "compare",
+    "left": {
+     "title": "Dropout",
+     "items": [
+      "random neurons off",
+      "सिर्फ training में"
+     ]
+    },
+    "right": {
+     "title": "Early stopping",
+     "items": [
+      "val loss बढ़े",
+      "तो रुक जाओ"
+     ]
+    }
+   },
+   "code": null
+  },
+  {
+   "say": "फोटो के लिए CNN, sequence के लिए RNN और LSTM, और text के लिए आज का राजा transformer, जो attention से हर word को बाकी सब से जोड़ता है।",
+   "sketch": {
+    "k": "table",
+    "head": [
+     "Data",
+     "Network"
+    ],
+    "rows": [
+     [
+      "Image",
+      "CNN"
+     ],
+     [
+      "Sequence",
+      "RNN / LSTM"
+     ],
+     [
+      "Text, सब",
+      "Transformer"
+     ]
+    ]
+   },
+   "code": "attention = softmax(Q @ K.T / sqrt(d)) @ V"
+  },
+  {
+   "say": "PyTorch में training के पाँच कदम: forward, loss, zero_grad, backward, step। इन्हें रट लो।",
+   "sketch": {
+    "k": "stack",
+    "items": [
+     "pred = model(x)",
+     "loss = loss_fn(pred, y)",
+     "optimizer.zero_grad()",
+     "loss.backward()",
+     "optimizer.step()"
+    ]
+   },
+   "code": null
+  },
+  {
+   "say": "Zero से train मत करो। Hugging Face से pre-trained model लो, और अपने data पर fine-tune करो। अब practice करो!",
+   "sketch": {
+    "k": "flow",
+    "steps": [
+     "Hugging Face Hub",
+     "pipeline()",
+     "Fine-tune",
+     "अपना model"
+    ],
+    "dir": "h"
+   },
+   "code": "from transformers import pipeline\nclf = pipeline(\"sentiment-analysis\")"
+  }
+ ],
+ "practice": [
+  {
+   "q": "एक neuron का **forward pass** सिर्फ `math` से लिखो।\nx = [1.0, 2.0, 3.0], w = [0.2, -0.5, 0.3], b = 0.4\nz = sum(w*x) + b, output = sigmoid(z) = 1/(1+e^-z)\nPrint करो (4 decimal):\nz = 0.5000\nsigmoid = 0.6225\nrelu = 0.5000",
+   "starter": "import math\n\nx = [1.0, 2.0, 3.0]\nw = [0.2, -0.5, 0.3]\nb = 0.4\n# TODO: find z (multiply pairs with zip and add, then b)\n# TODO: find sigmoid and relu\n# TODO: print 3 lines, :.4f format\n",
+   "expect": "z = 0.5000\nsigmoid = 0.6225\nrelu = 0.5000",
+   "hint": "z = sum(wi * xi for wi, xi in zip(w, x)) + b ; relu = max(0, z)",
+   "solution": "import math\n\nx = [1.0, 2.0, 3.0]\nw = [0.2, -0.5, 0.3]\nb = 0.4\nz = sum(wi * xi for wi, xi in zip(w, x)) + b\nsig = 1 / (1 + math.exp(-z))\nrelu = max(0, z)\nprint(f\"z = {z:.4f}\")\nprint(f\"sigmoid = {sig:.4f}\")\nprint(f\"relu = {relu:.4f}\")"
+  },
+  {
+   "q": "**Softmax** खुद बनाओ और cross-entropy loss निकालो।\nlogits = [2.0, 1.0, 0.1] (cat, dog, horse), सही जवाब = cat (index 0)।\nPrint करो (3 decimal):\nprobs = [0.659, 0.242, 0.099]\nprediction = cat\nloss = 0.417",
+   "starter": "import math\n\nlogits = [2.0, 1.0, 0.1]\nnames = [\"cat\", \"dog\", \"horse\"]\ntrue_idx = 0\n# TODO: exps = math.exp of each logit, probs = exp / total\n# TODO: index of the biggest prob -> prediction\n# TODO: loss = -log(probs[true_idx])\n",
+   "expect": "probs = [0.659, 0.242, 0.099]\nprediction = cat\nloss = 0.417",
+   "hint": "best = probs.index(max(probs)); list को print([round(p, 3) for p in probs]) से print करो।",
+   "solution": "import math\n\nlogits = [2.0, 1.0, 0.1]\nnames = [\"cat\", \"dog\", \"horse\"]\ntrue_idx = 0\nexps = [math.exp(v) for v in logits]\ntotal = sum(exps)\nprobs = [e / total for e in exps]\nbest = probs.index(max(probs))\nloss = -math.log(probs[true_idx])\nprint(\"probs =\", [round(p, 3) for p in probs])\nprint(\"prediction =\", names[best])\nprint(f\"loss = {loss:.3f}\")"
+  },
+  {
+   "q": "**Gradient descent** से model `y = w*x + b` train करो।\nData: x = [1, 2, 3, 4], y = [3, 5, 7, 9] (असली rule y = 2x + 1)।\nw = 0, b = 0, learning rate = 0.05, 500 epochs। हर epoch:\ngrad_w = avg(2*err*x), grad_b = avg(2*err), जहाँ err = (w*x + b) - y\nआखिर में print करो (2 decimal):\nw = 2.00\nb = 1.00",
+   "starter": "xs = [1, 2, 3, 4]\nys = [3, 5, 7, 9]\nw, b, lr = 0.0, 0.0, 0.05\nn = len(xs)\nfor epoch in range(500):\n    gw = gb = 0.0\n    for x, y in zip(xs, ys):\n        # TODO: find err, add to gw and gb (divide by n)\n        pass\n    # TODO: update w and b\n# TODO: print\n",
+   "expect": "w = 2.00\nb = 1.00",
+   "hint": "err = w*x + b - y ; gw += 2*err*x/n ; gb += 2*err/n ; w -= lr*gw ; b -= lr*gb",
+   "solution": "xs = [1, 2, 3, 4]\nys = [3, 5, 7, 9]\nw, b, lr = 0.0, 0.0, 0.05\nn = len(xs)\nfor epoch in range(500):\n    gw = gb = 0.0\n    for x, y in zip(xs, ys):\n        err = w * x + b - y\n        gw += 2 * err * x / n\n        gb += 2 * err / n\n    w -= lr * gw\n    b -= lr * gb\nprint(f\"w = {w:.2f}\")\nprint(f\"b = {b:.2f}\")"
+  }
+ ],
+ "quiz": [
+  {
+   "q": "एक neuron का output कैसे निकलता है?",
+   "o": [
+    "activation(sum(w*x) + b)",
+    "sum(x) / len(x)",
+    "max(x) * b",
+    "w + x + b"
+   ],
+   "a": 0,
+   "why": "Inputs को weights से गुणा करो, जोड़ो, bias add करो, फिर activation function लगाओ।"
+  },
+  {
+   "q": "Hidden layers में सबसे ज़्यादा कौन सा activation इस्तेमाल होता है?",
+   "o": [
+    "Softmax",
+    "Sigmoid",
+    "ReLU",
+    "Step function"
+   ],
+   "a": 2,
+   "why": "ReLU simple और fast है और vanishing gradient कम करता है, इसलिए यह default है।"
+  },
+  {
+   "q": "10 classes में से एक चुनना है। Output layer पर क्या लगाओगे?",
+   "o": [
+    "ReLU",
+    "Tanh",
+    "कोई activation नहीं, MSE",
+    "Softmax"
+   ],
+   "a": 3,
+   "why": "Softmax scores को probabilities में बदलता है जिनका sum 1 हो; इसे cross-entropy loss के साथ इस्तेमाल करते हैं।"
+  },
+  {
+   "q": "Activation function न हो तो 10 layer का network क्या बन जाता है?",
+   "o": [
+    "एक linear model जितना",
+    "ज़्यादा powerful",
+    "CNN",
+    "Random forest"
+   ],
+   "a": 0,
+   "why": "Linear के ऊपर linear = linear; non-linearity के बिना depth का कोई फायदा नहीं।"
+  },
+  {
+   "q": "Learning rate बहुत बड़ा रखा। क्या होगा?",
+   "o": [
+    "Training बहुत slow",
+    "Loss ऊपर-नीचे हो सकता है या फट सकता है",
+    "Model perfect हो जाएगा",
+    "कुछ नहीं बदलेगा"
+   ],
+   "a": 1,
+   "why": "बड़े कदम minimum के ऊपर से कूद जाते हैं, loss diverge हो सकता है।"
+  },
+  {
+   "q": "2000 rows, batch size 100। एक epoch में कितने weight updates?",
+   "o": [
+    "1",
+    "100",
+    "2000",
+    "20"
+   ],
+   "a": 3,
+   "why": "2000 / 100 = 20 batches, हर batch पर एक update।"
+  },
+  {
+   "q": "Training loss गिर रहा है, validation loss बढ़ रहा है। क्या करें?",
+   "o": [
+    "Learning rate 10 गुना",
+    "Early stopping / dropout",
+    "ज़्यादा epochs चलाओ",
+    "Validation data हटा दो"
+   ],
+   "a": 1,
+   "why": "यह overfitting है; early stopping, dropout, regularization और ज़्यादा data मदद करते हैं।"
+  },
+  {
+   "q": "Factory में cable की photos से defect पकड़ना है। कौन सा architecture?",
+   "o": [
+    "RNN",
+    "K-Means",
+    "CNN",
+    "Linear Regression"
+   ],
+   "a": 2,
+   "why": "Images के लिए CNN; इसके filters edges/shapes सीखते हैं।"
+  },
+  {
+   "q": "Transformer का core idea क्या है?",
+   "o": [
+    "Self-attention: हर token बाकी tokens को weight देता है",
+    "Words एक-एक करके पढ़ना",
+    "सिर्फ convolution",
+    "Decision trees की voting"
+   ],
+   "a": 0,
+   "why": "Attention = softmax(QKᵀ/√d)V; यह parallel चलता है और long-range relation पकड़ता है।"
+  },
+  {
+   "q": "PyTorch loop में `optimizer.zero_grad()` क्यों?",
+   "o": [
+    "Model reset करने के लिए",
+    "Learning rate 0 करने के लिए",
+    "पुराने gradients साफ करने के लिए, क्योंकि वे जुड़ते जाते हैं",
+    "Data shuffle करने के लिए"
+   ],
+   "a": 2,
+   "why": "PyTorch gradients accumulate करता है; हर batch से पहले उन्हें साफ करना ज़रूरी है।"
+  }
+ ],
+ "iq": [
+  {
+   "q": "Neural network क्या है? Neuron कैसे काम करता है?",
+   "a": "Neural network neurons की layers है: input, hidden और output। हर neuron inputs का weighted sum + bias निकालता है और activation function लगाता है: `out = f(w·x + b)`। Training में weights और bias ऐसे adjust होते हैं कि loss कम हो।"
+  },
+  {
+   "q": "Activation function क्यों चाहिए? ReLU, sigmoid, softmax कब इस्तेमाल करते हो?",
+   "a": "Activation non-linearity लाता है; इसके बिना कितनी भी layers हों, एक linear model ही बन जाती हैं। ReLU hidden layers में (fast, vanishing gradient कम)। Sigmoid binary output पर probability के लिए। Softmax multi-class output पर, जहाँ सब probabilities का sum 1 होता है।"
+  },
+  {
+   "q": "Gradient descent और backpropagation समझाओ।",
+   "a": "Gradient descent loss को कम करने का optimization है: हर parameter को gradient की उल्टी दिशा में update करो, `w = w - lr * dL/dw`। Backpropagation वह algorithm है जो chain rule से output से पीछे की तरफ चलकर हर weight का gradient efficiently निकालता है। Frameworks में `loss.backward()` यही करता है।"
+  },
+  {
+   "q": "Epoch, batch और iteration में फर्क?",
+   "a": "Epoch = पूरा training data एक बार model से गुज़रना। Batch = एक update के लिए कितने samples। Iteration = एक batch पर एक forward + backward + update। 10,000 samples, batch 100 → 1 epoch = 100 iterations।"
+  },
+  {
+   "q": "Vanishing gradient problem क्या है और कैसे solve होती है?",
+   "a": "Deep network में backprop के दौरान gradients layers से गुणा होते-होते बहुत छोटे हो जाते हैं, तो शुरू की layers सीखती ही नहीं। Sigmoid/tanh में यह ज़्यादा होता है। Fix: ReLU, अच्छा weight initialization (He/Xavier), batch normalization, residual connections (ResNet), और sequences के लिए LSTM/GRU।"
+  },
+  {
+   "q": "Deep learning में overfitting कैसे रोकते हो?",
+   "a": "Dropout (training में random neurons बंद), early stopping (validation loss बढ़ने पर रुकना), weight decay/L2, data augmentation, batch norm, छोटा model या ज़्यादा data। और मैं हमेशा train vs validation loss curve monitor करता हूँ।"
+  },
+  {
+   "q": "CNN, RNN और Transformer में फर्क बताओ।",
+   "a": "CNN images के लिए है: छोटे filters slide करके local patterns (edges, shapes) सीखता है, weight sharing से parameters कम। RNN/LSTM sequences को step-by-step पढ़ते हैं, hidden state में memory रखते हैं, पर slow हैं और long-range में कमज़ोर। Transformer self-attention से पूरा sequence parallel देखता है, long-range dependency अच्छे से पकड़ता है; आज के LLMs यही हैं।"
+  },
+  {
+   "q": "Attention mechanism क्या है?",
+   "a": "हर token के लिए Query, Key, Value vectors बनते हैं। Query का हर Key से dot product, √d से scale, softmax से weights, फिर Values का weighted sum: `softmax(QKᵀ/√d)V`। इससे हर word को पता चलता है कि sentence के कौन से words उसके लिए ज़रूरी हैं। Multi-head attention में कई ऐसे heads अलग-अलग relations सीखते हैं।"
+  },
+  {
+   "q": "Transfer learning क्या है, कब इस्तेमाल करोगे?",
+   "a": "बड़े data पर pre-trained model (ResNet, BERT) को अपने task के लिए reuse करना। कम data हो तो layers freeze करके सिर्फ नया head train करते हैं (feature extraction); ज़्यादा data हो तो छोटे learning rate से fine-tune करते हैं। इससे time, data और GPU cost बहुत बचती है, और accuracy बेहतर आती है।"
+  },
+  {
+   "q": "PyTorch का training loop लिखो / समझाओ।",
+   "a": "हर batch पर: `pred = model(x)`, `loss = loss_fn(pred, y)`, `optimizer.zero_grad()`, `loss.backward()`, `optimizer.step()`। Evaluation से पहले `model.eval()` और `torch.no_grad()`, ताकि dropout बंद हो और memory बचे। `model.train()` से वापस training mode।"
+  },
+  {
+   "q": "Hugging Face क्या है और pipeline() कैसे इस्तेमाल करते हो?",
+   "a": "Hugging Face pre-trained models, datasets और tokenizers का hub है, `transformers` library के साथ। `pipeline(\"sentiment-analysis\")` task के हिसाब से model और tokenizer download करके सीधा inference देता है। Specific model के लिए `pipeline(task, model=\"name\")`, और custom काम के लिए `AutoTokenizer` + `AutoModel` या Trainer से fine-tuning।"
+  },
+  {
+   "q": "Cross-entropy loss क्या है और classification में MSE क्यों नहीं?",
+   "a": "Cross-entropy सही class की predicted probability का negative log है: `-log(p_sahi)`। यह confident गलत जवाब पर बहुत बड़ी सज़ा देता है और softmax/sigmoid के साथ अच्छे gradients देता है। MSE classification में धीरे सीखता है, क्योंकि sigmoid saturate होने पर gradient छोटा हो जाता है।"
+  }
+ ]
+}

@@ -1,0 +1,659 @@
+# Stage 1 translations. Format:
+#   @ <start of Hinglish source text (exact prefix, or the full text for short labels)>
+#   H <Hindi>
+#   E <English>
+# "⏎" stands for a real line break. Lines starting with # are ignored.
+
+# ---------- stage ----------
+@ Python Basics
+H Python Basics
+E Python Basics
+@ Program kya hota hai, print, variables
+H Program क्या होता है, print, variables, data types, operators, strings, input और f-strings समझकर तुम छोटे programs खुद लिख पाओगे, .py file चला पाओगे और error message पढ़कर गलती खुद ठीक कर पाओगे।
+E Understand what a program is, plus print, variables, data types, operators, strings, input and f-strings, so you can write small programs yourself, run a .py file, and fix mistakes on your own by reading the error message.
+
+# ---------- lesson 1 ----------
+@ Program kya hai, aur print
+H Program क्या है, और print
+E What is a program, and print
+@ **Program** = computer ko diye
+H **Program** = computer को दिए गए **instructions (हुक्म)** की list। Computer बहुत तेज़ है, लेकिन खुद कुछ नहीं सोचता। जो लिखोगे, बिल्कुल वही करेगा, **ऊपर से नीचे, एक-एक line**।
+E A **program** = a list of **instructions (orders)** given to the computer. The computer is very fast, but it does not think on its own. It does exactly what you write, **top to bottom, one line at a time**.
+@ Jaise chai banane ke steps
+H जैसे चाय बनाने के steps: पानी गरम करो → चाय पत्ती डालो → दूध डालो। Order बदला तो चाय खराब। Computer भी ऐसे ही line by line, order में चलता है।
+E Like the steps for making chai: heat the water → add tea leaves → add milk. Change the order and the chai is ruined. The computer also runs line by line, in order.
+@ Program kaise chalta hai
+H Program कैसे चलता है
+E How a program runs
+@ Line 1
+H Line 1
+E Line 1
+@ Line 2
+H Line 2
+E Line 2
+@ Line 3
+H Line 3
+E Line 3
+@ Output
+H Output
+E Output
+@ **Python** ek language hai
+H **Python** एक language है जिसमें हम ये instructions लिखते हैं। यह **English जैसी** है, इसलिए पढ़ने में आसान है। AI/ML में सबसे ज़्यादा Python ही use होती है, इसलिए हम यहीं से शुरू कर रहे हैं।
+E **Python** is the language we write these instructions in. It is **like English**, so it is easy to read. Python is the most used language in AI/ML, which is why we are starting here.
+@ `print` = screen pe kuch
+H `print` = screen पर कुछ **दिखाना**। यह तुम्हारा पहला और सबसे ज़्यादा use होने वाला हुक्म है।
+E `print` = **show** something on the screen. It is your first and most used instruction.
+@ Dhyan se dekh: `print` ke baad
+H ध्यान से देखो: `print` के बाद गोल bracket `( )`, और text हमेशा quotes `" "` में। हर `print` नई line पर दिखाता है।
+E Look carefully: after `print` come round brackets `( )`, and text always goes in quotes `" "`. Each `print` shows on a new line.
+@ Numbers ko quotes nahi
+H Numbers को quotes नहीं चाहिए। `/` (divide) हमेशा decimal देता है, इसलिए `2.0` आया।
+E Numbers do not need quotes. `/` (divide) always gives a decimal, which is why we got `2.0`.
+@ Quotes ke andar = **text**
+H Quotes के अंदर = **text** (जैसा लिखा वैसा दिखेगा)। Quotes के बाहर = **number / हिसाब**।
+E Inside quotes = **text** (shown exactly as written). Outside quotes = **numbers / maths**.
+@ Ek hi `print` mein comma
+H एक ही `print` में comma `,` लगाकर कई चीज़ें दिखा सकते हो। Python बीच में अपने आप एक space डाल देता है। `sep` से बीच का निशान बदलो, `end` से line का आखिरी हिस्सा।
+E You can show many things in one `print` by putting a comma `,` between them. Python adds a space between them automatically. Use `sep` to change the separator and `end` to change how the line ends.
+@ `#` ke baad jo likha
+H `#` के बाद जो लिखा हो वह **comment** है। Python उसे ignore करता है, यह सिर्फ इंसान के लिए note है: "यह line क्यों लिखी"।
+E Whatever comes after `#` is a **comment**. Python ignores it; it is just a note for humans: "why I wrote this line".
+@ Common galti: `print(\"Hello)`
+H आम गलती: `print("Hello)` (quote बंद नहीं किया), `Print("Hello")` (P capital — Python छोटे-बड़े अक्षर में फर्क करता है), `print "Hello"` (bracket नहीं)।
+E Common mistake: `print("Hello)` (quote not closed), `Print("Hello")` (capital P — Python treats small and capital letters differently), `print "Hello"` (no brackets).
+
+# ---------- lesson 2 ----------
+@ Variables aur data types
+H Variables और data types — डिब्बा और उसका माल
+E Variables and data types — the box and what's inside
+@ **Variable** = ek **dibba**
+H **Variable** = एक **डिब्बा** जिसके ऊपर नाम लिखा है, और अंदर कोई value रखी है। बाद में नाम से value वापस निकाल लेते हैं।
+E A **variable** = a **box** with a name written on top and a value kept inside. Later you get the value back using the name.
+@ Memory mein dibbe
+H Memory में डिब्बे
+E Boxes in memory
+@ Yahan `=` ka matlab
+H यहाँ `=` का मतलब **बराबर नहीं**, बल्कि **"रख दो"** है। Right side की value, left side के डिब्बे में जाती है।
+E Here `=` does **not mean equal**; it means **"put it in"**. The value on the right goes into the box on the left.
+@ Dibbe ki value badal sakti
+H डिब्बे की value बदल सकती है। पहले 10 था, फिर पुरानी value + 5 = 15 रख दिया। पुरानी value मिट जाती है।
+E A box's value can change. First it was 10, then we stored old value + 5 = 15. The old value is gone.
+@ Naam letter ya `_` se
+H नाम letter या `_` से शुरू हो, number से नहीं: `name1` सही, `1name` गलत।
+E A name must start with a letter or `_`, not a number: `name1` is right, `1name` is wrong.
+@ Space nahi:
+H Space नहीं: `my_name` सही, `my name` गलत।
+E No spaces: `my_name` is right, `my name` is wrong.
+@ Python ke apne shabd
+H Python के अपने शब्द (`if`, `for`, `class`, `True`) नाम नहीं बन सकते।
+E Python's own words (`if`, `for`, `class`, `True`) cannot be used as names.
+@ Naam aisa rakho jo kaam bataye
+H नाम ऐसा रखो जो काम बताए: `total_price`, न कि `x`। Python में छोटे letters + `_` (snake_case) चलता है।
+E Choose a name that tells the job: `total_price`, not `x`. Python style is small letters + `_` (snake_case).
+@ Common galti: `print(\"name\")`
+H आम गलती: `print("name")` लिखोगे तो डिब्बे की value नहीं, सीधा शब्द `name` print होगा। Variable के लिए quotes मत लगाओ। और `Name` और `name` दो अलग डिब्बे हैं।
+E Common mistake: if you write `print("name")`, you get the word `name`, not the value in the box. Don't put quotes around a variable. Also, `Name` and `name` are two different boxes.
+@ Har value ka ek **type**
+H हर value का एक **type** होता है, यानी डिब्बे में किस तरह का माल है। Python खुद पहचान लेता है।
+E Every value has a **type**, meaning what kind of goods are in the box. Python figures it out by itself.
+@ Kirana dukaan socho
+H किराना दुकान सोचो: चावल के packet गिने जाते हैं (पूरा number), चावल का वज़न 2.5 kg (decimal), दुकान का नाम (text), और "stock है?" का जवाब हाँ/ना। हर चीज़ का type अलग।
+E Think of a grocery shop: rice packets are counted (whole number), the rice weighs 2.5 kg (decimal), the shop has a name (text), and "in stock?" has a yes/no answer. Each thing has a different type.
+@ 4 basic data types
+H 4 basic data types
+E 4 basic data types
+@ Type
+H Type
+E Type
+@ Matlab
+H मतलब
+E Meaning
+@ Example
+H Example
+E Example
+@ pura number
+H पूरा number
+E whole number
+@ decimal number
+H decimal number
+E decimal number
+@ text
+H text
+E text
+@ haan / naa
+H हाँ / ना
+E yes / no
+@ Type badalna (**type conversion**)
+H Type बदलना (**type conversion**) बहुत काम का है, खासकर `input` के साथ: `int()`, `float()`, `str()`, `bool()`।
+E Changing the type (**type conversion**) is very useful, especially with `input`: `int()`, `float()`, `str()`, `bool()`.
+@ Type conversion
+H Type conversion
+E Type conversion
+@ Dhyan se dekh: `int(9.99)`
+H ध्यान से देखो: `int(9.99)` round नहीं करता, decimal का हिस्सा **काट** देता है, इसलिए `9`। Round चाहिए तो `round(9.99)` = `10`।
+E Look carefully: `int(9.99)` does not round; it **cuts off** the decimal part, so you get `9`. If you want rounding, `round(9.99)` = `10`.
+@ Common galti: `\"10\" + 5`
+H आम गलती: `"10" + 5` error देता है (TypeError), क्योंकि text और number सीधे जोड़ नहीं सकते। पहले `int("10")` करो। और `int("3.5")` भी error देता है; पहले `float("3.5")` करो।
+E Common mistake: `"10" + 5` gives an error (TypeError), because you can't add text and a number directly. Do `int("10")` first. Also `int("3.5")` gives an error; use `float("3.5")` first.
+@ `True` aur `False` ka pehla
+H `True` और `False` का पहला letter capital होता है। `true` लिखोगे तो error। `0` और खाली text `""` False माने जाते हैं, बाकी सब True। `None` का मतलब "अभी कुछ नहीं"।
+E `True` and `False` start with a capital letter. Write `true` and you get an error. `0` and empty text `""` count as False, everything else is True. `None` means "nothing yet".
+
+# ---------- lesson 3 ----------
+@ Operators aur math
+H Operators और math — Python एक calculator
+E Operators and maths — Python as a calculator
+@ Python ek bahut tez **calculator**
+H Python एक बहुत तेज़ **calculator** भी है। हिसाब के निशान को **operator** कहते हैं। ML में भी अंदर सब यही जोड़ना, गुणा, भाग ही चलता है।
+E Python is also a very fast **calculator**. A maths symbol is called an **operator**. Inside ML, too, it is all just this adding, multiplying and dividing.
+@ Math operators
+H Math operators
+E Maths operators
+@ Operator
+H Operator
+E Operator
+@ Result
+H Result
+E Result
+@ jodna
+H जोड़ना
+E add
+@ guna
+H गुणा
+E multiply
+@ bhaag (decimal)
+H भाग (decimal)
+E divide (decimal)
+@ bhaag (pura)
+H भाग (पूरा)
+E divide (whole)
+@ bacha hua
+H बचा हुआ
+E remainder
+@ power
+H power
+E power
+@ 17 samose, 5 dost.
+H 17 समोसे, 5 दोस्त। हर दोस्त को कितने मिले? `17 // 5` = 3। कितने बचे? `17 % 5` = 2। `//` = पूरे हिस्से, `%` = जो बच गया।
+E 17 samosas, 5 friends. How many does each friend get? `17 // 5` = 3. How many are left? `17 % 5` = 2. `//` = whole shares, `%` = what is left over.
+@ Factory ka real example
+H Factory का असली example: 1250 meter cable है, एक coil 100 meter का बनता है। कितने पूरे coil बने, और कितना cable बचा?
+E A real factory example: there are 1250 metres of cable, and one coil takes 100 metres. How many full coils can we make, and how much cable is left?
+@ `%` se even/odd
+H `%` से even/odd पता करो: `n % 2` अगर `0` है तो number even, `1` है तो odd। यह trick IQ और coding tests में बहुत आती है।
+E Use `%` to check even/odd: if `n % 2` is `0` the number is even, if it is `1` it is odd. This trick comes up a lot in IQs and coding tests.
+@ int aur float mile
+H int और float मिलें तो result **float** बन जाता है, इसलिए `5 + 2.0` = `7.0`।
+E When an int and a float meet, the result becomes a **float**, so `5 + 2.0` = `7.0`.
+@ **Order (precedence)**
+H **Order (precedence)** school के BODMAS जैसा है: पहले bracket `( )`, फिर `**`, फिर `* / // %`, आखिर में `+ -`। शक हो तो bracket लगा दो।
+E **Order (precedence)** is like BODMAS from school: brackets `( )` first, then `**`, then `* / // %`, and `+ -` last. When in doubt, add brackets.
+@ Kaun pehle chalega
+H कौन पहले चलेगा
+E What runs first
+@ **Shortcut operators**
+H **Shortcut operators**: `x += 5` मतलब `x = x + 5`। वैसे ही `-=`, `*=`, `/=`।
+E **Shortcut operators**: `x += 5` means `x = x + 5`. Same for `-=`, `*=`, `/=`.
+@ Kuch ready-made math helpers
+H कुछ ready-made math helpers: `abs()` (minus हटाओ), `round()`, `min()`, `max()`। और `math` module में `sqrt`, `pi` जैसी चीज़ें।
+E Some ready-made maths helpers: `abs()` (removes the minus), `round()`, `min()`, `max()`. And the `math` module has things like `sqrt` and `pi`.
+@ Common galti: `10 / 0`
+H आम गलती: `10 / 0` करोगे तो **ZeroDivisionError**। और `0.1 + 0.2` बिल्कुल `0.3` नहीं आता (`0.30000000000000004`), क्योंकि float binary में store होता है। पैसे दिखाने हों तो `round()` लगाओ।
+E Common mistake: `10 / 0` gives a **ZeroDivisionError**. And `0.1 + 0.2` is not exactly `0.3` (`0.30000000000000004`), because floats are stored in binary. When showing money, use `round()`.
+
+# ---------- lesson 4 ----------
+@ Strings basics
+H Strings basics — text के साथ खेल
+E String basics — playing with text
+@ **String (str)** = characters
+H **String (str)** = characters (अक्षरों) की line। Single quote `' '` या double quote `" "` दोनों चलते हैं, बस शुरू और बंद एक जैसा हो।
+E A **string (str)** = a line of characters (letters). Single quotes `' '` and double quotes `" "` both work, as long as the opening and closing match.
+@ String ka har akshar
+H String का हर अक्षर एक **index** (number) पर बैठा है। गिनती **0** से शुरू होती है। उल्टा (पीछे से) गिनो तो `-1`, `-2`...
+E Each letter of a string sits at an **index** (a number). Counting starts at **0**. Counting backwards (from the end) gives `-1`, `-2`...
+@ Train ke dibbe socho
+H Train के डिब्बे सोचो: engine के बाद पहला डिब्बा number 0, फिर 1, 2... आखिरी डिब्बा पकड़ना हो तो बोलो `-1`, गिनती की ज़रूरत ही नहीं।
+E Think of train coaches: the first coach after the engine is number 0, then 1, 2... To grab the last coach, just say `-1`, no counting needed.
+@ `len()` batata hai
+H `len()` बताता है string में कितने अक्षर हैं। Space भी गिना जाता है।
+E `len()` tells you how many characters a string has. Spaces count too.
+@ Common galti: `\"Python\"` ki length
+H आम गलती: `"Python"` की length 6 है, तो आखिरी index **5** है, 6 नहीं। `word[6]` लिखोगे तो **IndexError**।
+E Common mistake: `"Python"` has length 6, so the last index is **5**, not 6. Writing `word[6]` gives an **IndexError**.
+@ **Slicing (preview)**
+H **Slicing (preview)**: `word[start:end]` से एक टुकड़ा निकालो। `start` शामिल, `end` शामिल **नहीं**। खाली छोड़ो तो शुरू/आखिर तक।
+E **Slicing (preview)**: `word[start:end]` takes out a piece. `start` is included, `end` is **not**. Leave one empty to go from the start / to the end.
+@ Slicing Stage 4 mein
+H Slicing Stage 4 में lists पर भी आएगी, और Pandas में भी। अभी बस याद रखो: `end` वाला index छूट जाता है।
+E Slicing will come again with lists in Stage 4, and in Pandas too. For now just remember: the `end` index is left out.
+@ String ke paas apne kaam
+H String के पास अपने काम के tools (**methods**) हैं: `.upper()`, `.lower()`, `.title()`, `.strip()` (आगे-पीछे की spaces हटाओ), `.replace()`।
+E Strings have their own handy tools (**methods**): `.upper()`, `.lower()`, `.title()`, `.strip()` (removes spaces at the start and end), `.replace()`.
+@ Dhyan se dekh: string **badalti nahi**
+H ध्यान से देखो: string **बदलती नहीं** (immutable)। `.upper()` नई string देता है; पुरानी वही रहती है। रखनी हो तो वापस variable में डालो: `name = name.upper()`।
+E Look carefully: a string **does not change** (immutable). `.upper()` gives a new string; the old one stays the same. To keep it, put it back in the variable: `name = name.upper()`.
+@ **Escape characters**
+H **Escape characters**: backslash `\` के बाद वाला अक्षर खास काम करता है। Text के अंदर नई line, tab या quote डालने के लिए।
+E **Escape characters**: the character after a backslash `\` does something special. Use them to put a new line, a tab or a quote inside text.
+@ Escape characters
+H Escape characters
+E Escape characters
+@ Likho
+H लिखो
+E Write
+@ nayi line
+H नई line
+E new line
+@ tab space
+H tab space
+E tab space
+@ quote andar
+H अंदर quote
+E quote inside
+@ ek backslash
+H एक backslash
+E one backslash
+@ Common galti: Windows path
+H आम गलती: Windows path `"C:\new"` में `\n` नई line बन जाता है! `\\` लिखो या raw string `r"C:\new"` use करो।
+E Common mistake: in the Windows path `"C:\new"`, `\n` becomes a new line! Write `\\` or use a raw string `r"C:\new"`.
+
+# ---------- lesson 5 ----------
+@ input aur f-strings
+H input और f-strings
+E input and f-strings
+@ `input()` user se value
+H `input()` user से value **माँगता** है। जो भी type करो, वह हमेशा **text (str)** बनकर आता है।
+E `input()` **asks** the user for a value. Whatever you type always arrives as **text (str)**.
+@ Upar wala code chalao
+H ऊपर वाला code चलाओ तो screen पर `Tumhara naam? ` आएगा। तुम `Akash` लिखकर Enter दबाओगे तो `Namaste Akash` दिखेगा।
+E Run the code above and the screen shows `Tumhara naam? `. Type `Akash` and press Enter, and you will see `Namaste Akash`.
+@ input ka safar
+H input का सफ़र
+E The journey of input
+@ User type kare
+H User type करे
+E User types
+@ str value
+H str value
+E str value
+@ variable
+H variable
+E variable
+@ Number chahiye to seedha lapet do
+H Number चाहिए तो सीधा लपेट दो: `age = int(input("Age? "))`, decimal के लिए `float(input(...))`।
+E If you need a number, wrap it directly: `age = int(input("Age? "))`, and for decimals `float(input(...))`.
+@ **f-string** = text ke andar
+H **f-string** = text के अंदर variable सीधा डालने का सबसे आसान तरीका। Quote से पहले `f` लगाओ और variable को `{ }` में लिखो।
+E An **f-string** = the easiest way to put a variable straight into text. Put `f` before the quote and write the variable inside `{ }`.
+@ `{ }` ke andar hisaab
+H `{ }` के अंदर हिसाब भी चल जाता है: `{age + 1}`, `{price * 2}`। और `{price:.2f}` = decimal के बाद सिर्फ 2 digit।
+E Maths works inside `{ }` too: `{age + 1}`, `{price * 2}`. And `{price:.2f}` = only 2 digits after the decimal point.
+@ Text jodne ke aur tareeke
+H Text जोड़ने के और तरीके भी हैं, सबका result same। लेकिन f-string सबसे साफ़ है और आजकल सबसे ज़्यादा use होती है।
+E There are other ways to join text too, all with the same result. But the f-string is the cleanest and the most used today.
+@ Text jodna
+H Text जोड़ना
+E Joining text
+@ + se
+H + से
+E With +
+@ str() bhoolo to error
+H str() भूले तो error
+E forget str() = error
+@ lamba
+H लंबा
+E long
+@ f-string
+H f-string
+E f-string
+@ type ki tension nahi
+H type की टेंशन नहीं
+E no type worries
+@ saaf aur tez
+H साफ़ और तेज़
+E clean and fast
+@ Common galti: `f` lagana
+H आम गलती: `f` लगाना भूल गए तो `{name}` जैसा का तैसा print होगा। और `"Age: " + 25` TypeError देता है; `str(25)` या f-string use करो।
+E Common mistake: forget the `f` and `{name}` is printed as it is. And `"Age: " + 25` gives a TypeError; use `str(25)` or an f-string.
+
+# ---------- lesson 6 ----------
+@ Pehli .py file
+H पहली .py file और error message पढ़ना
+E Your first .py file and reading error messages
+@ Ab tak chhote code tukde
+H अब तक छोटे code टुकड़े देखे। असली काम में code एक **file** में लिखते हैं जिसका नाम `.py` पर खत्म होता है, जैसे `hello.py`। File save रहती है, बार-बार चला सकते हो।
+E So far we have seen small pieces of code. In real work, code is written in a **file** whose name ends in `.py`, like `hello.py`. The file stays saved and you can run it again and again.
+@ Editor kholo
+H Editor खोलो (VS Code, या phone पर इसी app का editor)।
+E Open an editor (VS Code, or this app's editor on your phone).
+@ Nayi file banao
+H नई file बनाओ, नाम रखो `hello.py`।
+E Create a new file and name it `hello.py`.
+@ Code likho aur save karo.
+H Code लिखो और save करो।
+E Write the code and save it.
+@ Terminal mein usi folder
+H Terminal में उसी folder में जाकर लिखो: `python hello.py` (Linux/Mac पर अक्सर `python3 hello.py`)।
+E In the terminal, go to that folder and type: `python hello.py` (on Linux/Mac it is often `python3 hello.py`).
+@ File se program
+H File से program
+E Program from a file
+@ hello.py likho
+H hello.py लिखो
+E Write hello.py
+@ Save
+H Save
+E Save
+@ Galti hogi, aur woh bilkul
+H गलती होगी, और वह बिल्कुल ठीक है। Python गलती पर रुककर **error message (Traceback)** दिखाता है। यह दुश्मन नहीं, **दोस्त** है: बताता है कहाँ और क्या गलत है।
+E You will make mistakes, and that is totally fine. On a mistake Python stops and shows an **error message (Traceback)**. It is not an enemy but a **friend**: it tells you where and what went wrong.
+@ Factory ki machine ka alarm
+H Factory की machine का alarm panel सोचो: वह बताता है कौन सी machine (file), कौन सा हिस्सा (line number), और क्या problem (error type)। Alarm पढ़कर ही mechanic ठीक करता है।
+E Think of a factory machine's alarm panel: it tells you which machine (file), which part (line number), and what the problem is (error type). The mechanic fixes it by reading the alarm.
+@ Traceback padhna
+H Traceback पढ़ना
+E Reading a traceback
+@ Traceback
+H Traceback
+E Traceback
+@ File + line no.
+H File + line no.
+E File + line no.
+@ Galat wali line
+H गलत वाली line
+E The wrong line
+@ ErrorType: wajah
+H ErrorType: वजह
+E ErrorType: reason
+@ Dhyan se dekh: error **neeche se upar**
+H ध्यान से देखो: error **नीचे से ऊपर** पढ़ो। 1) आखिरी line: error का type और वजह। 2) ऊपर: file और **line number**। 3) उस line पर जाकर देखो। यहाँ Python ने खुद बता दिया: `nam` नहीं, `name` लिखना था।
+E Look carefully: read the error **from the bottom up**. 1) Last line: the error type and the reason. 2) Above it: the file and **line number**. 3) Go to that line and look. Here Python even told us: it should be `name`, not `nam`.
+@ **SyntaxError** = grammar
+H **SyntaxError** = grammar की गलती (bracket/quote बंद नहीं, colon छूटा)। यह code चलने से **पहले** ही पकड़ी जाती है, इसलिए एक भी line नहीं चलती।
+E **SyntaxError** = a grammar mistake (bracket/quote not closed, colon missing). It is caught **before** the code runs, so not a single line runs.
+@ **NameError** = Python ko
+H **NameError** = Python को यह नाम मिला ही नहीं। Spelling गलत, छोटा-बड़ा letter गलत, या variable बनाने से पहले use कर लिया।
+E **NameError** = Python could not find this name. Wrong spelling, wrong small/capital letter, or the variable was used before it was created.
+@ **TypeError** = galat type
+H **TypeError** = गलत type के साथ काम। जैसे text और number को `+` से जोड़ना।
+E **TypeError** = working with the wrong type. For example, joining text and a number with `+`.
+@ **ValueError** = type to sahi
+H **ValueError** = type तो सही है, लेकिन value बेकार। जैसे `int("abc")`: text को number बनाना था, पर `abc` कोई number नहीं।
+E **ValueError** = the type is right but the value is useless. For example `int("abc")`: we wanted to turn text into a number, but `abc` is not a number.
+@ Common errors
+H Common errors
+E Common errors
+@ Error
+H Error
+E Error
+@ Kab aata hai
+H कब आता है
+E When it happens
+@ grammar galat
+H grammar गलत
+E bad grammar
+@ naam nahi mila
+H नाम नहीं मिला
+E name not found
+@ type mismatch
+H type mismatch
+E type mismatch
+@ value galat
+H value गलत
+E bad value
+@ galat space
+H गलत space
+E wrong spacing
+@ 0 se bhaag
+H 0 से भाग
+E divide by 0
+@ Common galti: line ke shuru
+H आम गलती: line के शुरू में फालतू space डाल दी तो **IndentationError**। Python में शुरू की space का मतलब होता है (Stage 2 में if/for के साथ देखोगे)।
+E Common mistake: an extra space at the start of a line gives an **IndentationError**. In Python, the space at the start of a line has a meaning (you will see this with if/for in Stage 2).
+@ Error samajh na aaye
+H Error समझ न आए तो आखिरी line copy करके search करो या AI से पूछो। Stage 5 में `try/except` से errors को पकड़ना (handle करना) भी सीखेंगे।
+E If you don't understand an error, copy the last line and search it, or ask an AI. In Stage 5 we will also learn to catch (handle) errors with `try/except`.
+
+# ---------- teach ----------
+@ Chalo shuru karte hain.
+H चलो शुरू करते हैं। Program मतलब computer को दिए गए हुक्म, एक के बाद एक, ऊपर से नीचे।
+E Let's begin. A program means orders given to the computer, one after another, top to bottom.
+@ Hukum 1
+H हुक्म 1
+E Order 1
+@ Hukum 2
+H हुक्म 2
+E Order 2
+@ Hukum 3
+H हुक्म 3
+E Order 3
+@ Sabse pehla hukum: print.
+H सबसे पहला हुक्म: print। जो bracket के अंदर लिखोगे, screen पर दिखेगा। Text quotes में, number बिना quotes।
+E The very first order: print. Whatever you write inside the brackets shows on the screen. Text in quotes, numbers without quotes.
+@ Ab socho ek dibba hai
+H अब सोचो एक डिब्बा है, ऊपर नाम लिखा है 'name', और अंदर रखा है Akash। इसी को variable कहते हैं।
+E Now imagine a box with 'name' written on top and Akash kept inside. This is called a variable.
+@ Yahan barabar ka nishaan
+H यहाँ बराबर का निशान मतलब 'रख दो'। Right की value left के डिब्बे में जाती है, और नई value पुरानी को हटा देती है।
+E Here the equals sign means 'put it in'. The value on the right goes into the box on the left, and a new value replaces the old one.
+@ Har value ka type hota hai
+H हर value का type होता है: पूरा number int, decimal float, text str, और हाँ-ना bool।
+E Every value has a type: a whole number is int, a decimal is float, text is str, and yes/no is bool.
+@ Ab hisaab. 17 samose
+H अब हिसाब। 17 समोसे, 5 दोस्त: double slash से पूरे हिस्से मिलते हैं, percent से जो बचा। ये दोनों बहुत काम आते हैं।
+E Now maths. 17 samosas, 5 friends: double slash gives the whole shares, percent gives what is left. Both are very useful.
+@ String ke har akshar ka
+H String के हर अक्षर का एक number होता है, zero से शुरू। पीछे से गिनो तो minus एक। len बताता है कुल कितने अक्षर।
+E Every letter in a string has a number, starting from zero. Counting from the back starts at minus one. len tells you the total number of letters.
+@ input se jo bhi aata hai
+H input से जो भी आता है, वह text होता है। Number चाहिए तो int लगाओ।
+E Whatever comes from input is text. If you need a number, use int.
+@ f-string: quote se pehle f
+H f-string: quote से पहले f, और variable curly bracket में। Python खुद value भर देता है। बस, sentence तैयार।
+E f-string: an f before the quote, and the variable in curly brackets. Python fills in the value itself. That's it, the sentence is ready.
+@ Aur galti hogi to ghabrana nahi
+H और गलती हो तो घबराना नहीं। Error की आखिरी line पढ़ो, line number देखो, ठीक करो। Python छोटे-बड़े अक्षर को अलग मानता है, यह याद रखना। अब practice करो!
+E And if you make a mistake, don't panic. Read the last line of the error, check the line number, fix it. Remember, Python treats small and capital letters as different. Now go practise!
+@ Sahi
+H सही
+E Right
+@ Galat
+H गलत
+E Wrong
+
+# ---------- practice ----------
+@ `name = \"  akash kumar  \"` diya hai.
+H `name = "  akash kumar  "` दिया है। आगे-पीछे की spaces हटाओ, हर शब्द का पहला letter capital करो, और यह print करो:⏎Akash Kumar⏎Length: 11⏎Pehla akshar: A
+E You are given `name = "  akash kumar  "`. Remove the spaces at the start and end, make the first letter of each word capital, and print this:⏎Akash Kumar⏎Length: 11⏎Pehla akshar: A
+@ clean = name.strip().title(), phir
+H clean = name.strip().title(), फिर len(clean) और clean[0]।
+E clean = name.strip().title(), then len(clean) and clean[0].
+@ Variables `price = 120`
+H Variables `price = 120` और `qty = 3` बनाओ और f-string से print करो:⏎Total: 360
+E Create the variables `price = 120` and `qty = 3` and print using an f-string:⏎Total: 360
+@ print(f\"Total: {price * qty}\")
+H print(f"Total: {price * qty}")
+E print(f"Total: {price * qty}")
+@ Cable ki length text mein
+H Cable की length text में आई है: `length = "1250"` (meter)। एक coil 100 meter का बनता है। Length को number में बदलो, फिर `//` और `%` से यह print करो:⏎Pure coil: 12⏎Bacha hua: 50 m
+E The cable length has come in as text: `length = "1250"` (metres). One coil takes 100 metres. Convert the length to a number, then use `//` and `%` to print this:⏎Pure coil: 12⏎Bacha hua: 50 m
+@ meters = int(length), phir
+H meters = int(length), फिर meters // coil और meters % coil।
+E meters = int(length), then meters // coil and meters % coil.
+
+# ---------- quiz ----------
+@ `print(\"5\" + \"5\")` ka output
+H `print("5" + "5")` का output क्या होगा?
+E What will `print("5" + "5")` output?
+@ Dono text hain
+H दोनों text हैं, और text का + उन्हें जोड़ देता है: "55"।
+E Both are text, and + on text joins them: "55".
+@ `print(17 // 5)` kya
+H `print(17 // 5)` क्या print करेगा?
+E What will `print(17 // 5)` print?
+@ `//` bhaag ka sirf
+H `//` भाग का सिर्फ पूरा हिस्सा देता है: 17 में 5 तीन बार पूरा जाता है।
+E `//` gives only the whole part of the division: 5 goes into 17 three full times.
+@ Kaunsa variable naam sahi
+H कौन सा variable नाम सही है?
+E Which variable name is valid?
+@ Naam number se shuru
+H नाम number से शुरू नहीं हो सकता, space या - नहीं चलता; underscore चलता है।
+E A name can't start with a number, and spaces or - are not allowed; underscore is fine.
+@ `input()` hamesha kis type
+H `input()` हमेशा किस type की value देता है?
+E What type of value does `input()` always return?
+@ User jo bhi type kare
+H User जो भी type करे, input उसे text (str) बनाकर देता है।
+E Whatever the user types, input gives it back as text (str).
+@ `type(3.0)` kya hai?
+H `type(3.0)` क्या है?
+E What is `type(3.0)`?
+@ Decimal point wala number
+H Decimal point वाला number float होता है, चाहे .0 ही हो।
+E A number with a decimal point is a float, even if it is just .0.
+@ `word = \"Python\"` ho to
+H `word = "Python"` हो तो `word[-1]` क्या देगा?
+E If `word = "Python"`, what does `word[-1]` give?
+@ `-1` matlab peeche se
+H `-1` मतलब पीछे से पहला, यानी आखिरी अक्षर: n।
+E `-1` means the first from the back, that is, the last letter: n.
+@ Kaunsi line error degi?
+H कौन सी line error देगी?
+E Which line will give an error?
+@ Python case-sensitive hai;
+H Python case-sensitive है; `Print` नाम का कोई function नहीं, NameError आएगा।
+E Python is case-sensitive; there is no function called `Print`, so you get a NameError.
+@ `name = \"Ravi\"` ho to
+H `name = "Ravi"` हो तो `print(f"Hi {name}")` का output?
+E If `name = "Ravi"`, what is the output of `print(f"Hi {name}")`?
+@ f-string `{name}` ki jagah
+H f-string `{name}` की जगह variable की value डाल देती है।
+E The f-string puts the variable's value in place of `{name}`.
+@ `name` banaya hi nahi
+H `name` बनाया ही नहीं और `print(name)` लिख दिया। कौन सा error आएगा?
+E You never created `name` but wrote `print(name)`. Which error will you get?
+@ Python ko `name` naam ka
+H Python को `name` नाम का कोई डिब्बा मिला ही नहीं, इसलिए NameError।
+E Python could not find any box called `name`, so it is a NameError.
+@ `print(\"Age: \" + 25)` ka kya
+H `print("Age: " + 25)` का क्या होगा?
+E What happens with `print("Age: " + 25)`?
+@ Text aur number ko `+`
+H Text और number को `+` से सीधा नहीं जोड़ सकते; `str(25)` या f-string चाहिए।
+E You can't join text and a number directly with `+`; you need `str(25)` or an f-string.
+
+# ---------- iq ----------
+@ Python kya hai aur AI/ML
+H Python क्या है और AI/ML में इतनी popular क्यों है?
+E What is Python and why is it so popular in AI/ML?
+@ Python ek high-level
+H Python एक high-level, interpreted, पढ़ने में आसान language है। AI/ML में popular है क्योंकि इसके पास NumPy, Pandas, scikit-learn, PyTorch जैसी बड़ी libraries हैं, community बहुत बड़ी है, और ideas जल्दी prototype हो जाते हैं।
+E Python is a high-level, interpreted, easy-to-read language. It is popular in AI/ML because it has big libraries like NumPy, Pandas, scikit-learn and PyTorch, a huge community, and ideas can be prototyped quickly.
+@ Interpreted language ka
+H Interpreted language का क्या मतलब है?
+E What does "interpreted language" mean?
+@ Code ko pehle poora
+H Code को पहले पूरा machine code में compile नहीं करते; interpreter line by line पढ़कर चलाता है। इससे testing आसान होती है, लेकिन C/C++ से थोड़ा slow होता है।
+E The code is not compiled fully into machine code first; the interpreter reads and runs it line by line. This makes testing easy, but it is a bit slower than C/C++.
+@ Python dynamically typed
+H Python dynamically typed है — इसका मतलब?
+E Python is dynamically typed — what does that mean?
+@ Variable ka type pehle
+H Variable का type पहले declare नहीं करना पड़ता; value से type अपने आप तय होता है, और बाद में बदल भी सकता है: `x = 5` फिर `x = "hi"` चल जाता है।
+E You don't have to declare a variable's type first; the type is decided automatically from the value, and it can change later: `x = 5` and then `x = "hi"` works.
+@ `=` aur `==` mein
+H `=` और `==` में क्या फर्क है?
+E What is the difference between `=` and `==`?
+@ `=` assignment hai
+H `=` assignment है (value डिब्बे में रखना)। `==` comparison है (दोनों बराबर हैं क्या), जो True/False देता है।
+E `=` is assignment (putting a value in the box). `==` is comparison (are both equal?), which gives True/False.
+@ Python ke basic data types
+H Python के basic data types बताओ।
+E Name Python's basic data types.
+@ int (pura number)
+H int (पूरा number), float (decimal), str (text), bool (True/False)। इसके अलावा complex और NoneType भी हैं। Collections: list, tuple, set, dict।
+E int (whole number), float (decimal), str (text), bool (True/False). There are also complex and NoneType. Collections: list, tuple, set, dict.
+@ `/`, `//` aur `%`
+H `/`, `//` और `%` में क्या फर्क है?
+E What is the difference between `/`, `//` and `%`?
+@ `/` normal bhaag hai
+H `/` normal भाग है और हमेशा float देता है (`7 / 2` = 3.5)। `//` floor division है, सिर्फ पूरा हिस्सा (`7 // 2` = 3)। `%` modulo है, बचा हुआ (`7 % 2` = 1); even/odd check में बहुत use होता है।
+E `/` is normal division and always gives a float (`7 / 2` = 3.5). `//` is floor division, only the whole part (`7 // 2` = 3). `%` is modulo, the remainder (`7 % 2` = 1); it is used a lot for even/odd checks.
+@ input() se aaye number
+H input() से आए number पर हिसाब क्यों error देता है?
+E Why does maths on a number from input() give an error?
+@ Kyunki input hamesha str
+H क्योंकि input हमेशा str देता है। `"5" + 1` TypeError देगा। पहले `int(input())` या `float(input())` से convert करना पड़ता है।
+E Because input always returns a str. `"5" + 1` gives a TypeError. You first have to convert it with `int(input())` or `float(input())`.
+@ f-string kya hai aur
+H f-string क्या है और इसका फायदा?
+E What is an f-string and what is its benefit?
+@ Python 3.6+ ka string
+H Python 3.6+ का string formatting तरीका: `f"Hi {name}"`। पढ़ने में साफ़, तेज़, और `{}` के अंदर expressions भी चल जाते हैं, जैसे `{price * qty}` या `{x:.2f}`।
+E Python 3.6+'s way of formatting strings: `f"Hi {name}"`. It is clean to read, fast, and expressions also work inside `{}`, like `{price * qty}` or `{x:.2f}`.
+@ Strings mutable hain
+H Strings mutable हैं या immutable? इसका क्या असर है?
+E Are strings mutable or immutable? What effect does that have?
+@ Strings immutable hain:
+H Strings immutable हैं: एक बार बनी तो अंदर से बदल नहीं सकती। `s[0] = "X"` TypeError देता है। `.upper()`, `.replace()` जैसे methods नई string return करते हैं, इसलिए `s = s.upper()` लिखना पड़ता है।
+E Strings are immutable: once created, they can't be changed from inside. `s[0] = "X"` gives a TypeError. Methods like `.upper()` and `.replace()` return a new string, so you have to write `s = s.upper()`.
+@ Python mein comment kaise
+H Python में comment कैसे लिखते हैं और docstring क्या है?
+E How do you write a comment in Python, and what is a docstring?
+@ Single-line comment `#` se.
+H Single-line comment `#` से। Docstring triple quotes `"""..."""` में function/class के शुरू में लिखी documentation है, जो `help()` में दिखती है।
+E A single-line comment starts with `#`. A docstring is documentation written in triple quotes `"""..."""` at the start of a function/class, and it shows up in `help()`.
+@ Error aane pe tum debug
+H Error आने पर तुम debug कैसे करते हो? SyntaxError और runtime error में फर्क?
+E How do you debug when you get an error? What is the difference between a SyntaxError and a runtime error?
+@ Traceback neeche se upar
+H Traceback नीचे से ऊपर पढ़ता हूँ: आखिरी line में error type और वजह, ऊपर file और line number। SyntaxError code चलने से पहले ही आता है (grammar गलत), इसलिए एक भी line नहीं चलती। NameError, TypeError, ValueError, ZeroDivisionError runtime errors हैं, जो चलते समय उस line पर आते हैं।
+E I read the traceback from the bottom up: the last line has the error type and reason, and above it are the file and line number. A SyntaxError comes before the code runs (bad grammar), so not a single line runs. NameError, TypeError, ValueError and ZeroDivisionError are runtime errors, which happen at that line while the program is running.
+@ `print(0.1 + 0.2)` ka output
+H `print(0.1 + 0.2)` का output 0.3 क्यों नहीं आता?
+E Why doesn't `print(0.1 + 0.2)` output 0.3?
+@ Floats binary mein exactly
+H Floats binary में exactly store नहीं होते, इसलिए `0.30000000000000004` आता है। पैसे जैसे exact काम के लिए `round()` या `decimal.Decimal` use करते हैं।
+E Floats are not stored exactly in binary, so you get `0.30000000000000004`. For exact work like money, use `round()` or `decimal.Decimal`.
+
+# ---------- code comments (text after '#') ----------
+@ Yeh poori line comment hai
+H यह पूरी line comment है
+E This whole line is a comment
+@ line ke end mein bhi comment chal jaata hai
+H line के end में भी comment चल जाता है
+E a comment also works at the end of a line
+@ swap: dono ki value adla-badli
+H swap: दोनों की value अदला-बदली
+E swap: exchange the two values
+@ abhi koi value nahi
+H अभी कोई value नहीं
+E no value yet
+@ 30 bik gaye
+H 30 बिक गए
+E 30 sold
+@ 10 naye aaye
+H 10 नए आए
+E 10 new arrived
+@ input se aaya text, int mein badla
+H input से आया text, int में बदला
+E text from input, changed to int
+@ TODO: strip() aur title() se clean naam banao
+H TODO: strip() और title() से clean नाम बनाओ
+E TODO: make a clean name with strip() and title()
+@ TODO: clean, uski length aur pehla akshar print karo
+H TODO: clean, उसकी length और पहला अक्षर print करो
+E TODO: print clean, its length and its first letter
+@ TODO: f-string se total print karo
+H TODO: f-string से total print करो
+E TODO: print the total with an f-string
+@ TODO: length ko int mein badlo
+H TODO: length को int में बदलो
+E TODO: convert length to int
+@ TODO: // se pure coil, % se bacha hua cable nikaalo
+H TODO: // से पूरे coil, % से बचा हुआ cable निकालो
+E TODO: get full coils with // and leftover cable with %
+@ TODO: f-string se dono print karo
+H TODO: f-string से दोनों print करो
+E TODO: print both with f-strings
