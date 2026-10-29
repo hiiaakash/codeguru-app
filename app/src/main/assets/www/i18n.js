@@ -1,16 +1,16 @@
 /* Code Guru - interface text in 3 languages. */
 window.CG_I18N = {
   hinglish: {
-    cheatBooks: "Cheat Books", cheatNote: "Tumhari Master Books, game-style chapters mein.", formatsList: "Chalne wale formats: PDF, Word (.docx), PowerPoint (.pptx), EPUB, Jupyter notebook (.ipynb), Markdown (.md), HTML, TXT, OpenDocument (.odt), code files (.py, .js, .sql, .java, .cpp...), aur Claude ka pack (.json). Scan/photo wali file (bina text) nahi chalti.",
+    cheatBooks: "Cheat Books", cheatNote: "Tumhari Master Books, game-style chapters mein.", formatsList: "Chalne wale formats: PDF, Word (.docx), PowerPoint (.pptx), EPUB, Jupyter notebook (.ipynb), Markdown (.md), HTML, TXT, OpenDocument (.odt), code files (.py, .js, .sql, .java, .cpp...). Scan/photo wali file (bina text) nahi chalti.",
     course: "AI/ML Engineer course", courses: "Courses", myCourse: "Mera course", openCourse: "Course kholo",
     notes: "Notes", addNote: "Note likho", editNote: "Note badlo", noteSaved: "Note save ho gaya", notePh: "Jo samjha, jo yaad rakhna hai, likh do…", noNotes: "Abhi koi note nahi. Padhte waqt 📝 dabao.", saveToNotes: "📝 Notes mein save", searchNotes: "🔍 Notes mein dhoondho", exportNotes: "⬇ Notes download", copyAll: "📋 Sab copy", pin: "📌 Pin", unpin: "Unpin", edit: "✏️ Edit", save: "Save", general: "General note",
     menu: "Menu", resume: "▶ Wapas padhai", downloadStage: "⬇ Yeh stage download karo (HTML)", pdfStage: "🖨 Yeh stage PDF banao", downloaded: "Download ho gaya", help: "Madad / Kaise use karein",
     games: "Games", gamesIntro: "Khel-khel mein pakka karo. Har game se XP milta hai.", gOut: "🎯 Output batao", gOutD: "Code dekho, output pehchano", gFill: "🧩 Code bharo", gFillD: "Code ki khaali jagah bharo", gSpeed: "⚡ Speed round", gSpeedD: "60 second, 3 jaan", gMatch: "🔗 Jodi milao", gMatchD: "Sawal ko sahi jawab se jodo",
     lives: "Jaan", time: "Samay", gameOver: "Game khatam!", playAgain: "Phir khelo", noGame: "Is stage mein yeh game banane layak content nahi hai.", pickPair: "Pehle baayein se ek chuno, phir uska jawab",
-    pdfTitle: "Book / file se course banao", pdfIntro: "Koi bhi book ya notes ki file chuno. App use padh kar chapter-wise stages, teacher class, game, test aur IQ sawal khud bana dega — bina internet.", pdfPick: "📂 File chuno", pdfWorking: "File padh raha hoon…", pdfDone: "Course ban gaya! \"Meri books\" mein dekho.", pdfNote: "Auto course book ke text se banta hai. Behtar course ke liye PDF Claude ko bhejo (neeche wala tareeka).", packTitle: "Claude se bana pack import karo",
+    pdfTitle: "Book / file se course banao", pdfIntro: "Koi bhi book ya notes ki file chuno. App use padh kar chapter-wise stages, teacher class, game, test aur IQ sawal khud bana dega — bina internet.", pdfPick: "📂 File chuno", pdfWorking: "File padh raha hoon…", pdfDone: "Course ban gaya! \"Meri books\" mein dekho.", pdfNote: "Course file ke apne text se, phone mein hi, bina internet ke banta hai. Saaf chapter aur heading wali file se sabse achha course banta hai.", 
     libLoading: "Library load ho rahi hai (pehli baar 20-60 second)…", libMissing: "Yeh library is app mein nahi hai. Offline sirf numpy, pandas, scikit-learn, matplotlib aur standard library chalti hain.",
     bestAnswer: "Sabse achha jawab", related: "Aur related", autoBook: "Auto",
-    helpItems: ["📖 Padho: har stage ke lessons padho, \"Samajh gaya\" dabao.", "🧑‍🏫 Teacher: board pe chitra aur awaaz ke saath class. ⏸ se roko, ⏭ se aage.", "💻 Practice: code likho, ▶ Run karo, ✓ Check karo. Hint/Solution bhi hai.", "🎮 Games: output batao, code bharo, speed round, jodi milao.", "📝 Test: 10 sawaal, 80% pe agla stage khulta hai.", "🎯 IQ: sabse zyada puchhe jaane wale sawal aur jawab.", "📝 upar ka button: kabhi bhi note likho. Home → Notes mein sab milenge.", "☰ Menu: stage download/PDF, notes, Ask, Playground, settings.", "📕 PDF se course: Home → PDF se course banao.", "💬 Ask: koi bhi doubt likho. 💻 Playground: koi bhi code chalao (numpy, pandas, sklearn, matplotlib bhi).", "💾 Settings → Backup: progress ki file bana ke rakh lo."],
+    helpItems: ["📖 Padho: har stage ke lessons padho, \"Samajh gaya\" dabao.", "🧑‍🏫 Teacher: board pe chitra aur awaaz ke saath class. ⏸ se roko, ⏭ se aage.", "💻 Practice: code likho, ▶ Run karo, ✓ Check karo. Hint/Solution bhi hai.", "🎮 Games: output batao, code bharo, speed round, jodi milao.", "📝 Test: 10 sawaal, 80% pe agla stage khulta hai.", "🎯 IQ: sabse zyada puchhe jaane wale sawal aur jawab.", "📝 upar ka button: kabhi bhi note likho. Home → Notes mein sab milenge.", "☰ Menu: stage download/PDF, notes, Ask, Playground, settings.", "📕 File se course: Home → Book / file se course banao → koi bhi PDF, Word ya notes file chuno, naya course khud ban jayega.", "💬 Ask: koi bhi doubt likho. 💻 Playground: koi bhi code chalao (numpy, pandas, sklearn, matplotlib bhi).", "💾 Settings → Backup: progress ki file bana ke rakh lo."],
     appTagline: "Tera personal coding guru — zero se job-ready tak",
     hello: "Namaste!", level: "Level", xp: "XP", streak: "din ki streak",
     continue: "Aage padho", start: "Shuru karo", chooseRole: "Job role chuno",
@@ -39,9 +39,7 @@ window.CG_I18N = {
     askNone: "Is sawaal ka jawab books mein nahi mila. Chhote, simple words mein poocho (jaise \"for loop\", \"dict\", \"overfitting\").",
     openInStage: "Stage mein kholo", runInPlayground: "Yeh code Playground mein chalao", errorHelp: "Error ka matlab",
     pgIntro: "Yahan koi bhi Python ya JavaScript code likho aur chalao — bina internet.",
-    importIntro: "Kisi bhi book / PDF ka game-style course banao:",
-    importSteps: ["PDF Claude ko bhejo aur neeche wala prompt saath mein paste karo.", "Claude ek .json \"content pack\" file dega.", "Woh file yahan Import karo — uske stages, test aur IQ sawaal ban jaayenge."],
-    copyPrompt: "Prompt copy karo", chooseFile: "📂 Pack file chuno (.json)", imported: "Book import ho gayi!", importBad: "Yeh sahi Code Guru pack nahi hai",
+    importIntro: "Kisi bhi book / PDF ka game-style course banao:",   imported: "Book import ho gayi!", importBad: "Yeh sahi Code Guru pack nahi hai",
     delete: "Delete", confirmDelete: "Pakka delete karna hai?", cancel: "Cancel", yes: "Haan",
     language: "Bhasha", theme: "Theme", auto: "Auto", light: "Light", dark: "Dark", textSize: "Text size",
     voice: "Teacher ki awaaz", voiceSpeed: "Awaaz ki speed", backup: "Progress backup", backupBtn: "⬇ Backup file banao", restoreBtn: "⬆ Backup se wapas lao",
@@ -55,16 +53,16 @@ window.CG_I18N = {
     teachDone: "class li", practiceDone: "practice", iqDone: "IQ dekhe",
   },
   hindi: {
-    cheatBooks: "Cheat Books", cheatNote: "आपकी Master Books, game-style chapters में।", formatsList: "चलने वाले formats: PDF, Word (.docx), PowerPoint (.pptx), EPUB, Jupyter notebook (.ipynb), Markdown (.md), HTML, TXT, OpenDocument (.odt), code files (.py, .js, .sql, .java, .cpp...), और Claude का pack (.json)। Scan/photo वाली file (बिना text) नहीं चलती।",
+    cheatBooks: "Cheat Books", cheatNote: "आपकी Master Books, game-style chapters में।", formatsList: "चलने वाले formats: PDF, Word (.docx), PowerPoint (.pptx), EPUB, Jupyter notebook (.ipynb), Markdown (.md), HTML, TXT, OpenDocument (.odt), code files (.py, .js, .sql, .java, .cpp...)। Scan/photo वाली file (बिना text) नहीं चलती।",
     course: "AI/ML Engineer course", courses: "Courses", myCourse: "मेरा course", openCourse: "Course खोलें",
     notes: "Notes", addNote: "Note लिखें", editNote: "Note बदलें", noteSaved: "Note save हो गया", notePh: "जो समझा, जो याद रखना है, लिख दें…", noNotes: "अभी कोई note नहीं। पढ़ते समय 📝 दबाएँ।", saveToNotes: "📝 Notes में save", searchNotes: "🔍 Notes में ढूँढें", exportNotes: "⬇ Notes download", copyAll: "📋 सब copy", pin: "📌 Pin", unpin: "Unpin", edit: "✏️ Edit", save: "Save", general: "General note",
     menu: "Menu", resume: "▶ वापस पढ़ाई", downloadStage: "⬇ यह stage download करें (HTML)", pdfStage: "🖨 यह stage PDF बनाएँ", downloaded: "Download हो गया", help: "मदद / कैसे use करें",
     games: "Games", gamesIntro: "खेल-खेल में पक्का करें। हर game से XP मिलता है।", gOut: "🎯 Output बताओ", gOutD: "Code देखो, output पहचानो", gFill: "🧩 Code भरो", gFillD: "Code की ख़ाली जगह भरो", gSpeed: "⚡ Speed round", gSpeedD: "60 second, 3 जान", gMatch: "🔗 जोड़ी मिलाओ", gMatchD: "सवाल को सही जवाब से जोड़ो",
     lives: "जान", time: "समय", gameOver: "Game ख़त्म!", playAgain: "फिर खेलें", noGame: "इस stage में यह game बनाने लायक content नहीं है।", pickPair: "पहले बाएँ से एक चुनें, फिर उसका जवाब",
-    pdfTitle: "Book / file से course बनाएँ", pdfIntro: "कोई भी book या notes की file चुनें। App उसे पढ़कर chapter-wise stages, teacher class, game, test और IQ सवाल ख़ुद बना देगा — बिना internet।", pdfPick: "📂 File चुनें", pdfWorking: "File पढ़ रहा हूँ…", pdfDone: "Course बन गया! \"मेरी books\" में देखें।", pdfNote: "Auto course book के text से बनता है। बेहतर course के लिए PDF Claude को भेजें (नीचे वाला तरीका)।", packTitle: "Claude से बना pack import करें",
+    pdfTitle: "Book / file से course बनाएँ", pdfIntro: "कोई भी book या notes की file चुनें। App उसे पढ़कर chapter-wise stages, teacher class, game, test और IQ सवाल ख़ुद बना देगा — बिना internet।", pdfPick: "📂 File चुनें", pdfWorking: "File पढ़ रहा हूँ…", pdfDone: "Course बन गया! \"मेरी books\" में देखें।", pdfNote: "Course file के अपने text से, phone में ही, बिना internet के बनता है। साफ़ chapter और heading वाली file से सबसे अच्छा course बनता है।", 
     libLoading: "Library load हो रही है (पहली बार 20-60 second)…", libMissing: "यह library इस app में नहीं है। Offline सिर्फ़ numpy, pandas, scikit-learn, matplotlib और standard library चलती हैं।",
     bestAnswer: "सबसे अच्छा जवाब", related: "और related", autoBook: "Auto",
-    helpItems: ["📖 पढ़ें: हर stage के lessons पढ़ें, \"समझ गया\" दबाएँ।", "🧑‍🏫 Teacher: board पर चित्र और आवाज़ के साथ class। ⏸ से रोकें, ⏭ से आगे।", "💻 Practice: code लिखें, ▶ Run करें, ✓ Check करें। Hint/Solution भी है।", "🎮 Games: output बताओ, code भरो, speed round, जोड़ी मिलाओ।", "📝 Test: 10 सवाल, 80% पर अगला stage खुलता है।", "🎯 IQ: सबसे ज़्यादा पूछे जाने वाले सवाल और जवाब।", "📝 ऊपर का button: कभी भी note लिखें। Home → Notes में सब मिलेंगे।", "☰ Menu: stage download/PDF, notes, Ask, Playground, settings।", "📕 PDF से course: Home → PDF से course बनाएँ।", "💬 Ask: कोई भी doubt लिखें। 💻 Playground: कोई भी code चलाएँ (numpy, pandas, sklearn, matplotlib भी)।", "💾 Settings → Backup: progress की file बनाकर रख लें।"],
+    helpItems: ["📖 पढ़ें: हर stage के lessons पढ़ें, \"समझ गया\" दबाएँ।", "🧑‍🏫 Teacher: board पर चित्र और आवाज़ के साथ class। ⏸ से रोकें, ⏭ से आगे।", "💻 Practice: code लिखें, ▶ Run करें, ✓ Check करें। Hint/Solution भी है।", "🎮 Games: output बताओ, code भरो, speed round, जोड़ी मिलाओ।", "📝 Test: 10 सवाल, 80% पर अगला stage खुलता है।", "🎯 IQ: सबसे ज़्यादा पूछे जाने वाले सवाल और जवाब।", "📝 ऊपर का button: कभी भी note लिखें। Home → Notes में सब मिलेंगे।", "☰ Menu: stage download/PDF, notes, Ask, Playground, settings।", "📕 File से course: Home → Book / file से course बनाएँ → कोई भी PDF, Word या notes file चुनें, नया course खुद बन जाएगा।", "💬 Ask: कोई भी doubt लिखें। 💻 Playground: कोई भी code चलाएँ (numpy, pandas, sklearn, matplotlib भी)।", "💾 Settings → Backup: progress की file बनाकर रख लें।"],
     appTagline: "आपका अपना coding गुरु — zero से job-ready तक",
     hello: "नमस्ते!", level: "Level", xp: "XP", streak: "दिन की streak",
     continue: "आगे पढ़ें", start: "शुरू करें", chooseRole: "Job role चुनें",
@@ -93,9 +91,7 @@ window.CG_I18N = {
     askNone: "इस सवाल का जवाब books में नहीं मिला। छोटे, आसान शब्दों में पूछें (जैसे \"for loop\", \"dict\", \"overfitting\")।",
     openInStage: "Stage में खोलें", runInPlayground: "यह code Playground में चलाएँ", errorHelp: "Error का मतलब",
     pgIntro: "यहाँ कोई भी Python या JavaScript code लिखें और चलाएँ — बिना internet।",
-    importIntro: "किसी भी book / PDF का game-style course बनाएँ:",
-    importSteps: ["PDF Claude को भेजें और नीचे वाला prompt साथ में paste करें।", "Claude एक .json \"content pack\" file देगा।", "वह file यहाँ Import करें — उसके stages, test और IQ सवाल बन जाएँगे।"],
-    copyPrompt: "Prompt copy करें", chooseFile: "📂 Pack file चुनें (.json)", imported: "Book import हो गई!", importBad: "यह सही Code Guru pack नहीं है",
+    importIntro: "किसी भी book / PDF का game-style course बनाएँ:",   imported: "Book import हो गई!", importBad: "यह सही Code Guru pack नहीं है",
     delete: "Delete", confirmDelete: "पक्का delete करना है?", cancel: "Cancel", yes: "हाँ",
     language: "भाषा", theme: "Theme", auto: "Auto", light: "Light", dark: "Dark", textSize: "Text size",
     voice: "Teacher की आवाज़", voiceSpeed: "आवाज़ की speed", backup: "Progress backup", backupBtn: "⬇ Backup file बनाएँ", restoreBtn: "⬆ Backup से वापस लाएँ",
@@ -109,16 +105,16 @@ window.CG_I18N = {
     teachDone: "class ली", practiceDone: "practice", iqDone: "IQ देखे",
   },
   english: {
-    cheatBooks: "Cheat Books", cheatNote: "Your Master Books as game-style chapters.", formatsList: "Supported: PDF, Word (.docx), PowerPoint (.pptx), EPUB, Jupyter notebook (.ipynb), Markdown (.md), HTML, TXT, OpenDocument (.odt), code files (.py, .js, .sql, .java, .cpp...), and a Claude pack (.json). Scanned/photo files (no text) are not supported.",
+    cheatBooks: "Cheat Books", cheatNote: "Your Master Books as game-style chapters.", formatsList: "Supported: PDF, Word (.docx), PowerPoint (.pptx), EPUB, Jupyter notebook (.ipynb), Markdown (.md), HTML, TXT, OpenDocument (.odt), code files (.py, .js, .sql, .java, .cpp...). Scanned/photo files (no text) are not supported.",
     course: "AI/ML Engineer course", courses: "Courses", myCourse: "My course", openCourse: "Open course",
     notes: "Notes", addNote: "Write a note", editNote: "Edit note", noteSaved: "Note saved", notePh: "Write what you understood or want to remember…", noNotes: "No notes yet. Tap 📝 while studying.", saveToNotes: "📝 Save to notes", searchNotes: "🔍 Search notes", exportNotes: "⬇ Download notes", copyAll: "📋 Copy all", pin: "📌 Pin", unpin: "Unpin", edit: "✏️ Edit", save: "Save", general: "General note",
     menu: "Menu", resume: "▶ Back to study", downloadStage: "⬇ Download this stage (HTML)", pdfStage: "🖨 Make PDF of this stage", downloaded: "Downloaded", help: "Help / How to use",
     games: "Games", gamesIntro: "Lock in what you learned by playing. Every game gives XP.", gOut: "🎯 Guess the output", gOutD: "Read code, pick its output", gFill: "🧩 Fill the code", gFillD: "Fill the gap in the code", gSpeed: "⚡ Speed round", gSpeedD: "60 seconds, 3 lives", gMatch: "🔗 Match pairs", gMatchD: "Match each question to its answer",
     lives: "Lives", time: "Time", gameOver: "Game over!", playAgain: "Play again", noGame: "This stage doesn't have enough content for this game.", pickPair: "Pick one on the left, then its answer",
-    pdfTitle: "Make a course from a book / file", pdfIntro: "Pick any book or notes file. The app reads it and builds chapter-wise stages, teacher class, games, test and IQ questions by itself — no internet.", pdfPick: "📂 Choose file", pdfWorking: "Reading the file…", pdfDone: "Course ready! See \"My books\".", pdfNote: "The auto course is built from the book's text. For a better course, send the PDF to Claude (method below).", packTitle: "Import a pack made by Claude",
+    pdfTitle: "Make a course from a book / file", pdfIntro: "Pick any book or notes file. The app reads it and builds chapter-wise stages, teacher class, games, test and IQ questions by itself — no internet.", pdfPick: "📂 Choose file", pdfWorking: "Reading the file…", pdfDone: "Course ready! See \"My books\".", pdfNote: "The course is built from the file's own text, on the phone, without internet. Files with clear chapters and headings give the best course.", 
     libLoading: "Loading library (first time 20-60 seconds)…", libMissing: "This library isn't in the app. Offline Python has numpy, pandas, scikit-learn, matplotlib and the standard library.",
     bestAnswer: "Best answer", related: "Related", autoBook: "Auto",
-    helpItems: ["📖 Learn: read each stage's lessons and tap \"Got it\".", "🧑‍🏫 Teacher: class with drawings and voice on the board. ⏸ to pause, ⏭ to skip.", "💻 Practice: write code, ▶ Run, ✓ Check. Hint and solution available.", "🎮 Games: guess the output, fill the code, speed round, match pairs.", "📝 Test: 10 questions, 80% unlocks the next stage.", "🎯 IQ: most-asked questions with answers.", "📝 top button: write a note any time. Home → Notes has them all.", "☰ Menu: download stage / PDF, notes, Ask, Playground, settings.", "📕 Course from PDF: Home → Make a course from a PDF.", "💬 Ask: type any doubt. 💻 Playground: run any code (numpy, pandas, sklearn, matplotlib too).", "💾 Settings → Backup: save a file of your progress."],
+    helpItems: ["📖 Learn: read each stage's lessons and tap \"Got it\".", "🧑‍🏫 Teacher: class with drawings and voice on the board. ⏸ to pause, ⏭ to skip.", "💻 Practice: write code, ▶ Run, ✓ Check. Hint and solution available.", "🎮 Games: guess the output, fill the code, speed round, match pairs.", "📝 Test: 10 questions, 80% unlocks the next stage.", "🎯 IQ: most-asked questions with answers.", "📝 top button: write a note any time. Home → Notes has them all.", "☰ Menu: download stage / PDF, notes, Ask, Playground, settings.", "📕 Course from a file: Home → Make a course from a book / file → pick any PDF, Word or notes file and a new course is built.", "💬 Ask: type any doubt. 💻 Playground: run any code (numpy, pandas, sklearn, matplotlib too).", "💾 Settings → Backup: save a file of your progress."],
     appTagline: "Your personal coding guru — from zero to job-ready",
     hello: "Hello!", level: "Level", xp: "XP", streak: "day streak",
     continue: "Continue", start: "Start", chooseRole: "Choose a job role",
@@ -147,9 +143,7 @@ window.CG_I18N = {
     askNone: "No answer found in the books. Try short, simple words (like \"for loop\", \"dict\", \"overfitting\").",
     openInStage: "Open in stage", runInPlayground: "Run this code in the Playground", errorHelp: "What the error means",
     pgIntro: "Write and run any Python or JavaScript code here — no internet needed.",
-    importIntro: "Turn any book / PDF into a game-style course:",
-    importSteps: ["Send the PDF to Claude and paste the prompt below with it.", "Claude gives you a .json \"content pack\" file.", "Import that file here — its stages, tests and IQ questions appear."],
-    copyPrompt: "Copy prompt", chooseFile: "📂 Choose pack file (.json)", imported: "Book imported!", importBad: "This is not a valid Code Guru pack",
+    importIntro: "Turn any book / PDF into a game-style course:",   imported: "Book imported!", importBad: "This is not a valid Code Guru pack",
     delete: "Delete", confirmDelete: "Delete this for sure?", cancel: "Cancel", yes: "Yes",
     language: "Language", theme: "Theme", auto: "Auto", light: "Light", dark: "Dark", textSize: "Text size",
     voice: "Teacher's voice", voiceSpeed: "Voice speed", backup: "Progress backup", backupBtn: "⬇ Create backup file", restoreBtn: "⬆ Restore from backup",
@@ -201,23 +195,6 @@ window.CG_ERRORS = {
   UnboundLocalError: { hinglish: "Function ke andar variable ko value dene se pehle padha. global/parameter ya pehle value do.", hindi: "Function के अंदर variable को value देने से पहले पढ़ा। global/parameter use करें या पहले value दें।", english: "A local variable was read before it got a value inside the function. Pass it as a parameter or assign first." },
   ReferenceError: { hinglish: "(JavaScript) Variable bana hi nahi ya spelling galat. let/const se pehle declare karo.", hindi: "(JavaScript) Variable बना ही नहीं या spelling ग़लत। let/const से पहले declare करें।", english: "(JavaScript) The variable isn't declared or is misspelled. Declare it with let/const first." },
 };
-
-/* Prompt the user can give Claude together with a PDF to get an importable pack. */
-window.CG_PACK_PROMPT = `Make a "Code Guru" content pack from the attached PDF.
-Output ONE JSON file (UTF-8) with this shape:
-{"format":"codeguru-pack","version":1,"id":"short-id","lang":"hinglish|hindi|english",
- "role":{"name":"Course name","icon":"one emoji","desc":"one line"},
- "stages":[ /* 6-14 stages in learning order, easy to advanced */
-  {"n":1,"id":"short-id-01","title":"...","goal":"...",
-   "lessons":[{"title":"...","blocks":[["p","text with **bold** and \`code\`"],["code","python","source","exact output or empty"],["sketch",{"k":"flow","steps":["A","B","C"],"dir":"h"}],["tip","..."],["warn","common mistake"],["analogy","real-life example"],["list",["a","b"]]]}],
-   "teach":[{"say":"what the teacher says (1-3 sentences)","sketch":null,"code":null}],
-   "practice":[{"q":"task","starter":"code with # TODO","expect":"exact stdout","hint":"...","solution":"python, standard library only"}],
-   "quiz":[{"q":"...","o":["A","B","C","D"],"a":0,"why":"..."}],
-   "iq":[{"q":"most-asked IQ (job interview) question","a":"model answer"}]}]}
-Sketch kinds: boxes{items:[{label,value}]}, flow{steps,dir}, cycle{steps}, array{items,index}, stack{items}, tree{root:{label,children}}, layers{layers:[3,4,2],labels}, table{head,rows}, compare{left:{title,items},right:{title,items}}, chart{type:line|scatter|bar,points,line,xl,yl}.
-Per stage: 3-6 lessons, 6-10 teach slides, exactly 3 practice, exactly 10 quiz (one correct option, "a" = 0-based index), 8-12 IQ.
-Teach in very simple language with everyday examples, step by step, covering EVERY topic of the PDF. Code outputs must be exact.`;
-
 /* v1.3: summary, revision, mock IQ exam, progress dashboard */
 Object.assign(window.CG_I18N.hinglish, {
   summary: "Saar", sumTitle: "Is stage ka saar", sumLessons: "Har lesson ka main point", glossary: "Zaroori shabd (Glossary)", noGloss: "Is stage mein alag se shabd nahi mile.", addGloss: "➕ Shabd revision mein daalo", stageCards: "Is stage ke flashcards", added: "{n} card revision mein jode",

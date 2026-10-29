@@ -460,9 +460,7 @@ onmessage=async()=>{try{await (async()=>{\n${code}\n})();postMessage({ok:true,ou
       <p class="mut small">${T("formatsList")}</p>
       <p class="mut small">ℹ️ ${T("pdfNote")}</p></div>
       ${list ? `<h3>📘 ${T("myBooks")}</h3>${list}` : ""}
-      <div class="card"><h3 style="margin-top:0">✨ ${T("packTitle")}</h3><ol>${T("importSteps").map((x) => `<li>${esc(x)}</li>`).join("")}</ol>
-      <button class="full" onclick="CG.copyPrompt()">📋 ${T("copyPrompt")}</button>
-      <label class="btn full" style="display:block">${T("chooseFile")}<input type="file" accept=".json,application/json,text/plain" style="display:none" onchange="CG.importFile(this)"></label></div>`;
+`;
   };
 
   SCR.badges = () => topbar(T("badges")) + `<div class="grid">${window.CG_BADGES.map((b) => `<div class="card center" style="${S.badges[b.id] ? "" : "opacity:.4;filter:grayscale(1)"}"><div style="font-size:2.2rem">${b.ic}</div><b>${esc(L3(b.n))}</b>${S.badges[b.id] ? `<div class="mut small">${S.badges[b.id]}</div>` : ""}</div>`).join("")}</div>`;
@@ -1072,22 +1070,6 @@ onmessage=async()=>{try{await (async()=>{\n${code}\n})();postMessage({ok:true,ou
       if (!unlocked(it.role, it.n) && getPack(it.role)) { /* allow reading even if locked: open learn of that stage */ }
       UI.qz = null; UI.tm = null;
       go("stage", { role: it.role, n: it.n, tab: it.tab, li: it.li, pi: 0 });
-    },
-    copyPrompt() { copyText(window.CG_PACK_PROMPT); },
-    importFile(inp) {
-      const f = inp.files && inp.files[0]; if (!f) return;
-      const rd = new FileReader();
-      rd.onload = async () => {
-        let p; try { p = JSON.parse(rd.result); } catch (e) { toast(T("importBad")); return; }
-        const bad = validPack(p); if (bad) { toast(T("importBad") + " (" + bad + ")"); return; }
-        const role = p.role || {};
-        const rec = { key: "book_" + String(p.id || role.name || Date.now()).toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 40), role: { name: role.name || p.id || "My book", icon: role.icon || "📘", desc: role.desc || "" }, lang: p.lang || S.lang, stages: p.stages.sort((a, b) => a.n - b.n) };
-        try { await DB.put(rec); } catch (e) { toast("Storage error"); return; }
-        IMPORTED = IMPORTED.filter((x) => x.key !== rec.key).concat([rec]); INDEX = null;
-        badge("bookworm"); toast(T("imported")); UI.keep = 1; render();
-      };
-      rd.readAsText(f);
-      inp.value = "";
     },
     delPack(k) { ask(T("confirmDelete"), T("delete"), async () => { await DB.del(k); IMPORTED = IMPORTED.filter((x) => x.key !== k); INDEX = null; delete S.prog[k]; if (S.cur === k) S.cur = null; save(); render(); }); },
     async setOpt(k, v) {
